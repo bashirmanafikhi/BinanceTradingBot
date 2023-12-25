@@ -1,0 +1,41 @@
+import json
+
+import_path = "settings/settings.json"
+
+
+class BinanceSettings:
+    def __init__(self, api_key, api_secret, api_testnet):
+        self.api_key = api_key
+        self.api_secret = api_secret
+        self.api_testnet = api_testnet
+
+class Settings:
+    def __init__(self, json_file_path= import_path):
+        self.json_file_path = json_file_path
+        self.settings = self.load_settings()
+        self.binance_settings = BinanceSettings(
+            api_key=self.settings.get("Binance", {}).get("API_Key"),
+            api_secret=self.settings.get("Binance", {}).get("API_Secret"),
+            api_testnet=self.settings.get("Binance", {}).get("API_Testnet")
+        )
+
+    def load_settings(self):
+        try:
+            with open(self.json_file_path, "r") as file:
+                return json.load(file)
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Settings file not found at: {self.json_file_path}")
+
+    @property
+    def binance(self):
+        return self.binance_settings
+
+
+if __name__ == "__main__":
+    # Example usage
+    settings = Settings()
+
+    # Accessing BinanceSettings properties
+    print(f"Binance API Key: {settings.binance.api_key}")
+    print(f"Binance API Secret: {settings.binance.api_secret}")
+    print(f"Binance API Testnet: {settings.binance.api_testnet}")

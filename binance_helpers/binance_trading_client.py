@@ -1,24 +1,19 @@
 from binance.client import Client
 import pandas as pd
 import os
-import json
 
-import_path = "settings.json"
-def get_binance_trading_client(json_file_path = import_path):
-    if os.path.exists(json_file_path):
-        with open(json_file_path, "r") as file:
-            project_settings = json.load(file)
+from settings.settings import Settings
 
-        binance_settings = project_settings.get("Binance", {})
-        api_key = binance_settings.get("API_Key")
-        api_secret = binance_settings.get("API_Secret")
-        api_testnet = binance_settings.get("API_Testnet", True)
+def get_binance_trading_client():
+    settings = Settings()
 
-        return BinanceTradingClient(api_key, api_secret, api_testnet)
-    else:
-        raise FileNotFoundError(f"Settings file not found at: {json_file_path}")
+    api_key = settings.binance.api_key
+    api_secret = settings.binance.api_secret
+    api_testnet = settings.binance.api_testnet
+
+    return BinanceTradingClient(api_key, api_secret, api_testnet)
     
-    
+
 class BinanceTradingClient:
     def __init__(self, api_key, api_secret, testnet=True):
         self.client = Client(api_key, api_secret, testnet=testnet)
@@ -47,20 +42,29 @@ class BinanceTradingClient:
             print(f"An error occurred: {e}")
             return None
 
-    def place_market_buy_order(self, symbol, quantity):
-        return self.place_market_order("BUY", symbol, quantity)
+    def place_market_buy_order(self, symbol, quantity, quantity_type='quote'):
+        return self.place_market_order("BUY", symbol, quantity, quantity_type)
 
-    def place_market_sell_order(self, symbol, quantity):
-        return self.place_market_order("SELL", symbol, quantity)
+    def place_market_sell_order(self, symbol, quantity, quantity_type='quote'):
+        return self.place_market_order("SELL", symbol, quantity, quantity_type)
 
-    def place_market_order(self, side, symbol, quantity):
+    def place_market_order(self, side, symbol, quantity, quantity_type='quote'):
         try:
-            order = self.client.create_order(
-                symbol=symbol,
-                side=side,
-                type='MARKET',
-                quantity=quantity
-            )
+            if quantity_type == 'quote':
+                order = self.client.create_order(
+                    symbol=symbol,
+                    side=side,
+                    type='MARKET',
+                    quoteOrderQty=quantity
+                )
+            else:
+                order = self.client.create_order(
+                    symbol=symbol,
+                    side=side,
+                    type='MARKET',
+                    quantity=quantity
+                )
+
             return order
         except Exception as e:
             print(f"Error placing order: {e}")
@@ -71,18 +75,9 @@ class BinanceTradingClient:
         df = pd.DataFrame(
             klines,
             columns=[
-                "timestamp",
-                "open",
-                "high",
-                "low",
-                "close",
-                "volume",
-                "close_time",
-                "quote_asset_volume",
-                "number_of_trades",
-                "taker_buy_base_asset_volume",
-                "taker_buy_quote_asset_volume",
-                "ignore",
+                "timestamp", "open", "high", "low", "close", "volume",
+                "close_time", "quote_asset_volume", "number_of_trades",
+                "taker_buy_base_asset_volume", "taker_buy_quote_asset_volume", "ignore",
             ],
         )
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
@@ -99,14 +94,7 @@ class BinanceTradingClient:
 
             print("Open Trades:")
             for order in open_orders:
-                print(f"Symbol: {order['symbol']}")
-                print(f"Order ID: {order['orderId']}")
-                print(f"Side: {order['side']}")
-                print(f"Type: {order['type']}")
-                print(f"Price: {order['price']}")
-                print(f"Quantity: {order['origQty']}")
-                print(f"Time: {order['time']}")
-                print("\n---\n")
+                self.print_order_details(order)
 
         except Exception as e:
             print(f"An error occurred: {e}")
@@ -115,11 +103,85 @@ class BinanceTradingClient:
         symbol_dictionary = self.client.get_exchange_info()
         symbol_dataframe = pd.DataFrame(symbol_dictionary["symbols"])
         quote_symbol_dataframe = symbol_dataframe.loc[
-            symbol_dataframe["quoteAsset"] == quote_asset_symbol
-        ]
-        quote_symbol_dataframe = quote_symbol_dataframe.loc[
-            quote_symbol_dataframe["status"] == "TRADING"
+            (symbol_dataframe["quoteAsset"] == quote_asset_symbol) &
+            (symbol_dataframe["status"] == "TRADING")
         ]
         return quote_symbol_dataframe
 
+    def print_order_details(self, order):
+        print(f"Symbol: {order['symbol']}")
+        print(f"Order ID: {order['orderId']}")
+        print(f"Side: {order['side']}")
+        print(f"Type: {order['type']}")
+        print(f"Price: {order['price']}")
+        print(f"Quantity: {order['origQty']}")
+        print(f"Time: {order['time']}")
+        print("\n---\n")
 
+    def get_symbol_info(self, symbol):
+        return self.client.get_symbol_info(symbol)
+
+    def get_trade_fee(self, symbol=None):
+        if symbol:
+            return self.client.get_trade_fee(symbol=symbol)
+        else:
+            return self.client.get_trade_fee()
+
+    def get_order_book(self, symbol, limit=5):
+        return self.client.get_order_book(symbol=symbol, limit=limit)
+
+    def get_recent_trades(self, symbol, limit=5):
+        return self.client.get_recent_trades(symbol=symbol, limit=limit)
+    
+    def get_symbol_ticker(self, symbol):
+        return self.client.get_symbol_ticker(symbol=symbol)
+
+    def get_all_tickers(self):
+        return self.client.get_all_tickers()
+
+    def get_open_positions(self):
+        return self.client.get_margin_account()["userAssets"]
+
+    def get_order_status(self, symbol, order_id):
+        return self.client.get_order(symbol=symbol, orderId=order_id)
+
+    def cancel_order(self, symbol, order_id):
+        return self.client.cancel_order(symbol=symbol, orderId=order_id)
+
+    def cancel_all_open_orders(self, symbol=None):
+        if symbol:
+            open_orders = self.client.get_open_orders(symbol=symbol)
+        else:
+            open_orders = self.client.get_open_orders()
+
+        for order in open_orders:
+            self.client.cancel_order(symbol=order['symbol'], orderId=order['orderId'])
+
+    def place_limit_order(self, side, symbol, quantity, price):
+        try:
+            order = self.client.create_order(
+                symbol=symbol,
+                side=side,
+                type='LIMIT',
+                quantity=quantity,
+                price=price
+            )
+            return order
+        except Exception as e:
+            print(f"Error placing limit order: {e}")
+            return None
+
+    def place_stop_loss_order(self, symbol, quantity, stop_price, activation_price):
+        try:
+            order = self.client.create_order(
+                symbol=symbol,
+                side='SELL',
+                type='STOP_MARKET',
+                quantity=quantity,
+                stopPrice=stop_price,
+                activationPrice=activation_price
+            )
+            return order
+        except Exception as e:
+            print(f"Error placing stop-loss order: {e}")
+            return None
