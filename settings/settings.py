@@ -29,13 +29,3 @@ class Settings:
     @property
     def binance(self):
         return self.binance_settings
-
-
-if __name__ == "__main__":
-    # Example usage
-    settings = Settings()
-
-    # Accessing BinanceSettings properties
-    print(f"Binance API Key: {settings.binance.api_key}")
-    print(f"Binance API Secret: {settings.binance.api_secret}")
-    print(f"Binance API Testnet: {settings.binance.api_testnet}")

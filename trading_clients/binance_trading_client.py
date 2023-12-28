@@ -1,22 +1,39 @@
 from binance.client import Client
 import pandas as pd
-import os
+from other_services.binance_websocket import get_binance_websocket_service
 
 from settings.settings import Settings
+from trading_clients.trading_client import TradingClient
 
-def get_binance_trading_client():
-    settings = Settings()
-
-    api_key = settings.binance.api_key
-    api_secret = settings.binance.api_secret
-    api_testnet = settings.binance.api_testnet
-
-    return BinanceTradingClient(api_key, api_secret, api_testnet)
-    
-
-class BinanceTradingClient:
+class BinanceTradingClient(TradingClient):
     def __init__(self, api_key, api_secret, testnet=True):
         self.client = Client(api_key, api_secret, testnet=testnet)
+    
+    # we should place limit orders but I concern what if the limit didn't hit..
+    # so I places a market order for now.
+    def buy(self, symbol, quantity, price, quoteOrderQty=None):
+        return self.place_market_order(self.client.SIDE_BUY, symbol, quantity, quoteOrderQty=quoteOrderQty)
+
+    def sell(self, symbol, quantity, price, quoteOrderQty=None):
+        return self.place_market_order(self.client.SIDE_SELL, symbol, quantity, quoteOrderQty=quoteOrderQty)
+
+    def get_balance(self, symbol):
+        return self.get_asset_balance(symbol)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def get_account_info(self):
         return self.client.get_account()
@@ -28,8 +45,8 @@ class BinanceTradingClient:
 
     def get_asset_balance(self, asset):
         try:
-            account_info = self.get_account_info()
-            balances = account_info["balances"]
+            
+            balances = self.get_asset_balances()
 
             for balance in balances:
                 if balance["asset"] == asset:
@@ -42,35 +59,18 @@ class BinanceTradingClient:
             print(f"An error occurred: {e}")
             return None
 
-    def place_market_buy_order(self, symbol, quantity, quantity_type='quote'):
-        return self.place_market_order("BUY", symbol, quantity, quantity_type)
+    def start_kline_socket(self, symbol, callback):
+        # Create an instance of BinanceWebSocketService
+        binanceWebSocket = get_binance_websocket_service()
+        # Start the WebSocket service
+        binanceWebSocket.start()
+        # Start Kline (candlestick) socket with custom message handling
+        binanceWebSocket.start_kline_socket(symbol=symbol, callback=callback)
+        # Keep the program running
+        binanceWebSocket.join()
 
-    def place_market_sell_order(self, symbol, quantity, quantity_type='quote'):
-        return self.place_market_order("SELL", symbol, quantity, quantity_type)
 
-    def place_market_order(self, side, symbol, quantity, quantity_type='quote'):
-        try:
-            if quantity_type == 'quote':
-                order = self.client.create_order(
-                    symbol=symbol,
-                    side=side,
-                    type='MARKET',
-                    quoteOrderQty=quantity
-                )
-            else:
-                order = self.client.create_order(
-                    symbol=symbol,
-                    side=side,
-                    type='MARKET',
-                    quantity=quantity
-                )
-
-            return order
-        except Exception as e:
-            print(f"Error placing order: {e}")
-            return None
-
-    def fetch_historical_data(self, symbol, timeframe, limit=100):
+    def fetch_historical_data(self, symbol, timeframe, limit=50):
         klines = self.client.get_klines(symbol=symbol, interval=timeframe, limit=limit)
         df = pd.DataFrame(
             klines,
@@ -81,7 +81,9 @@ class BinanceTradingClient:
             ],
         )
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
-        df.set_index("timestamp", inplace=True)
+        df['close'] = pd.to_numeric(df['close'])
+        df['high'] = pd.to_numeric(df['high'])
+        df['low'] = pd.to_numeric(df['low'])
         return df
 
     def list_open_trades(self):
@@ -120,6 +122,17 @@ class BinanceTradingClient:
 
     def get_symbol_info(self, symbol):
         return self.client.get_symbol_info(symbol)
+    
+    def print_symbol_info(self, symbol):
+        # Print symbol information
+        symbol_info = self.get_symbol_info(symbol)# Extract quote and base asset names
+        quote_asset = symbol_info['quoteAsset']
+        base_asset = symbol_info['baseAsset']
+        if symbol_info:
+            print(f"Symbol Information for {symbol}:")
+            print(symbol_info)
+        else:
+            print(f"Symbol {symbol} not found.")
 
     def get_trade_fee(self, symbol=None):
         if symbol:
@@ -157,6 +170,21 @@ class BinanceTradingClient:
         for order in open_orders:
             self.client.cancel_order(symbol=order['symbol'], orderId=order['orderId'])
 
+
+    def place_market_order(self, side, symbol, quantity, quoteOrderQty=None):
+        try:
+            order = self.client.create_order(
+                symbol=symbol,
+                side=side,
+                type='MARKET',
+                quantity=quantity,
+                quoteOrderQty = quoteOrderQty)
+
+            return order
+        except Exception as e:
+            print(f"Error placing order: {e}")
+            return None
+        
     def place_limit_order(self, side, symbol, quantity, price):
         try:
             order = self.client.create_order(
@@ -175,7 +203,7 @@ class BinanceTradingClient:
         try:
             order = self.client.create_order(
                 symbol=symbol,
-                side='SELL',
+                side=self.client.SIDE_SELL,
                 type='STOP_MARKET',
                 quantity=quantity,
                 stopPrice=stop_price,
@@ -184,4 +212,14 @@ class BinanceTradingClient:
             return order
         except Exception as e:
             print(f"Error placing stop-loss order: {e}")
+            return None
+    
+    def extract_price_from_order(self, order):
+        if "fills" in order and order["fills"]:
+            # Assuming there can be multiple fills, extracting the price from the first fill
+            first_fill = order["fills"][0]
+            buy_price = float(first_fill["price"])
+            return buy_price
+        else:
+            print("No fills information found in the order.")
             return None

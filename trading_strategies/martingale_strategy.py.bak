@@ -1,0 +1,208 @@
+from binance_helpers.binance_trading_client import get_binance_trading_client
+from binance_helpers.binance_websocket import (
+    BinanceWebSocketService,
+    get_binance_websocket_service,
+)
+from charts.candlestick_chart import RealTimeCandlestickChart
+from sequences.duplicated_numbers_sequence import DuplicatedNumbersSequence
+from typing import Type
+from sequences.sequence_strategy import SequenceStrategy
+import time
+import pandas as pd
+from binance import ThreadedWebsocketManager
+
+from trading_strategies.trading_strategy import TradingStrategy
+
+
+class MartingaleStrategy(TradingStrategy):
+    def __init__(self, baseCapital, symbol):
+        self.sequence_strategy = DuplicatedNumbersSequence()
+        self.binanceClient = get_binance_trading_client()
+        self.baseCapital = baseCapital
+        self.symbol = symbol
+        self.startTradingPercentage = 0.01
+        self.startTradingCapital = self.baseCapital * self.startTradingPercentage
+        self.isRunning = True
+        self.isStarted = False
+        self.totalBuyQuantity = 0
+        self.totalSellQuantity = 0
+        self.printBalances()
+        self.initWebSocket()
+
+    def tick(self):
+        if self.isRunning == False:
+            return
+        
+        if self.isStarted == False:
+            self.startTrading()        
+
+        elif ((self.isLastOrderBuy == False) and self.close_price > self.buyLimit):
+            self.buy()
+        
+        elif (self.isLastOrderBuy and self.close_price > self.highCloseLimit):
+            self.close()
+        
+        elif (self.isLastOrderBuy and self.close_price < self.sellLimit):
+            self.sell()
+
+        elif ((self.isLastOrderBuy == False) and self.close_price < self.lowCloseLimit):
+            self.close()
+        else:
+            print(f"{self.close_price}  {self.close_price_time}")
+
+            return
+        
+        self.printStatus()
+
+
+
+    def calculateTradingRange(self):
+        # historical_data = self.binanceClient.fetch_historical_data(self.symbol, "1m")
+
+        # # Calculate the price difference for each minute
+        # historical_data["price_difference"] = (
+        #     historical_data["high"] - historical_data["low"]
+        # )
+
+        # # Calculate the average price difference
+        # average_price_difference = historical_data["price_difference"].mean()
+
+        # return average_price_difference
+        return 15
+
+    def custom_handle_message(self, msg):
+        print(f"Message type: {msg['e']}")
+        dataframe = pd.DataFrame(msg)
+        print(dataframe)
+
+    def getQuantity(self):
+        sequence = self.sequence_strategy.next()
+        quantity = self.startTradingCapital * sequence
+        print(f"level: {sequence}")
+        print(f"quantity: {quantity}")
+        return quantity
+    
+    def buy(self):
+        self.isLastOrderBuy = True
+
+        print("\nMarket Buy Order..")
+        buy_quantity = self.getQuantity()
+        order = self.binanceClient.place_market_buy_order(self.symbol, buy_quantity)
+        self.totalBuyQuantity += buy_quantity
+        buyPrice = self.extract_price_from_order(order)
+        print(f"buyPrice: {buyPrice}")
+        return buyPrice
+    
+    def sell(self):
+        self.isLastOrderBuy = False
+
+        print("\nMarket Sell Order..")
+        sell_quantity = self.getQuantity()
+        order = self.binanceClient.place_market_sell_order(self.symbol, sell_quantity)
+        self.totalSellQuantity += sell_quantity
+        sellPrice = self.extract_price_from_order(order)
+        print(f"sellPrice: {sellPrice}")
+        return sellPrice
+
+    def extract_price_from_order(self, order):
+        if "fills" in order and order["fills"]:
+            # Assuming there can be multiple fills, extracting the price from the first fill
+            first_fill = order["fills"][0]
+            buy_price = float(first_fill["price"])
+            return buy_price
+        else:
+            print("No fills information found in the order.")
+            return None
+    
+    def close(self):
+        print("++++++++++++++++++++ Close ++++++++++++++++++++")
+
+        buy_quantity = self.totalSellQuantity
+        order = self.binanceClient.place_market_buy_order(self.symbol, buy_quantity)
+        buyPrice = self.extract_price_from_order(order)
+        print(f"buyPrice: {buyPrice}")
+
+        sell_quantity = self.totalBuyQuantity
+        order = self.binanceClient.place_market_sell_order(self.symbol, sell_quantity)
+        sellPrice = self.extract_price_from_order(order)
+        print(f"sellPrice: {sellPrice}")
+
+        self.printBalances()
+        self.isRunning = False
+
+    def startTrading(self):
+        
+        self.isStarted = True
+        self.tradingRange = self.calculateTradingRange()
+        price = self.buy()
+        self.buyLimit = price
+        self.sellLimit = price - self.tradingRange
+        self.highCloseLimit = price + self.tradingRange + self.tradingRange
+        self.lowCloseLimit = (
+            price - self.tradingRange - self.tradingRange - self.tradingRange
+        )
+
+    def initWebSocket(self):
+        # Create an instance of BinanceWebSocketService
+        binanceWebSocket = get_binance_websocket_service()
+
+        # Start the WebSocket service
+        binanceWebSocket.start()
+
+        # Start Kline (candlestick) socket with custom message handling
+        binanceWebSocket.start_kline_socket(symbol=self.symbol, callback=self.handle_kline_message)
+
+        # Keep the program running
+        binanceWebSocket.join()
+
+    def set_sequence_strategy(self, sequence_strategy: Type[SequenceStrategy]):
+        self.sequence_strategy = sequence_strategy
+
+
+    def handle_kline_message(self, msg):
+        kline = msg['k']
+        close_price = float(kline['c'])
+        self.close_price = close_price
+        self.close_price_time = pd.to_datetime(kline['T'], unit="ms")
+        
+        self.tick()
+
+    def handle_depth_message(self, msg):
+        # وقت بدك تبيع طلع على هاد
+        # Bid Price: The highest price a buyer is willing to pay for a security. If you want to sell an asset immediately, you could place a market sell order at the bid price.
+        if "b" in msg and len(msg["b"]) > 0:
+            self.bid_price = float(msg["b"][0][0])  # Highest bid price
+        else:
+            return
+
+        # وقت تشتري طلع على هاد
+        # Ask Price: The lowest price a seller is willing to accept for a security. If you want to buy an asset immediately, you could place a market buy order at the ask price.
+        if "a" in msg and len(msg["a"]) > 0:
+            self.ask_price = float(msg["a"][0][0])  # Lowest ask price
+        else:
+            return
+
+        self.tick()
+
+    def printBalances(self):
+
+        balances = self.binanceClient.get_asset_balances()
+
+        for balance in balances:
+            if balance["asset"] == "BTC" or balance["asset"] == "USDT":
+                print( balance["asset"] + ": " + balance["free"])
+        print(" ")
+
+    def printStatus(self):
+        print("====================")
+        print(f"close_price: {self.close_price}")
+        self.printBalances()
+        
+        print(f"Trading Range: {self.tradingRange}")
+        print(f"Buy limit: {self.buyLimit}")
+        print(f"sell limit: {self.sellLimit}")
+        print(f"high close limit: {self.highCloseLimit}")
+        print(f"low close limit: {self.lowCloseLimit}")
+        print("====================")
+        print("  ")
+        print("  ")
