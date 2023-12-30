@@ -46,24 +46,27 @@ class TradingSystem:
         
     
     def calculate_profit_loss(self):
+        initial_base_balance = Decimal(self.initial_base_balance)
+        initial_quote_balance = Decimal(self.initial_quote_balance)
+
         final_base_balance = Decimal(self.trading_client.get_asset_balance(self.base_asset))
         final_quote_balance = Decimal(self.trading_client.get_asset_balance(self.quote_asset))
 
         # Calculate the changes in balances
-        base_balance_change = final_base_balance - self.initial_base_balance
-        quote_balance_change = final_quote_balance - self.initial_quote_balance
+        base_balance_change = final_base_balance - initial_base_balance
+        quote_balance_change = final_quote_balance - initial_quote_balance
 
         # Calculate percentage changes
-        base_percentage_change = (base_balance_change / self.initial_base_balance) * 100
-        quote_percentage_change = (quote_balance_change / self.initial_quote_balance) * 100
+        base_percentage_change = (base_balance_change / initial_base_balance) * 100
+        quote_percentage_change = (quote_balance_change / initial_quote_balance) * 100
 
         print("-------------------------------------")
-        print(f"{self.base_asset} initial balance : {self.initial_base_balance}")
+        print(f"{self.base_asset} initial balance : {initial_base_balance}")
         print(f"{self.base_asset} final balance: {final_base_balance}")
         print(f"{self.base_asset} balance change: {base_balance_change}")
         print(f"{self.base_asset} percentage change: {base_percentage_change:.2f}%")
         print("-------------------------------------")
-        print(f"{self.quote_asset} initial balance : {self.initial_quote_balance}")
+        print(f"{self.quote_asset} initial balance : {initial_quote_balance}")
         print(f"{self.quote_asset} final balance: {final_quote_balance}")
         print(f"{self.quote_asset} balance change: {quote_balance_change}")
         print(f"{self.quote_asset} percentage change: {quote_percentage_change:.2f}%")

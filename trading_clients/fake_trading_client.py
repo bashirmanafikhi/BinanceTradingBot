@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from decimal import Decimal
+import logging
 from helpers.settings.constants import (
     ACTION_BUY,
     ACTION_SELL,
@@ -15,7 +16,7 @@ class FakeTradingClient(TradingClient):
     COMMISSION_RATE = 0.1
 
     def __init__(self):
-        self.balances = {"USDT": 200, "BTC": 1}
+        self.balances = {"USDT": 2000, "BTC": 1}
         self.orders_history = []
 
     def _apply_commission(self, cost):
@@ -54,18 +55,24 @@ class FakeTradingClient(TradingClient):
         order["timestamp"] = time.time()
         self.orders_history.append(order)
 
-    def create_market_order(self, side, symbol, quantity, price, quoteOrderQty=None):
+    def create_market_order(self,
+                            side,
+                            symbol,
+                            quantity,
+                            price,
+                            quoteOrderQty=None):
         if side not in [ACTION_BUY, ACTION_SELL]:
-            print("Invalid side for market order.")
+            logging.warning("Invalid side for market order.")
             return
 
         if quoteOrderQty is not None:
-            print("quoteOrderQty parameter is only applicable for limit orders.")
+            logging.warning(
+                "quoteOrderQty parameter is only applicable for limit orders.")
             return
 
         symbol_info = self.get_symbol_info(symbol)
         if symbol_info is None:
-            print(f"Symbol not found: {symbol}")
+            logging.warning(f"Symbol not found: {symbol}")
             return
 
         if not self._update_balances(symbol_info, side, quantity, price):
@@ -78,7 +85,9 @@ class FakeTradingClient(TradingClient):
             "quantity": quantity,
             "price": price,
             "status": ORDER_STATUS_FILLED,
-            "fills": [{"price": price}],
+            "fills": [{
+                "price": price
+            }],
         }
 
         self._add_to_orders_history(order)
@@ -101,18 +110,25 @@ class FakeTradingClient(TradingClient):
             "quantity": quantity,
             "price": price,
             "status": ORDER_STATUS_FILLED,
-            "fills": [{"price": price}],
+            "fills": [{
+                "price": price
+            }],
         }
 
         self._add_to_orders_history(order)
         print(f"Placed limit order - {order}")
         return order
 
-    def create_order(self, side, type, symbol, quantity, price, quoteOrderQty=None):
+    def create_order(self,
+                     side,
+                     type,
+                     symbol,
+                     quantity,
+                     price,
+                     quoteOrderQty=None):
         if type == ORDER_TYPE_MARKET:
-            return self.create_market_order(
-                side, symbol, quantity, price, quoteOrderQty
-            )
+            return self.create_market_order(side, symbol, quantity, price,
+                                            quoteOrderQty)
         elif type == ORDER_TYPE_LIMIT:
             return self.create_limit_order(side, symbol, quantity, price)
 
@@ -122,9 +138,12 @@ class FakeTradingClient(TradingClient):
     def get_symbol_info(self, symbol):
         symbol_info_list = [
             {
-                "symbol": "BTCUSDT",
-                "baseAsset": "BTC",
-                "quoteAsset": "USDT",
+                "symbol":
+                "BTCUSDT",
+                "baseAsset":
+                "BTC",
+                "quoteAsset":
+                "USDT",
                 "filters": [
                     {
                         "filterType": "PRICE_FILTER",
@@ -141,9 +160,12 @@ class FakeTradingClient(TradingClient):
                 ],
             },
             {
-                "symbol": "ETHBTC",
-                "baseAsset": "ETH",
-                "quoteAsset": "BTC",
+                "symbol":
+                "ETHBTC",
+                "baseAsset":
+                "ETH",
+                "quoteAsset":
+                "BTC",
                 "filters": [
                     {
                         "filterType": "PRICE_FILTER",

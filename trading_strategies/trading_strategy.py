@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+import logging
+
+import pandas as pd
 from helpers.ddd.buy_command import BuyCommand
 from helpers.ddd.event import Event
 from helpers.ddd.sell_command import SellCommand
@@ -16,8 +19,13 @@ class TradingStrategy(ABC):
         self.strategy_disabled_event = Event()
 
     @abstractmethod
-    def execute(self, data):
+    def process(self, row):
         pass
+    
+    def execute(self, data):
+        signals = pd.DataFrame(data[["close"]])
+        signals["trades"] = signals.apply(self.process, axis=1)
+        return signals
 
     def create_order(self, action, price, quantity, type=ORDER_TYPE_LIMIT):
         if(action == ACTION_BUY):

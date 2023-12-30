@@ -1,3 +1,4 @@
+import logging
 from binance.client import Client
 import pandas as pd
 from helpers.binance_websocket import get_binance_websocket_service
@@ -7,6 +8,7 @@ from trading_clients.trading_client import TradingClient
 
 
 class BinanceTradingClient(TradingClient):
+
     def __init__(self, api_key, api_secret, testnet=True):
         self.client = Client(api_key, api_secret, testnet=testnet)
 
@@ -44,7 +46,9 @@ class BinanceTradingClient(TradingClient):
         binanceWebSocket.join()
 
     def fetch_historical_data(self, symbol, timeframe, limit=1000):
-        klines = self.client.get_klines(symbol=symbol, interval=timeframe, limit=limit)
+        klines = self.client.get_klines(symbol=symbol,
+                                        interval=timeframe,
+                                        limit=limit)
         df = pd.DataFrame(
             klines,
             columns=[
@@ -88,8 +92,7 @@ class BinanceTradingClient(TradingClient):
         symbol_dataframe = pd.DataFrame(symbol_dictionary["symbols"])
         quote_symbol_dataframe = symbol_dataframe.loc[
             (symbol_dataframe["quoteAsset"] == quote_asset_symbol)
-            & (symbol_dataframe["status"] == "TRADING")
-        ]
+            & (symbol_dataframe["status"] == "TRADING")]
         return quote_symbol_dataframe
 
     def print_order_details(self, order):
@@ -107,7 +110,8 @@ class BinanceTradingClient(TradingClient):
 
     def print_symbol_info(self, symbol):
         # Print symbol information
-        symbol_info = self.get_symbol_info(symbol)  # Extract quote and base asset names
+        symbol_info = self.get_symbol_info(
+            symbol)  # Extract quote and base asset names
         quote_asset = symbol_info["quoteAsset"]
         base_asset = symbol_info["baseAsset"]
         if symbol_info:
@@ -150,19 +154,33 @@ class BinanceTradingClient(TradingClient):
             open_orders = self.client.get_open_orders()
 
         for order in open_orders:
-            self.client.cancel_order(symbol=order["symbol"], orderId=order["orderId"])
+            self.client.cancel_order(symbol=order["symbol"],
+                                     orderId=order["orderId"])
 
-    def create_market_order(self, side, symbol, quantity, price, quoteOrderQty=None):
-        return self.create_order(
-            side, self.client.ORDER_TYPE_MARKET, symbol, quantity, price, quoteOrderQty= quoteOrderQty
-        )
+    def create_market_order(self,
+                            side,
+                            symbol,
+                            quantity,
+                            price,
+                            quoteOrderQty=None):
+        return self.create_order(side,
+                                 self.client.ORDER_TYPE_MARKET,
+                                 symbol,
+                                 quantity,
+                                 price,
+                                 quoteOrderQty=quoteOrderQty)
 
     def create_limit_order(self, side, symbol, quantity, price):
-        return self.create_order(side, self.client.ORDER_TYPE_LIMIT, symbol, quantity, price)
+        return self.create_order(side, self.client.ORDER_TYPE_LIMIT, symbol,
+                                 quantity, price)
 
-    def create_order(
-        self, side, type, symbol, quantity, price, quoteOrderQty=None
-    ):
+    def create_order(self,
+                     side,
+                     type,
+                     symbol,
+                     quantity,
+                     price,
+                     quoteOrderQty=None):
         try:
             timeInForce = self.client.TIME_IN_FORCE_FOK
             if type == self.client.ORDER_TYPE_MARKET:
@@ -193,3 +211,29 @@ class BinanceTradingClient(TradingClient):
         else:
             print("No fills information found in the order.")
             return None
+    def cancel_open_orders(self, symbol=None):
+        if symbol:
+            open_orders = self.client.get_open_orders(symbol=symbol)
+        else:
+            open_orders = self.client.get_open_orders()
+
+        for order in open_orders:
+            self.client.cancel_order(symbol=order["symbol"], orderId=order["orderId"])
+
+    def get_all_orders(self, symbol, limit=10):
+        return self.client.get_all_orders(symbol=symbol, limit=limit)
+
+    def get_ticker(self, symbol):
+        return self.client.get_ticker(symbol=symbol)
+
+    def get_latest_price(self, symbol):
+        return self.client.get_latest_price(symbol=symbol)["price"]
+
+    def get_kline(self, symbol, interval, limit=100):
+        return self.client.get_klines(symbol=symbol, interval=interval, limit=limit)
+
+    def get_exchange_info(self):
+        return self.client.get_exchange_info()
+
+    def get_server_time(self):
+        return self.client.get_server_time()["serverTime"]

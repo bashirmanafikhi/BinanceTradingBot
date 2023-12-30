@@ -1,3 +1,4 @@
+import logging
 import matplotlib.pyplot as plt
 import mplfinance as mpf
 from binance.client import Client

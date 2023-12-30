@@ -1,4 +1,5 @@
 # Implement another trading client (e.g., for a different exchange)
+import logging
 from trading_clients.trading_client import TradingClient
 
 

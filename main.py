@@ -1,6 +1,7 @@
 import pandas as pd
 from helpers.binance_websocket import get_binance_websocket_service
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL, ORDER_TYPE_LIMIT
+from helpers.trading_data_service import TradingDataService
 from trading_clients.trading_client import TradingClient
 from trading_clients.trading_client_factory import TradingClientFactory
 from trading_strategies.martingale_strategy import MartingaleStrategy
@@ -19,7 +20,7 @@ import sys
 
 def configure_logging():
     # Configure logging to write to the console
-    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
 symbol = "BTCUSDT"
@@ -30,15 +31,36 @@ strategy: TradingStrategy = MartingaleStrategy(keep_running=True)
 
 # Create a BinanceTradingClient instance
 trading_client_factory = TradingClientFactory()
-binance_client: TradingClient = trading_client_factory.create_binance_trading_client()
 fake_client: TradingClient = trading_client_factory.create_fake_trading_client()
 
 # Create a trading system with the selected strategy and BinanceTradingClient
 trading_system = TradingSystem(symbol, strategy, fake_client)
 
 
+# Example usage:
+data_dir = 'C:\\Users\\pc\\Desktop\\TradingProjects\\Bitcoin Historical Dataset'
+file_name = 'BTC-2017min.csv'
+
+# Create an instance of the TradingDataService
+trading_data_service = TradingDataService(data_dir, file_name)
+
+
+
 def historical_data_example():
-    data = binance_client.fetch_historical_data(symbol, "1m")
+        
+    # Load historical data
+    success = trading_data_service.load_data()
+    data = pd.DataFrame()
+    if success:
+        data = trading_data_service.query_one_month()
+        # data = trading_data_service.query_data(start_date, end_date)
+
+        if data is not None:
+            print(data.head())
+    else:
+        print("data didn't loaded.")
+    
+    ##data = binance_client.fetch_historical_data(symbol, "1m")
 
     # Run the strategy on the data
     result_data = trading_system.run_strategy(data)
@@ -49,6 +71,7 @@ def historical_data_example():
 
 def live_data_example():
 
+    binance_client: TradingClient = trading_client_factory.create_binance_trading_client()
     binance_client.start_kline_socket(symbol=symbol, callback=handle_live_kline_message)
 
 def handle_live_kline_message(data):

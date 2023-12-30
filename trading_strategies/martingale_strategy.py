@@ -6,7 +6,7 @@ import logging
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL, ORDER_TYPE_LIMIT, ORDER_TYPE_MARKET
 
 class MartingaleStrategy(TradingStrategy):
-    DEFAULT_TRADING_RANGE = 40
+    DEFAULT_TRADING_RANGE = 30
 
     def __init__(self, keep_running = False, sequence_strategy = DuplicatedNumbersSequence()):
         super().__init__()
@@ -25,10 +25,6 @@ class MartingaleStrategy(TradingStrategy):
         self.low_close_limit = None
         self.sequence_strategy.reset()
 
-    def execute(self, data):
-        signals = pd.DataFrame(data[["timestamp", "close"]])
-        signals["trades"] = signals.apply(self.process, axis=1)
-        return signals
 
     def process(self, row):
         if((self.is_enabled == False) and self.keep_running):

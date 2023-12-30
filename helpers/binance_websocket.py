@@ -13,13 +13,18 @@ def get_binance_websocket_service():
 
     return BinanceWebSocketService(api_key, api_secret, api_testnet)
 
+
 class BinanceWebSocketService:
+
     def __init__(self, api_key, api_secret, api_testnet):
         self.api_key = api_key
         self.api_secret = api_secret
-        self.twm = ThreadedWebsocketManager(api_key=api_key, api_secret=api_secret, testnet=api_testnet)
+        self.twm = ThreadedWebsocketManager(api_key=api_key,
+                                            api_secret=api_secret,
+                                            testnet=api_testnet)
 
     def start_kline_socket(self, symbol, callback):
+
         def convert_kline_to_dataframe(kline_data):
             kline = kline_data['k']
 
@@ -47,8 +52,10 @@ class BinanceWebSocketService:
             df['high'] = pd.to_numeric(df['high'])
             df['low'] = pd.to_numeric(df['low'])
 
-            callback(df)  
-        self.twm.start_kline_socket(callback=convert_kline_to_dataframe, symbol=symbol)
+            callback(df)
+
+        self.twm.start_kline_socket(callback=convert_kline_to_dataframe,
+                                    symbol=symbol)
 
     def start_depth_socket(self, symbol, callback):
         self.twm.start_depth_socket(callback=callback, symbol=symbol)
@@ -63,7 +70,7 @@ class BinanceWebSocketService:
         self.twm.join()
 
 
-    
+
 
 
     # def handle_depth_message_example(self, msg):
@@ -80,4 +87,3 @@ class BinanceWebSocketService:
     #         self.ask_price = float(msg["a"][0][0])  # Lowest ask price
     #     else:
     #         return
-
