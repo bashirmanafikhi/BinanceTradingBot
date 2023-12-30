@@ -5,35 +5,10 @@ from other_services.binance_websocket import get_binance_websocket_service
 from settings.settings import Settings
 from trading_clients.trading_client import TradingClient
 
+
 class BinanceTradingClient(TradingClient):
     def __init__(self, api_key, api_secret, testnet=True):
         self.client = Client(api_key, api_secret, testnet=testnet)
-    
-    # we should place limit orders but I concern what if the limit didn't hit..
-    # so I places a market order for now.
-    def buy(self, symbol, quantity, price, quoteOrderQty=None):
-        return self.place_market_order(self.client.SIDE_BUY, symbol, quantity, quoteOrderQty=quoteOrderQty)
-
-    def sell(self, symbol, quantity, price, quoteOrderQty=None):
-        return self.place_market_order(self.client.SIDE_SELL, symbol, quantity, quoteOrderQty=quoteOrderQty)
-
-    def get_balance(self, symbol):
-        return self.get_asset_balance(symbol)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     def get_account_info(self):
         return self.client.get_account()
@@ -45,7 +20,6 @@ class BinanceTradingClient(TradingClient):
 
     def get_asset_balance(self, asset):
         try:
-            
             balances = self.get_asset_balances()
 
             for balance in balances:
@@ -69,21 +43,29 @@ class BinanceTradingClient(TradingClient):
         # Keep the program running
         binanceWebSocket.join()
 
-
     def fetch_historical_data(self, symbol, timeframe, limit=50):
         klines = self.client.get_klines(symbol=symbol, interval=timeframe, limit=limit)
         df = pd.DataFrame(
             klines,
             columns=[
-                "timestamp", "open", "high", "low", "close", "volume",
-                "close_time", "quote_asset_volume", "number_of_trades",
-                "taker_buy_base_asset_volume", "taker_buy_quote_asset_volume", "ignore",
+                "timestamp",
+                "open",
+                "high",
+                "low",
+                "close",
+                "volume",
+                "close_time",
+                "quote_asset_volume",
+                "number_of_trades",
+                "taker_buy_base_asset_volume",
+                "taker_buy_quote_asset_volume",
+                "ignore",
             ],
         )
         df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
-        df['close'] = pd.to_numeric(df['close'])
-        df['high'] = pd.to_numeric(df['high'])
-        df['low'] = pd.to_numeric(df['low'])
+        df["close"] = pd.to_numeric(df["close"])
+        df["high"] = pd.to_numeric(df["high"])
+        df["low"] = pd.to_numeric(df["low"])
         return df
 
     def list_open_trades(self):
@@ -105,8 +87,8 @@ class BinanceTradingClient(TradingClient):
         symbol_dictionary = self.client.get_exchange_info()
         symbol_dataframe = pd.DataFrame(symbol_dictionary["symbols"])
         quote_symbol_dataframe = symbol_dataframe.loc[
-            (symbol_dataframe["quoteAsset"] == quote_asset_symbol) &
-            (symbol_dataframe["status"] == "TRADING")
+            (symbol_dataframe["quoteAsset"] == quote_asset_symbol)
+            & (symbol_dataframe["status"] == "TRADING")
         ]
         return quote_symbol_dataframe
 
@@ -122,12 +104,12 @@ class BinanceTradingClient(TradingClient):
 
     def get_symbol_info(self, symbol):
         return self.client.get_symbol_info(symbol)
-    
+
     def print_symbol_info(self, symbol):
         # Print symbol information
-        symbol_info = self.get_symbol_info(symbol)# Extract quote and base asset names
-        quote_asset = symbol_info['quoteAsset']
-        base_asset = symbol_info['baseAsset']
+        symbol_info = self.get_symbol_info(symbol)  # Extract quote and base asset names
+        quote_asset = symbol_info["quoteAsset"]
+        base_asset = symbol_info["baseAsset"]
         if symbol_info:
             print(f"Symbol Information for {symbol}:")
             print(symbol_info)
@@ -145,7 +127,7 @@ class BinanceTradingClient(TradingClient):
 
     def get_recent_trades(self, symbol, limit=5):
         return self.client.get_recent_trades(symbol=symbol, limit=limit)
-    
+
     def get_symbol_ticker(self, symbol):
         return self.client.get_symbol_ticker(symbol=symbol)
 
@@ -168,52 +150,40 @@ class BinanceTradingClient(TradingClient):
             open_orders = self.client.get_open_orders()
 
         for order in open_orders:
-            self.client.cancel_order(symbol=order['symbol'], orderId=order['orderId'])
+            self.client.cancel_order(symbol=order["symbol"], orderId=order["orderId"])
 
+    def create_market_order(self, side, symbol, quantity, quoteOrderQty=None):
+        return self.create_order(
+            side, self.client.ORDER_TYPE_MARKET, symbol, quantity, quoteOrderQty= quoteOrderQty
+        )
 
-    def place_market_order(self, side, symbol, quantity, quoteOrderQty=None):
+    def create_limit_order(self, side, symbol, quantity):
+        return self.create_order(side, self.client.ORDER_TYPE_LIMIT, symbol, quantity)
+
+    def create_order(
+        self, side, type, symbol, quantity, price=None, quoteOrderQty=None
+    ):
         try:
+            timeInForce = self.client.TIME_IN_FORCE_FOK
+            if type == self.client.ORDER_TYPE_MARKET:
+                timeInForce = None
+                price = None
+
             order = self.client.create_order(
                 symbol=symbol,
                 side=side,
-                type='MARKET',
+                type=type,
                 quantity=quantity,
-                quoteOrderQty = quoteOrderQty)
+                price=price,
+                quoteOrderQty=quoteOrderQty,
+                timeInForce=timeInForce,
+            )
 
             return order
         except Exception as e:
             print(f"Error placing order: {e}")
             return None
-        
-    def place_limit_order(self, side, symbol, quantity, price):
-        try:
-            order = self.client.create_order(
-                symbol=symbol,
-                side=side,
-                type='LIMIT',
-                quantity=quantity,
-                price=price
-            )
-            return order
-        except Exception as e:
-            print(f"Error placing limit order: {e}")
-            return None
 
-    def place_stop_loss_order(self, symbol, quantity, stop_price, activation_price):
-        try:
-            order = self.client.create_order(
-                symbol=symbol,
-                side=self.client.SIDE_SELL,
-                type='STOP_MARKET',
-                quantity=quantity,
-                stopPrice=stop_price,
-                activationPrice=activation_price
-            )
-            return order
-        except Exception as e:
-            print(f"Error placing stop-loss order: {e}")
-            return None
-    
     def extract_price_from_order(self, order):
         if "fills" in order and order["fills"]:
             # Assuming there can be multiple fills, extracting the price from the first fill

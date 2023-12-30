@@ -16,6 +16,9 @@ class SequenceStrategy:
             Any: The next element in the sequence.
         """
         raise NotImplementedError("Subclasses must implement the 'next' method.")
+    
+    def previous(self):
+        raise NotImplementedError("Subclasses must implement the 'generate_sequence' method.")
 
     def generate_sequence(self, length):
         """

@@ -3,15 +3,19 @@ from abc import ABC, abstractmethod
 # Define an interface for the trading client
 class TradingClient(ABC):
     @abstractmethod
-    def buy(self, symbol, quantity, price, quoteOrderQty=None):
+    def create_market_order(self, side, symbol, quantity, quoteOrderQty=None):
         pass
 
     @abstractmethod
-    def sell(self, symbol, quantity, price, quoteOrderQty=None):
+    def create_limit_order(self, side, symbol, quantity, price):
         pass
 
     @abstractmethod
-    def get_balance(self, symbol):
+    def create_order(self, side, type, symbol, quantity, price, quoteOrderQty=None):
+        pass
+
+    @abstractmethod
+    def get_asset_balance(self, asset):
         pass
 
     @abstractmethod

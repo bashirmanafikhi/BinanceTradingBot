@@ -21,6 +21,9 @@ class FibonacciSequence(SequenceStrategy):
         """
         return self.curr
     
+    def previous(self):
+        return super().previous()
+
     def initialize(self):
         self.prev = 1
         self.curr = 1

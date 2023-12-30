@@ -15,7 +15,7 @@ class DuplicatedNumbersSequence(SequenceStrategy):
 
         The initial value of the sequence is set to 1.
         """
-        self.current_value = 1
+        self.current_value = 0.5
         
     def reset(self):
         """
@@ -43,10 +43,13 @@ class DuplicatedNumbersSequence(SequenceStrategy):
         Returns:
             int: The next value in the sequence.
         """
-        result = self.current_value
         self.current_value *= 2
+        return self.current_value
 
-        return result
+
+    def previous(self):
+        self.current_value /= 2
+        return self.current_value
 
     def generate_sequence(self, length):
         """

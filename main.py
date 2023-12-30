@@ -51,7 +51,7 @@ def live_data_example():
 
 def handle_live_kline_message(data):
     # Run the strategy on the data
-    result_data = trading_system.run_strategy(data, act_on_signals=True)
+    result_data = trading_system.run_strategy(data)
 
 
 def movingAverageExample():
@@ -78,6 +78,6 @@ def movingAverageExample():
 
 if __name__ == "__main__":
     configure_logging()
-    # live_data_example()
-    historical_data_example()
+    live_data_example()
+    # historical_data_example()
     # movingAverageExample()
