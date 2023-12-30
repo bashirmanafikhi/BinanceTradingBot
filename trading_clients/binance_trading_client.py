@@ -152,16 +152,16 @@ class BinanceTradingClient(TradingClient):
         for order in open_orders:
             self.client.cancel_order(symbol=order["symbol"], orderId=order["orderId"])
 
-    def create_market_order(self, side, symbol, quantity, quoteOrderQty=None):
+    def create_market_order(self, side, symbol, quantity, price, quoteOrderQty=None):
         return self.create_order(
-            side, self.client.ORDER_TYPE_MARKET, symbol, quantity, quoteOrderQty= quoteOrderQty
+            side, self.client.ORDER_TYPE_MARKET, symbol, quantity, price, quoteOrderQty= quoteOrderQty
         )
 
-    def create_limit_order(self, side, symbol, quantity):
-        return self.create_order(side, self.client.ORDER_TYPE_LIMIT, symbol, quantity)
+    def create_limit_order(self, side, symbol, quantity, price):
+        return self.create_order(side, self.client.ORDER_TYPE_LIMIT, symbol, quantity, price)
 
     def create_order(
-        self, side, type, symbol, quantity, price=None, quoteOrderQty=None
+        self, side, type, symbol, quantity, price, quoteOrderQty=None
     ):
         try:
             timeInForce = self.client.TIME_IN_FORCE_FOK

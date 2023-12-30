@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 # Define an interface for the trading client
 class TradingClient(ABC):
     @abstractmethod
-    def create_market_order(self, side, symbol, quantity, quoteOrderQty=None):
+    def create_market_order(self, side, symbol, quantity, price, quoteOrderQty=None):
         pass
 
     @abstractmethod

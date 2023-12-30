@@ -1,5 +1,6 @@
 from helpers.settings.settings import Settings
 from trading_clients.binance_trading_client import BinanceTradingClient
+from trading_clients.fake_trading_client import FakeTradingClient
 
 
 class TradingClientFactory:
@@ -12,3 +13,6 @@ class TradingClientFactory:
         api_testnet = self.settings.binance.api_testnet
 
         return BinanceTradingClient(api_key, api_secret, api_testnet)
+
+    def create_fake_trading_client(self):
+        return FakeTradingClient()

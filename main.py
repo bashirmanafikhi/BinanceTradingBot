@@ -1,5 +1,6 @@
 import pandas as pd
 from helpers.binance_websocket import get_binance_websocket_service
+from helpers.settings.constants import ACTION_BUY, ACTION_SELL, ORDER_TYPE_LIMIT
 from trading_clients.trading_client import TradingClient
 from trading_clients.trading_client_factory import TradingClientFactory
 from trading_strategies.martingale_strategy import MartingaleStrategy
@@ -78,6 +79,12 @@ def movingAverageExample():
 
 if __name__ == "__main__":
     configure_logging()
-    live_data_example()
+    fake_client = trading_client_factory.create_fake_trading_client()
+    fake_client.create_market_order(ACTION_BUY, "BTCUSDT", 0.05, 36000)
+    fake_client.create_limit_order(ACTION_SELL, "BTCUSDT", 0.04, 38000)
+    fake_client.create_order(ACTION_BUY, ORDER_TYPE_LIMIT, "ETHBTC", 3, 0.05)
+    print("Balances:", fake_client.balances)
+    print("Orders History:", fake_client.orders_history)
+    # live_data_example()
     # historical_data_example()
     # movingAverageExample()
