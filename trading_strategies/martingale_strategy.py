@@ -6,10 +6,11 @@ import logging
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL, ORDER_TYPE_LIMIT, ORDER_TYPE_MARKET
 
 class MartingaleStrategy(TradingStrategy):
-    DEFAULT_TRADING_RANGE = 15
+    DEFAULT_TRADING_RANGE = 40
 
-    def __init__(self, sequence_strategy = DuplicatedNumbersSequence()):
+    def __init__(self, keep_running = False, sequence_strategy = DuplicatedNumbersSequence()):
         super().__init__()
+        self.keep_running = keep_running
         self.sequence_strategy = sequence_strategy
         self.initialize_variables()
     
@@ -22,6 +23,7 @@ class MartingaleStrategy(TradingStrategy):
         self.sell_limit = None
         self.high_close_limit = None
         self.low_close_limit = None
+        self.sequence_strategy.reset()
 
     def execute(self, data):
         signals = pd.DataFrame(data[["timestamp", "close"]])
@@ -29,9 +31,14 @@ class MartingaleStrategy(TradingStrategy):
         return signals
 
     def process(self, row):
+        if((self.is_enabled == False) and self.keep_running):
+            self.initialize_variables()
+            self.enable_strategy()
+
         if not self.is_enabled or self.is_processing:
             return []
         
+
         try:
             self.enable_processing()
 
@@ -78,22 +85,21 @@ class MartingaleStrategy(TradingStrategy):
         is_succeed = self.create_order(first_action, price, first_quantity, ORDER_TYPE_LIMIT)
 
         if is_succeed:
-            self.disable_strategy()
 
             trades.append({"action": first_action, "quantity": first_quantity})
 
+
             second_action = ACTION_BUY if first_action == ACTION_SELL else ACTION_SELL
             second_quantity = self.get_closing_quantity(second_action)
-            if second_quantity == 0:
-                return trades
-            
-            is_succeed = self.create_order(second_action, price, second_quantity, ORDER_TYPE_MARKET)
-            if is_succeed:
-                trades.append({"action": second_action, "quantity": first_quantity})
+            if second_quantity != 0:
+                is_succeed = self.create_order(second_action, price, second_quantity, ORDER_TYPE_MARKET)
+                if is_succeed:
+                    trades.append({"action": second_action, "quantity": first_quantity})
 
-            return trades
-        else:
-            return trades
+            self.disable_strategy()
+            
+
+        return trades
         
     
     def get_closing_quantity(self, action):

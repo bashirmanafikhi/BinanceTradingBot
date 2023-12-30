@@ -43,7 +43,7 @@ class BinanceTradingClient(TradingClient):
         # Keep the program running
         binanceWebSocket.join()
 
-    def fetch_historical_data(self, symbol, timeframe, limit=50):
+    def fetch_historical_data(self, symbol, timeframe, limit=1000):
         klines = self.client.get_klines(symbol=symbol, interval=timeframe, limit=limit)
         df = pd.DataFrame(
             klines,

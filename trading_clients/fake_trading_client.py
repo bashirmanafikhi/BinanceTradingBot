@@ -15,7 +15,7 @@ class FakeTradingClient(TradingClient):
     COMMISSION_RATE = 0.1
 
     def __init__(self):
-        self.balances = {"USDT": 100000, "BTC": 10}
+        self.balances = {"USDT": 200, "BTC": 1}
         self.orders_history = []
 
     def _apply_commission(self, cost):
@@ -125,7 +125,6 @@ class FakeTradingClient(TradingClient):
                 "symbol": "BTCUSDT",
                 "baseAsset": "BTC",
                 "quoteAsset": "USDT",
-                "quoteAssetPrice": 41500,
                 "filters": [
                     {
                         "filterType": "PRICE_FILTER",
@@ -145,7 +144,6 @@ class FakeTradingClient(TradingClient):
                 "symbol": "ETHBTC",
                 "baseAsset": "ETH",
                 "quoteAsset": "BTC",
-                "quoteAssetPrice": 0.05,
                 "filters": [
                     {
                         "filterType": "PRICE_FILTER",

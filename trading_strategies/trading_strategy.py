@@ -13,6 +13,7 @@ class TradingStrategy(ABC):
         
         self.buy_command = BuyCommand()
         self.sell_command = SellCommand()
+        self.strategy_disabled_event = Event()
 
     @abstractmethod
     def execute(self, data):
@@ -30,6 +31,7 @@ class TradingStrategy(ABC):
 
     def disable_strategy(self):
         self.is_enabled = False
+        self.strategy_disabled_event()
         print("Strategy Disabled")
 
     def set_processing(self, is_processing):

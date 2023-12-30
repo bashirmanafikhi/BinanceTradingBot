@@ -26,9 +26,11 @@ class TradingSystem:
         self.strategy = strategy
         self.trading_client = trading_client
         self.trade_quote_size = trade_quote_size
+        self.last_price = 1
 
         self.register_handlers()
         self.initialize_symbol_info(symbol)
+        self.initialize_balance()
 
     def run_strategy(self, data):
         signals = self.strategy.execute(data)
@@ -37,7 +39,45 @@ class TradingSystem:
     def register_handlers(self):
         self.strategy.buy_command.set_handler(self.handle_buy)
         self.strategy.sell_command.set_handler(self.handle_sell)
+        self.strategy.strategy_disabled_event.add_handler(self.handle_strategy_disabled)
 
+    def handle_strategy_disabled(self):
+        self.calculate_profit_loss()
+        
+    
+    def calculate_profit_loss(self):
+        final_base_balance = Decimal(self.trading_client.get_asset_balance(self.base_asset))
+        final_quote_balance = Decimal(self.trading_client.get_asset_balance(self.quote_asset))
+
+        # Calculate the changes in balances
+        base_balance_change = final_base_balance - self.initial_base_balance
+        quote_balance_change = final_quote_balance - self.initial_quote_balance
+
+        # Calculate percentage changes
+        base_percentage_change = (base_balance_change / self.initial_base_balance) * 100
+        quote_percentage_change = (quote_balance_change / self.initial_quote_balance) * 100
+
+        print("-------------------------------------")
+        print(f"{self.base_asset} initial balance : {self.initial_base_balance}")
+        print(f"{self.base_asset} final balance: {final_base_balance}")
+        print(f"{self.base_asset} balance change: {base_balance_change}")
+        print(f"{self.base_asset} percentage change: {base_percentage_change:.2f}%")
+        print("-------------------------------------")
+        print(f"{self.quote_asset} initial balance : {self.initial_quote_balance}")
+        print(f"{self.quote_asset} final balance: {final_quote_balance}")
+        print(f"{self.quote_asset} balance change: {quote_balance_change}")
+        print(f"{self.quote_asset} percentage change: {quote_percentage_change:.2f}%")
+        print("-------------------------------------")
+
+        # Calculate the profit or loss amounts
+        profit_loss_base = base_balance_change * Decimal(self.last_price)
+        profit_loss_quote = quote_balance_change * 1  # Adjust this based on your quote asset pricing
+        total_profit = round(profit_loss_base + profit_loss_quote, 4)
+        print(f"Total Profit: {total_profit} $")
+
+
+
+    
     def handle_buy(self, price, quantity, type):
         return self.create_order(ACTION_BUY, type, price, quantity)
 
@@ -45,6 +85,8 @@ class TradingSystem:
         return self.create_order(ACTION_SELL, type, price, quantity)
 
     def create_order(self, action, type, price, quantity):
+        self.last_price = price
+
         quantity = self.calculate_quantity(price, quantity)
 
         print(f"{action} {quantity} {self.base_asset} at {price}")
@@ -109,4 +151,5 @@ class TradingSystem:
 
     def initialize_balance(self):
         # Get the balance from the trading client
-        self.quote_balance = self.trading_client.get_asset_balance(self.quote_asset)
+        self.initial_base_balance = self.trading_client.get_asset_balance(self.base_asset)
+        self.initial_quote_balance = self.trading_client.get_asset_balance(self.quote_asset)

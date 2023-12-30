@@ -26,7 +26,7 @@ symbol = "BTCUSDT"
 
 # Choose a strategy
 # strategy: TradingStrategy = SimpleMovingAverage(20)
-strategy: TradingStrategy = MartingaleStrategy()
+strategy: TradingStrategy = MartingaleStrategy(keep_running=True)
 
 # Create a BinanceTradingClient instance
 trading_client_factory = TradingClientFactory()
