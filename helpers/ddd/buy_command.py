@@ -1,4 +1,4 @@
-from other_services.ddd.command import Command
+from helpers.ddd.command import Command
 
 
 class BuyCommand(Command):

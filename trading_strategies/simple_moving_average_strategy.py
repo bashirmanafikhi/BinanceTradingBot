@@ -1,6 +1,6 @@
 
 import pandas as pd
-from other_services.ddd.event import Event
+from helpers.ddd.event import Event
 from trading_strategies.trading_strategy import TradingStrategy
 
 

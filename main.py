@@ -1,5 +1,5 @@
 import pandas as pd
-from other_services.binance_websocket import get_binance_websocket_service
+from helpers.binance_websocket import get_binance_websocket_service
 from trading_clients.trading_client import TradingClient
 from trading_clients.trading_client_factory import TradingClientFactory
 from trading_strategies.martingale_strategy import MartingaleStrategy

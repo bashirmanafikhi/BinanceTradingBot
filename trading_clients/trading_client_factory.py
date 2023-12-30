@@ -1,4 +1,4 @@
-from settings.settings import Settings
+from helpers.settings.settings import Settings
 from trading_clients.binance_trading_client import BinanceTradingClient
 
 

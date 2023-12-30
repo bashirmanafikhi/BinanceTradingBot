@@ -1,9 +1,9 @@
-from other_services.sequences.duplicated_numbers_sequence import DuplicatedNumbersSequence
-from other_services.sequences.sequence_strategy import SequenceStrategy
+from helpers.sequences.duplicated_numbers_sequence import DuplicatedNumbersSequence
+from helpers.sequences.sequence_strategy import SequenceStrategy
 from trading_strategies.trading_strategy import TradingStrategy
 import pandas as pd
 import logging
-from settings.constants import ACTION_BUY, ACTION_SELL, ORDER_TYPE_LIMIT, ORDER_TYPE_MARKET
+from helpers.settings.constants import ACTION_BUY, ACTION_SELL, ORDER_TYPE_LIMIT, ORDER_TYPE_MARKET
 
 class MartingaleStrategy(TradingStrategy):
     DEFAULT_TRADING_RANGE = 6

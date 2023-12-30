@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from other_services.ddd.buy_command import BuyCommand
-from other_services.ddd.event import Event
-from other_services.ddd.sell_command import SellCommand
-from settings.constants import ACTION_BUY, ACTION_SELL, ORDER_TYPE_LIMIT
+from helpers.ddd.buy_command import BuyCommand
+from helpers.ddd.event import Event
+from helpers.ddd.sell_command import SellCommand
+from helpers.settings.constants import ACTION_BUY, ACTION_SELL, ORDER_TYPE_LIMIT
 
 
 # an interface for the trading strategy

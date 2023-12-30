@@ -2,7 +2,7 @@ import time
 import pandas as pd
 from binance import ThreadedWebsocketManager
 
-from settings.settings import Settings
+from helpers.settings.settings import Settings
 
 def get_binance_websocket_service():
     settings = Settings()

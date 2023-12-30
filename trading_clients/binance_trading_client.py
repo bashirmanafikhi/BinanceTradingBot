@@ -1,8 +1,8 @@
 from binance.client import Client
 import pandas as pd
-from other_services.binance_websocket import get_binance_websocket_service
+from helpers.binance_websocket import get_binance_websocket_service
 
-from settings.settings import Settings
+from helpers.settings.settings import Settings
 from trading_clients.trading_client import TradingClient
 
 

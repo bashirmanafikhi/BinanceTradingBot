@@ -1,5 +1,5 @@
-from other_services.ddd.command import Command
-from settings.constants import ORDER_TYPE_LIMIT
+from helpers.ddd.command import Command
+from helpers.settings.constants import ORDER_TYPE_LIMIT
 
 
 class SellCommand(Command):

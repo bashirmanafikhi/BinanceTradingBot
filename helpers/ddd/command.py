@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import Callable, Tuple
 
-from settings.constants import ACTION_BUY, ACTION_SELL
+from helpers.settings.constants import ACTION_BUY, ACTION_SELL
 
 class Command(ABC):
     def __init__(self):
