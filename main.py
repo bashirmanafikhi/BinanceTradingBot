@@ -31,9 +31,10 @@ strategy: TradingStrategy = MartingaleStrategy()
 # Create a BinanceTradingClient instance
 trading_client_factory = TradingClientFactory()
 binance_client: TradingClient = trading_client_factory.create_binance_trading_client()
+fake_client: TradingClient = trading_client_factory.create_fake_trading_client()
 
 # Create a trading system with the selected strategy and BinanceTradingClient
-trading_system = TradingSystem(symbol, strategy, binance_client)
+trading_system = TradingSystem(symbol, strategy, fake_client)
 
 
 def historical_data_example():
@@ -79,12 +80,6 @@ def movingAverageExample():
 
 if __name__ == "__main__":
     configure_logging()
-    fake_client = trading_client_factory.create_fake_trading_client()
-    fake_client.create_market_order(ACTION_BUY, "BTCUSDT", 0.05, 36000)
-    fake_client.create_limit_order(ACTION_SELL, "BTCUSDT", 0.04, 38000)
-    fake_client.create_order(ACTION_BUY, ORDER_TYPE_LIMIT, "ETHBTC", 3, 0.05)
-    print("Balances:", fake_client.balances)
-    print("Orders History:", fake_client.orders_history)
     # live_data_example()
-    # historical_data_example()
+    historical_data_example()
     # movingAverageExample()

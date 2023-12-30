@@ -6,7 +6,7 @@ import logging
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL, ORDER_TYPE_LIMIT, ORDER_TYPE_MARKET
 
 class MartingaleStrategy(TradingStrategy):
-    DEFAULT_TRADING_RANGE = 6
+    DEFAULT_TRADING_RANGE = 15
 
     def __init__(self, sequence_strategy = DuplicatedNumbersSequence()):
         super().__init__()
