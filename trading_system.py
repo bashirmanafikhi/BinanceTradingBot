@@ -14,20 +14,25 @@ from trading_strategies.trading_strategy import TradingStrategy
 
 
 class TradingSystem:
-    DEFAULT_TRADE_QUOTE_SIZE = 10
+    # should be between 0 and 1
+    DEFAULT_TRADE_QUOTE_Percentage = 0.75
 
     def __init__(
         self,
         symbol: str,
         strategy: TradingStrategy,
         trading_client: TradingClient,
-        trade_quote_size=DEFAULT_TRADE_QUOTE_SIZE,
+        trade_quote_percentage=DEFAULT_TRADE_QUOTE_Percentage,
     ):
         self.strategy = strategy
         self.trading_client = trading_client
-        self.trade_quote_size = trade_quote_size
-        self.last_price = 1
-
+        self.trade_quote_percentage = trade_quote_percentage
+        self.last_price = 0
+        self.max_quantity = 0
+        self.max_quote_quantity = 0
+        self.max_level = 0
+        self.levels = []
+        self.trades_count = 0
         self.register_handlers()
         self.initialize_symbol_info(symbol)
         self.initialize_balance()
@@ -46,6 +51,10 @@ class TradingSystem:
         
     
     def calculate_profit_loss(self):
+        if(self.trades_count == 0):
+            print("No Trades Happened")
+            return
+        
         initial_base_balance = Decimal(self.initial_base_balance)
         initial_quote_balance = Decimal(self.initial_quote_balance)
 
@@ -57,7 +66,11 @@ class TradingSystem:
         quote_balance_change = final_quote_balance - initial_quote_balance
 
         # Calculate percentage changes
-        base_percentage_change = (base_balance_change / initial_base_balance) * 100
+        if(initial_base_balance != 0):
+            base_percentage_change = (base_balance_change / initial_base_balance) * 100
+        else:
+            base_percentage_change = 0
+            
         quote_percentage_change = (quote_balance_change / initial_quote_balance) * 100
 
         print("-------------------------------------")
@@ -77,6 +90,13 @@ class TradingSystem:
         profit_loss_quote = quote_balance_change * 1  # Adjust this based on your quote asset pricing
         total_profit = round(profit_loss_base + profit_loss_quote, 4)
         print(f"Total Profit: {total_profit} $")
+        print(f"Max {self.base_asset} Quantity: {self.max_quantity}")
+        print(f"Max Quote Quantity: {self.max_quote_quantity}")
+        print(f"Max Level: {self.max_level}")
+        average = sum(self.levels) / len(self.levels)
+        print(f"Levels Average:{average}")
+        print(f"Total Trades Count: {self.trades_count}")
+        print("-------------------------------")
 
 
 
@@ -88,11 +108,10 @@ class TradingSystem:
         return self.create_order(ACTION_SELL, type, price, quantity)
 
     def create_order(self, action, type, price, quantity):
-        self.last_price = price
-
+        level = quantity
         quantity = self.calculate_quantity(price, quantity)
 
-        print(f"{action} {quantity} {self.base_asset} at {price}")
+        # print(f"{action} {quantity} {self.base_asset} at {price}")
 
         order = self.trading_client.create_order(
             action, type, self.symbol, quantity, price
@@ -101,7 +120,14 @@ class TradingSystem:
         # Print order price
         order_price = self.extract_price_from_order(order)
         if order_price is not None:
-            print(f"{action} order placed at: {order_price}")
+            self.last_price = price
+            if(self.max_quantity < quantity):
+                self.max_quantity = quantity
+                self.max_level = level
+                self.max_quote_quantity = quantity * Decimal(price)
+                self.levels.append(level)
+            #print(f"{action} order placed at: {order_price}")
+            self.trades_count += 1
             return True
 
         return False
@@ -109,16 +135,17 @@ class TradingSystem:
     def calculate_quantity(self, price, quantity_percentage):
         try:
             # Convert numbers to decimal before dividing
-            price_decimal = decimal.Decimal(str(price))
-            quantity_percentage_decimal = decimal.Decimal(str(quantity_percentage))
+            price = decimal.Decimal(str(price))
+            quantity_percentage = decimal.Decimal(str(quantity_percentage))
 
             # Avoid division by zero
-            if price_decimal == 0:
+            if price == 0:
                 raise ValueError("Price should not be zero.")
 
             # Calculate quantity using decimal arithmetic
+            size = self.initial_quote_balance * Decimal(self.trade_quote_percentage)
             quantity = (
-                self.trade_quote_size * quantity_percentage_decimal / price_decimal
+                size * quantity_percentage / price
             )
 
             # Round the quantity to an appropriate number of decimal places
@@ -139,12 +166,16 @@ class TradingSystem:
         return rounded_number
 
     def extract_price_from_order(self, order):
-        if order["status"] == ORDER_STATUS_FILLED:
-            return float(order["fills"][0]["price"])
-        else:
-            print(f"Order status not filled.. it's {order['status']}")
+        try:
+            if order["status"] == ORDER_STATUS_FILLED:
+                return float(order["fills"][0]["price"])
+            else:
+                print(f"Order status not filled.. it's {order['status']}")
+                return None
+        except (KeyError, IndexError, ValueError, Exception) as e:
+            #print(f"Error extracting price from order: {e}")
             return None
-
+        
     def initialize_symbol_info(self, symbol):
         # Extract quote and base asset names
         self.symbol_info = self.trading_client.get_symbol_info(symbol)

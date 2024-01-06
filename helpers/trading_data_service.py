@@ -5,7 +5,7 @@ import pandas as pd
 
 class TradingDataService:
 
-    def __init__(self, data_dir, file_name):
+    def __init__(self, data_dir = 'bitcoin_historical_data\\Bitcoin Historical Dataset', file_name = 'BTC-2017min.csv'):
         self.data_dir = data_dir
         self.file_name = file_name
         self.file_path = os.path.join(data_dir, file_name)
@@ -49,7 +49,8 @@ class TradingDataService:
             return None
 
         queried_data = self.data
-
+        queried_data["date"] = pd.to_datetime(queried_data["date"], format="%Y-%m-%d %H:%M:%S")
+        
         if start_date is not None:
             queried_data = queried_data[queried_data["date"] >= start_date]
 

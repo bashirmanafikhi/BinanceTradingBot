@@ -16,12 +16,15 @@ class FakeTradingClient(TradingClient):
     COMMISSION_RATE = 0.1
 
     def __init__(self):
-        self.balances = {"USDT": 2000, "BTC": 1}
+        self.balances = {"USDT": Decimal(100), "BTC": Decimal(0)}
+        # self.balances = {"USDT": Decimal(500), "BTC": Decimal(0.012)}
         self.orders_history = []
+        self.total_paid_commission = 0
 
     def _apply_commission(self, cost):
         commission_rate = Decimal(self.COMMISSION_RATE)
         commission = cost * commission_rate
+        self.total_paid_commission += commission
         return cost + commission
 
     def _update_balances(self, symbol_info, side, quantity, price):
@@ -35,15 +38,19 @@ class FakeTradingClient(TradingClient):
             self.balances[symbol_info["baseAsset"]] = 0
 
         if side == ACTION_BUY:
-            if cost_with_commission > self.balances[symbol_info["quoteAsset"]]:
+            current_quote_balance = self.balances[symbol_info["quoteAsset"]]
+            if cost_with_commission > current_quote_balance:
                 print("Insufficient balance to place order.")
+                print(f"side: {side}, cost_with_commission: {cost_with_commission}, current_quote_balance: {current_quote_balance}")
                 return False
 
             self.balances[symbol_info["quoteAsset"]] -= cost_with_commission
             self.balances[symbol_info["baseAsset"]] += quantity
         elif side == ACTION_SELL:
-            if quantity > self.balances[symbol_info["baseAsset"]]:
+            current_base_balance = self.balances[symbol_info["baseAsset"]]
+            if quantity > current_base_balance:
                 print("Insufficient balance to place order.")
+                print(f"side: {side}, cost_with_commission: {cost_with_commission}, current_base_balance: {current_base_balance}")
                 return False
 
             self.balances[symbol_info["baseAsset"]] -= quantity
@@ -116,7 +123,7 @@ class FakeTradingClient(TradingClient):
         }
 
         self._add_to_orders_history(order)
-        print(f"Placed limit order - {order}")
+        #print(f"Placed limit order - {order}")
         return order
 
     def create_order(self,
