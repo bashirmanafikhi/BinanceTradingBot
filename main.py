@@ -35,9 +35,9 @@ def get_historical_data():
     success = trading_data_service.load_data()
     data = pd.DataFrame()
     if success:
-        start_date = datetime(2017, 1, 2, 1, 0, 0)  # (year, month, day, hour, minute, second)
+        start_date = datetime(2017, 1, 3, 1, 0, 0)  # (year, month, day, hour, minute, second)
         # end_date = datetime(2017, 1,4, 1, 0, 0)  # (year, month, day, hour, minute, second)
-        end_date = start_date + timedelta(days=1)
+        end_date = start_date + timedelta(days=14)
         data = trading_data_service.query_data(start_date, end_date)
     else:
         print("Data didn't load.")

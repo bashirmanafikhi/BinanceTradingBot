@@ -15,7 +15,7 @@ from trading_strategies.trading_strategy import TradingStrategy
 
 class TradingSystem:
     # should be between 0 and 1
-    DEFAULT_TRADE_QUOTE_Percentage = 0.75
+    DEFAULT_TRADE_QUOTE_Percentage = 0.9
 
     def __init__(
         self,
