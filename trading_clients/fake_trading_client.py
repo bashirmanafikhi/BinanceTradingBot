@@ -13,7 +13,7 @@ import time
 
 
 class FakeTradingClient(TradingClient):
-    COMMISSION_RATE = 0.1
+    COMMISSION_RATE = 0.0
 
     def __init__(self):
         self.balances = {"USDT": Decimal(100), "BTC": Decimal(0.1)}

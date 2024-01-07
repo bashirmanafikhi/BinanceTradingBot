@@ -37,7 +37,7 @@ def get_historical_data():
     if success:
         start_date = datetime(2017, 1, 2, 1, 0, 0)  # (year, month, day, hour, minute, second)
         # end_date = datetime(2017, 1,4, 1, 0, 0)  # (year, month, day, hour, minute, second)
-        end_date = start_date + timedelta(days=14)
+        end_date = start_date + timedelta(days=1)
         data = trading_data_service.query_data(start_date, end_date)
     else:
         print("Data didn't load.")

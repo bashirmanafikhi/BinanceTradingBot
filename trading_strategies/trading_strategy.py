@@ -37,11 +37,17 @@ class TradingStrategy(ABC):
         pass
     
     def execute(self, data):
+        self.total_count = len(data)
+        self.counter = 0
+        
         signals = pd.DataFrame(data)
         signals["trades"] = signals.apply(self.try_process, axis=1)
         return signals
     
     def try_process(self, candle):
+        self.counter += 1
+        self.print_progress_bar(self.counter, self.total_count, prefix='Progress:', suffix='Complete', length=50)
+        
         if((self.is_enabled == False) and self.keep_running):
             self.enable_strategy()
             
@@ -128,3 +134,8 @@ class TradingStrategy(ABC):
             self.high_close_limit = price + self.stop_lose_range
             self.low_close_limit = price -  self.take_profit_range
             
+    def print_progress_bar(self, iteration, total, prefix='', suffix='', length=30, fill='█', print_end='\r'):
+        percent = ("{0:.1f}").format(100 * (iteration / float(total)))
+        filled_length = int(length * iteration // total)
+        bar = fill * filled_length + '-' * (length - filled_length)
+        print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=print_end, flush=True)
