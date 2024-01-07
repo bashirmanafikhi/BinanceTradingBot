@@ -7,6 +7,7 @@ from helpers.trading_data_service import TradingDataService
 from trading_clients.trading_client import TradingClient
 from trading_clients.trading_client_factory import TradingClientFactory
 from trading_strategies.bollinger_rsi_strategy import BollingerRSIStrategy
+from trading_strategies.bollinger_rsi_strategy_stop_limit import BollingerRSIStrategyStopLimit
 from trading_strategies.ema_crossover_strategy import EMACrossoverStrategy
 from trading_strategies.ema_rsi_strategy import EMARSIStrategy
 from trading_strategies.macd_strategy import MACDStrategy
@@ -22,7 +23,7 @@ def configure_logging():
 def get_trading_system():
     trading_client_factory = TradingClientFactory()
     fake_client: TradingClient = trading_client_factory.create_fake_trading_client()
-    strategy: TradingStrategy = BollingerRSIStrategy()
+    strategy: TradingStrategy = BollingerRSIStrategy(30,2,13,70,30)
     
     symbol = "BTCUSDT"
     trading_system = TradingSystem(symbol, strategy, fake_client)
@@ -34,9 +35,9 @@ def get_historical_data():
     success = trading_data_service.load_data()
     data = pd.DataFrame()
     if success:
-        start_date = datetime(2017, 1, 1, 1, 0, 0)  # (year, month, day, hour, minute, second)
+        start_date = datetime(2017, 1, 2, 1, 0, 0)  # (year, month, day, hour, minute, second)
         # end_date = datetime(2017, 1,4, 1, 0, 0)  # (year, month, day, hour, minute, second)
-        end_date = start_date + timedelta(hours=48)
+        end_date = start_date + timedelta(days=14)
         data = trading_data_service.query_data(start_date, end_date)
     else:
         print("Data didn't load.")

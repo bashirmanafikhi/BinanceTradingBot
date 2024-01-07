@@ -23,7 +23,7 @@ class MartingaleStrategy(TradingStrategy):
         self.keep_running = keep_running
         self.sequence_strategy = sequence_strategy
 
-    def on_enabling(self):
+    def on_starting(self):
         self.total_buy_quantity = 0
         self.total_sell_quantity = 0
         self.last_action = None
@@ -41,7 +41,7 @@ class MartingaleStrategy(TradingStrategy):
         if self.last_action is None:
             trade = self.create_trade_action(ACTION_BUY, price)
             if trade is not None:
-                self.initialize_trading_limits(price)
+                self.set_profit_lose_limits(price)
             return trade
 
         # Buy Limit
@@ -122,7 +122,7 @@ class MartingaleStrategy(TradingStrategy):
     def set_sequence_strategy(self, sequence_strategy: SequenceStrategy):
         self.sequence_strategy = sequence_strategy
 
-    def initialize_trading_limits(self, price):
+    def set_profit_lose_limits(self, price):
         self.trading_range = self.DEFAULT_TRADING_CENTER_RANGE
         self.buy_limit = price
         self.sell_limit = price - self.DEFAULT_TRADING_CENTER_RANGE

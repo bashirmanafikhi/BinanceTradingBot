@@ -14,7 +14,7 @@ class EMARSIStrategy(TradingStrategy):
         self.rsi_window = rsi_window
         self.rsi_threshold = rsi_threshold
 
-    def on_enabling(self):
+    def on_starting(self):
         self.last_action = None
 
     def process(self, row):

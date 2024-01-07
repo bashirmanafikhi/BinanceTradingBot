@@ -12,7 +12,7 @@ class EMACrossoverStrategy(TradingStrategy):
         self.short_window = short_window
         self.long_window = long_window
 
-    def on_enabling(self):
+    def on_starting(self):
         self.last_action = None
 
     def process(self, row):

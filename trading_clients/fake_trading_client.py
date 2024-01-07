@@ -16,7 +16,7 @@ class FakeTradingClient(TradingClient):
     COMMISSION_RATE = 0.1
 
     def __init__(self):
-        self.balances = {"USDT": Decimal(100), "BTC": Decimal(0)}
+        self.balances = {"USDT": Decimal(100), "BTC": Decimal(0.1)}
         # self.balances = {"USDT": Decimal(500), "BTC": Decimal(0.012)}
         self.orders_history = []
         self.total_paid_commission = 0
@@ -37,20 +37,21 @@ class FakeTradingClient(TradingClient):
         if symbol_info["baseAsset"] not in self.balances:
             self.balances[symbol_info["baseAsset"]] = 0
 
+        current_quote_balance = self.balances[symbol_info["quoteAsset"]]
+        current_base_balance = self.balances[symbol_info["baseAsset"]]
+        
         if side == ACTION_BUY:
-            current_quote_balance = self.balances[symbol_info["quoteAsset"]]
             if cost_with_commission > current_quote_balance:
                 print("Insufficient balance to place order.")
-                print(f"side: {side}, cost_with_commission: {cost_with_commission}, current_quote_balance: {current_quote_balance}")
+                print(f"side: {side}, price: {price}, cost_with_commission: {cost_with_commission}, current_quote_balance: {current_quote_balance}, current_base_balance: {current_base_balance}")
                 return False
 
             self.balances[symbol_info["quoteAsset"]] -= cost_with_commission
             self.balances[symbol_info["baseAsset"]] += quantity
         elif side == ACTION_SELL:
-            current_base_balance = self.balances[symbol_info["baseAsset"]]
             if quantity > current_base_balance:
                 print("Insufficient balance to place order.")
-                print(f"side: {side}, cost_with_commission: {cost_with_commission}, current_base_balance: {current_base_balance}")
+                print(f"side: {side}, price: {price}, quantity: {quantity}, current_quote_balance: {current_quote_balance}, current_base_balance: {current_base_balance}")
                 return False
 
             self.balances[symbol_info["baseAsset"]] -= quantity

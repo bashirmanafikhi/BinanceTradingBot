@@ -42,6 +42,7 @@ def exponential_moving_average_crossover_strategy(data, short_window, long_windo
 
 def add_moving_average(signals, short_window, long_window):
 
+    signals.ta.ema(100, append=True)
     signals.ta.ema(length=short_window, append=True)
     signals.ta.ema(length=long_window, append=True)
 
@@ -78,8 +79,9 @@ def plot_signals(signals):
 
     # Create a secondary y-axis for the moving averages
     ax2 = ax1.twinx()
-    ax2.plot(signals['EMA_9'], label='Short-Term MA', linestyle='--', color='blue')
-    ax2.plot(signals['EMA_21'], label='Long-Term MA', linestyle='--', color='orange')
+    ax2.plot(signals['EMA_9'], label='EMA 9', linestyle='--', color='blue')
+    ax2.plot(signals['EMA_21'], label='EMA 21', linestyle='--', color='orange')
+    ax2.plot(signals['EMA_100'], label='EMA 100', linestyle='--', color='red')
     ax2.set_ylabel('Moving Averages', color='black')
     ax2.tick_params('y', colors='black')
     ax2.legend(loc='upper right')
