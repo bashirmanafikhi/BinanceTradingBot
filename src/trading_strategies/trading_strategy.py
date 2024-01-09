@@ -57,7 +57,7 @@ class TradingStrategy(ABC):
                 
             if not hasattr(self, 'candles') or self.candles is None:
                 # Create a DataFrame from the Series with the Series name as the column name
-                self.candles = pd.DataFrame(candle).transpose()
+                self.candles = pd.DataFrame(candle).transpose().reset_index(drop=True)
             else:
                 # Append the current row to the DataFrame
                 self.candles.loc[len(self.candles)] = candle

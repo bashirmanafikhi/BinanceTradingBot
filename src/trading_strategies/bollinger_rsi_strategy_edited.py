@@ -1,4 +1,5 @@
 import pandas_ta as ta
+import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 import logging
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL
@@ -18,6 +19,29 @@ class BollingerRSIStrategyEdited(TradingStrategy):
     def on_starting(self):
         self.last_action = None
 
+        # Initialize live plotting
+        plt.ion()
+        self.fig, self.ax = plt.subplots()
+
+    def live_plot(self):
+        # Plotting logic goes here
+        # You can customize the plot based on your needs
+        self.ax.clear()
+
+        # Plot Close Price
+        self.ax.plot(self.candles.index, self.candles["close"], label="Close Price", color='black')
+
+        # Plot Lower Bollinger Band
+        self.ax.plot(self.candles.index, self.candles["BBL"], label="Lower Bollinger Band", linestyle='--', color='blue')
+
+        # Plot Upper Bollinger Band
+        self.ax.plot(self.candles.index, self.candles["BBU"], label="Upper Bollinger Band", linestyle='--', color='red')
+
+        self.ax.legend()
+        plt.draw()
+        plt.pause(0.001)
+
+
     def process(self, row):
         # Wait for at least bollinger_window + rsi_window rows to form
         if len(self.candles) < self.bollinger_window + self.rsi_window:
@@ -33,6 +57,9 @@ class BollingerRSIStrategyEdited(TradingStrategy):
         except TypeError as e:
             pass
             # logging.info("Error during Bollinger Bands and RSI calculation:", e)
+
+        # Call live plotting method
+        self.live_plot()
 
         # Extract current and previous rows
         current_row = self.candles.iloc[-1]

@@ -37,7 +37,7 @@ def configure_logging():
 
     # Get the root logger and add both handlers
     root_logger = logging.getLogger()
-    root_logger.addHandler(console_handler)
+    #root_logger.addHandler(console_handler)
     root_logger.addHandler(file_handler)
 
 def get_trading_system():
@@ -73,6 +73,7 @@ def historical_data_example():
     trading_system.calculate_profit_loss()
 
     plot_signals(signals)
+        
     
 def live_data_example():
     binance_client: TradingClient = trading_client_factory.create_binance_trading_client()
@@ -83,7 +84,7 @@ def handle_live_kline_message(data):
     result_data = trading_system.run_strategy(data)
 
 if __name__ == "__main__":
-    #configure_logging()
+    configure_logging()
     trading_client_factory, symbol, trading_system = get_trading_system()
 
     # Uncomment one of the following lines based on the scenario you want to run

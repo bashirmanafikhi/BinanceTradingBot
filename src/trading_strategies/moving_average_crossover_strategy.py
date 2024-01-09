@@ -49,9 +49,6 @@ def add_moving_average(signals, short_window, long_window):
     return signals
 
 def plot_signals(signals):
-    # invert sorting
-    signals = signals.sort_index(ascending=False)
-
     # Apply the function to fill the 'positions' column
     signals['positions'] = signals['trades'].apply(map_action_to_position)
 
@@ -87,6 +84,7 @@ def plot_signals(signals):
     ax2.legend(loc='upper right')
 
     ax1.set_title('Moving Average Crossover Strategy')
+    plt.show()
     plt.show()
 
     
