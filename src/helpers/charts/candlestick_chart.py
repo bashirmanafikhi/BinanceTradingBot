@@ -4,6 +4,7 @@ import mplfinance as mpf
 from binance.client import Client
 from datetime import datetime
 import pandas as pd
+import logging
 
 class RealTimeCandlestickChart:
     def __init__(self):
@@ -13,15 +14,15 @@ class RealTimeCandlestickChart:
         # وقت تشتري طلع على هاد
         # Ask Price: The lowest price a seller is willing to accept for a security. If you want to buy an asset immediately, you could place a market buy order at the ask price.
         ask_price = float(msg['a'][0][0])  # Lowest ask price
-        print(f"Ask Price: {ask_price}")
+        logging.info(f"Ask Price: {ask_price}")
 
         # وقت بدك تبيع طلع على هاد
         # Bid Price: The highest price a buyer is willing to pay for a security. If you want to sell an asset immediately, you could place a market sell order at the bid price.
         bid_price = float(msg['b'][0][0])  # Highest bid price
-        print(f"Bid Price: {bid_price}")
+        logging.info(f"Bid Price: {bid_price}")
 
     def print_price_from_kline_message(self, msg):
-        print(f"Symbol: {msg['s']}, Price: {msg['c']}")
+        logging.info(f"Symbol: {msg['s']}, Price: {msg['c']}")
 
     def custom_handle_kline_message(self, msg):
         kline = msg['k']

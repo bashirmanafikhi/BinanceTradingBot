@@ -1,11 +1,12 @@
 import logging
 import os
+import logging
 import pandas as pd
 
 
 class TradingDataService:
 
-    def __init__(self, data_dir = 'bitcoin_historical_data\\Bitcoin Historical Dataset', file_name = 'BTC-2017min.csv'):
+    def __init__(self, data_dir = 'src\\bitcoin_historical_data\\Bitcoin Historical Dataset', file_name = 'BTC-2017min.csv'):
         self.data_dir = data_dir
         self.file_name = file_name
         self.file_path = os.path.join(data_dir, file_name)
@@ -24,7 +25,7 @@ class TradingDataService:
             self.data = self.data.drop(["unix", "symbol"], axis=1)
             return True
         except FileNotFoundError:
-            print(f"File not found: {self.file_path}")
+            logging.info(f"File not found: {self.file_path}")
             return False
 
     def query_one_month(self):
@@ -45,7 +46,7 @@ class TradingDataService:
         - Pandas DataFrame containing the queried data.
         """
         if self.data is None:
-            print("Data not loaded. Use 'load_data()' to load the data first.")
+            logging.info("Data not loaded. Use 'load_data()' to load the data first.")
             return None
 
         queried_data = self.data

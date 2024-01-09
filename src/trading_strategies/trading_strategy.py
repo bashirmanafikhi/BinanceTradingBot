@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 import logging
-
 import pandas as pd
 from helpers.ddd.buy_command import BuyCommand
 from helpers.ddd.event import Event
@@ -45,8 +44,8 @@ class TradingStrategy(ABC):
         return signals
     
     def try_process(self, candle):
-        self.counter += 1
-        self.print_progress_bar(self.counter, self.total_count, prefix='Progress:', suffix='Complete', length=50)
+        #self.counter += 1
+        #self.print_progress_bar(self.counter, self.total_count, prefix='Progress:', suffix='Complete', length=50)
         
         if((self.is_enabled == False) and self.keep_running):
             self.enable_strategy()
@@ -80,12 +79,12 @@ class TradingStrategy(ABC):
         self.on_starting()
         self.is_enabled = True
         self.strategy_enabled_event()
-        print("Strategy Enabled")
+        logging.info("Strategy Enabled")
 
     def disable_strategy(self):
         self.is_enabled = False
         self.strategy_disabled_event()
-        print("Strategy Disabled")
+        logging.info("Strategy Disabled")
 
     def set_processing(self, is_processing):
         self.is_processing = is_processing
@@ -118,7 +117,7 @@ class TradingStrategy(ABC):
         is_succeed = self.create_order(action, price, self.QUANTITY)
 
         if is_succeed:
-            #print(f"Trade: {action} - Quantity: {self.QUANTITY} - Price: {price}")
+            #logging.info(f"Trade: {action} - Quantity: {self.QUANTITY} - Price: {price}")
             if(set_stop_limits):
                 self.set_profit_lose_limits(action, price)
             self.last_action = action
@@ -138,4 +137,4 @@ class TradingStrategy(ABC):
         percent = ("{0:.1f}").format(100 * (iteration / float(total)))
         filled_length = int(length * iteration // total)
         bar = fill * filled_length + '-' * (length - filled_length)
-        print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=print_end, flush=True)
+        logging.info(f'\r{prefix} |{bar}| {percent}% {suffix}', end=print_end, flush=True)

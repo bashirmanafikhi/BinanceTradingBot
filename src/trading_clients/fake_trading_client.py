@@ -42,16 +42,16 @@ class FakeTradingClient(TradingClient):
         
         if side == ACTION_BUY:
             if cost_with_commission > current_quote_balance:
-                print("Insufficient balance to place order.")
-                print(f"side: {side}, price: {price}, cost_with_commission: {cost_with_commission}, current_quote_balance: {current_quote_balance}, current_base_balance: {current_base_balance}")
+                logging.info("Insufficient balance to place order.")
+                logging.info(f"side: {side}, price: {price}, cost_with_commission: {cost_with_commission}, current_quote_balance: {current_quote_balance}, current_base_balance: {current_base_balance}")
                 return False
 
             self.balances[symbol_info["quoteAsset"]] -= cost_with_commission
             self.balances[symbol_info["baseAsset"]] += quantity
         elif side == ACTION_SELL:
             if quantity > current_base_balance:
-                print("Insufficient balance to place order.")
-                print(f"side: {side}, price: {price}, quantity: {quantity}, current_quote_balance: {current_quote_balance}, current_base_balance: {current_base_balance}")
+                logging.info("Insufficient balance to place order.")
+                logging.info(f"side: {side}, price: {price}, quantity: {quantity}, current_quote_balance: {current_quote_balance}, current_base_balance: {current_base_balance}")
                 return False
 
             self.balances[symbol_info["baseAsset"]] -= quantity
@@ -99,13 +99,13 @@ class FakeTradingClient(TradingClient):
         }
 
         self._add_to_orders_history(order)
-        print(f"Executed market order - {order}")
+        logging.info(f"Executed market order - {order}")
         return order
 
     def create_limit_order(self, side, symbol, quantity, price):
         symbol_info = self.get_symbol_info(symbol)
         if symbol_info is None:
-            print(f"Symbol not found: {symbol}")
+            logging.info(f"Symbol not found: {symbol}")
             return
 
         if not self._update_balances(symbol_info, side, quantity, price):
@@ -124,7 +124,7 @@ class FakeTradingClient(TradingClient):
         }
 
         self._add_to_orders_history(order)
-        #print(f"Placed limit order - {order}")
+        #logging.info(f"Placed limit order - {order}")
         return order
 
     def create_order(self,
@@ -195,5 +195,5 @@ class FakeTradingClient(TradingClient):
             if info["symbol"] == symbol:
                 return info
 
-        print(f"Symbol not found: {symbol}")
+        logging.info(f"Symbol not found: {symbol}")
         return None

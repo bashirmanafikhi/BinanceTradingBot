@@ -3,6 +3,7 @@ from helpers.sequences.sequence_strategy import SequenceStrategy
 from trading_strategies.trading_strategy import TradingStrategy
 import pandas as pd
 import logging
+import logging
 from helpers.settings.constants import (
     ACTION_BUY,
     ACTION_SELL,
@@ -61,7 +62,7 @@ class MartingaleStrategy(TradingStrategy):
             return self.close_trades(ACTION_BUY, price)
 
         else:
-            # print(f"Price: {price}")
+            # logging.info(f"Price: {price}")
             return []
 
     def close_trades(self, first_action, price):
@@ -106,7 +107,7 @@ class MartingaleStrategy(TradingStrategy):
         is_succeed = self.create_order(action, price, quantity)
 
         if is_succeed:
-            print(f"Level: {quantity} placed")
+            logging.info(f"Level: {quantity} placed")
             self.last_action = action
 
             if action == ACTION_BUY:
@@ -131,10 +132,10 @@ class MartingaleStrategy(TradingStrategy):
         self.describe()
 
     def describe(self):
-        print("====================")
-        print(f"Trading Range: {self.trading_range}")
-        print(f"Buy limit: {self.buy_limit}")
-        print(f"Sell limit: {self.sell_limit}")
-        print(f"High close limit: {self.high_close_limit}")
-        print(f"Low close limit: {self.low_close_limit}")
-        print("====================")
+        logging.info("====================")
+        logging.info(f"Trading Range: {self.trading_range}")
+        logging.info(f"Buy limit: {self.buy_limit}")
+        logging.info(f"Sell limit: {self.sell_limit}")
+        logging.info(f"High close limit: {self.high_close_limit}")
+        logging.info(f"Low close limit: {self.low_close_limit}")
+        logging.info("====================")

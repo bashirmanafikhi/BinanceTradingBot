@@ -10,11 +10,11 @@ class OtherExchangeTradingClient(TradingClient):
 
     def buy(self, symbol, quantity, price):
         # Implement buy order using the other exchange API
-        print(f"Other Exchange: Buying {quantity} {symbol} at {price}")
+        logging.info(f"Other Exchange: Buying {quantity} {symbol} at {price}")
 
     def sell(self, symbol, quantity, price):
         # Implement sell order using the other exchange API
-        print(f"Other Exchange: Selling {quantity} {symbol} at {price}")
+        logging.info(f"Other Exchange: Selling {quantity} {symbol} at {price}")
 
     def get_balance(self, symbol):
         # Implement fetching balance using the other exchange API
