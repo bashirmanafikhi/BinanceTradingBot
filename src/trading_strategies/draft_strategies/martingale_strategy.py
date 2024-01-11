@@ -35,7 +35,7 @@ class MartingaleStrategy(TradingStrategy):
         self.low_close_limit = None
         self.sequence_strategy.reset()
 
-    def process(self, row):
+    def process_row(self, row):
         price = row.close
 
         # First Trade

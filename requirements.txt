@@ -3,3 +3,4 @@ matplotlib
 python-binance
 pandas-ta
 numpy
+PyQt5

@@ -5,98 +5,138 @@ from helpers.ddd.buy_command import BuyCommand
 from helpers.ddd.event import Event
 from helpers.ddd.sell_command import SellCommand
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL, ORDER_TYPE_LIMIT
-
+import matplotlib.pyplot as plt
 
 # an interface for the trading strategy
 class TradingStrategy(ABC):
     QUANTITY = 1
     
-    def __init__(self, keep_running = True, stop_lose_range = 20, take_profit_range = 40):
-        
-        self.keep_running = keep_running
+    def __init__(self, stop_lose_range = 20, take_profit_range = 40):
         self.stop_lose_range = stop_lose_range
         self.take_profit_range = take_profit_range
         self.high_close_limit = None
         self.low_close_limit = None
-        
+        self.last_action = None
+                
         self.buy_command = BuyCommand()
         self.sell_command = SellCommand()
-        self.strategy_disabled_event = Event()
-        self.strategy_enabled_event = Event()
+        self.trade_closed_event = Event()
         
-        self.enable_strategy()
         self.set_processing(False)
-
+        
+    
     @abstractmethod
-    def on_starting(self, row):
+    def process_row(self, row):
         pass
     
     @abstractmethod
-    def process(self, row):
+    def process_all(self, data):
         pass
     
+        
     def execute(self, data):
-        self.total_count = len(data)
-        self.counter = 0
-        
-        signals = pd.DataFrame(data)
-        signals["trades"] = signals.apply(self.try_process, axis=1)
-        return signals
-    
-    def try_process(self, candle):
-        #self.counter += 1
-        #self.print_progress_bar(self.counter, self.total_count, prefix='Progress:', suffix='Complete', length=50)
-        
-        if((self.is_enabled == False) and self.keep_running):
-            self.enable_strategy()
+        # Check if data is empty or None
+        if data is None or data.empty:
+            return None
+
+        # Live data case
+        if len(data) == 1:
+            # If 'self.data' doesn't exist, initialize it with the provided data
+            if not hasattr(self, 'data'):
+                self.data = data
+            else:
+                # Append the new data to the existing DataFrame
+                self.data = self.data = pd.concat([self.data, data], ignore_index=True)
+
+            # Process all data and get signals
+            signals = self.process_all(self.data)
+
+            # Select the last row using iloc
+            last_signal = signals.iloc[-1]
             
-        if not self.is_enabled or self.is_processing:
-            return []
+            # Now, you can safely update the "signal" column using at
+            signals.at[signals.index[-1], "signal"] = self.execute_candle(last_signal)
+
+
+        # Backtest data case
+        else:
+            # Process all data and calculate signals
+            signals = self.process_all(data)
+
+            # Apply execute_candle to each row and update the "signal" column
+            signals["signal"] = signals.apply(self.execute_candle, axis=1)
+        
+        self.live_plot(signals)
+
+        # Return the resulting DataFrame with signals
+        return signals
+
+    
+    def execute_candle(self, candle):
+            
+        if self.is_processing:
+            return None
+        
         try:
             self.enable_processing()
-                
-            if not hasattr(self, 'candles') or self.candles is None:
-                # Create a DataFrame from the Series with the Series name as the column name
-                self.candles = pd.DataFrame(candle).transpose().reset_index(drop=True)
-            else:
-                # Append the current row to the DataFrame
-                self.candles.loc[len(self.candles)] = candle
 
-            return self.process(candle)
+            return self.process_row(candle)
 
         finally:
             self.disable_processing()
-            
-            
+      
+    
+                
+    def live_plot(self, signals):
+        if not hasattr(self, 'fig'):
+            #plt.ion()
+            self.fig, self.ax = plt.subplots()
+            self.lines, = self.ax.plot([], [], label='Close Price')
+            self.bbu_line, = self.ax.plot([], [], label='Upper Band', linestyle='--')
+            self.bbl_line, = self.ax.plot([], [], label='Lower Band', linestyle='--')
+            self.ax.legend()
 
+        x_data = signals.index
+        
+        y_data_close = signals['close'] 
+        self.lines.set_xdata(x_data)
+        self.lines.set_ydata(y_data_close)
+        
+        if 'BBL' in signals.columns:
+            y_data_bbl = signals['BBL']
+            self.bbl_line.set_xdata(x_data)
+            self.bbl_line.set_ydata(y_data_bbl)
+            
+        if 'BBU' in signals.columns:
+            y_data_bbu = signals['BBU']
+            self.bbu_line.set_xdata(x_data)
+            self.bbu_line.set_ydata(y_data_bbu)
+        
+        # Iterate through the "signal" column and annotate buy/sell points
+        for i, signal in enumerate(signals['signal']):
+            if signal is not None:
+                action = signal.get("action", "")
+                if action == ACTION_BUY:
+                    self.ax.annotate("Buy", (x_data[i], y_data_close[i]), textcoords="offset points", xytext=(0, 10), ha='center', fontsize=8, color='green')
+                elif action == ACTION_SELL:
+                    self.ax.annotate("Sell", (x_data[i], y_data_close[i]), textcoords="offset points", xytext=(0, -10), ha='center', fontsize=8, color='red')
+
+        self.ax.relim()
+        self.ax.autoscale_view()
+        plt.pause(2)
+            
+            
+            
+            
+            
     def create_order(self, action, price, quantity, type=ORDER_TYPE_LIMIT):
         if(action == ACTION_BUY):
             return self.buy_command(price, quantity, type)
         elif(action == ACTION_SELL):
             return self.sell_command(price, quantity, type)
 
-    def enable_strategy(self):
-        self.on_starting()
-        self.is_enabled = True
-        self.strategy_enabled_event()
-        logging.info("Strategy Enabled")
-
-    def disable_strategy(self):
-        self.is_enabled = False
-        self.strategy_disabled_event()
-        logging.info("Strategy Disabled")
-
-    def set_processing(self, is_processing):
-        self.is_processing = is_processing
-
-    def enable_processing(self):
-        self.set_processing(True)
-
-    def disable_processing(self):
-        self.set_processing(False)
-    
-    def close_trade(self, price):
-        result = []    
+    def close_order(self, price):
+        result = None    
         
         if(self.last_action == ACTION_BUY):
             result = self.create_trade_action(ACTION_SELL, price, set_stop_limits = False)
@@ -104,7 +144,7 @@ class TradingStrategy(ABC):
             result = self.create_trade_action(ACTION_BUY, price, set_stop_limits = False)
         
         if(len(result) != 0):
-            self.disable_strategy()
+            self.trade_closed_event()
             self.high_close_limit = None
             self.low_close_limit = None
             
@@ -117,13 +157,13 @@ class TradingStrategy(ABC):
         is_succeed = self.create_order(action, price, self.QUANTITY)
 
         if is_succeed:
-            #logging.info(f"Trade: {action} - Quantity: {self.QUANTITY} - Price: {price}")
+            logging.info(f"Trade: {action} - Quantity: {self.QUANTITY} - Price: {price}")
             if(set_stop_limits):
                 self.set_profit_lose_limits(action, price)
             self.last_action = action
-            return [{"action": action, "quantity": self.QUANTITY}]
+            return {"action": action, "quantity": self.QUANTITY}
         else:
-            return []
+            return None
 
     def set_profit_lose_limits(self, action,  price):
         if(action == ACTION_BUY):
@@ -132,9 +172,12 @@ class TradingStrategy(ABC):
         elif(action == ACTION_SELL):
             self.high_close_limit = price + self.stop_lose_range
             self.low_close_limit = price -  self.take_profit_range
-            
-    def print_progress_bar(self, iteration, total, prefix='', suffix='', length=30, fill='█', print_end='\r'):
-        percent = ("{0:.1f}").format(100 * (iteration / float(total)))
-        filled_length = int(length * iteration // total)
-        bar = fill * filled_length + '-' * (length - filled_length)
-        logging.info(f'\r{prefix} |{bar}| {percent}% {suffix}', end=print_end, flush=True)
+        
+    def enable_processing(self):
+        self.set_processing(True)
+
+    def disable_processing(self):
+        self.set_processing(False)
+
+    def set_processing(self, is_processing):
+        self.is_processing = is_processing

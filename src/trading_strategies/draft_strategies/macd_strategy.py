@@ -15,7 +15,7 @@ class MACDStrategy(TradingStrategy):
         self.high_close_limit = None
         self.low_close_limit = None
 
-    def process(self, row):
+    def process_row(self, row):
         price = row.close
 
         # Wait for at least 15 rows to form
@@ -65,7 +65,7 @@ class MACDStrategy(TradingStrategy):
 
         # Close
         elif self.last_action != None and (price > self.high_close_limit or price < self.low_close_limit):
-            return self.close_trade(price) 
+            return self.close_order(price) 
         
         else:
             return []

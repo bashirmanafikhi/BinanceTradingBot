@@ -16,7 +16,7 @@ class FakeTradingClient(TradingClient):
     COMMISSION_RATE = 0.1
 
     def __init__(self):
-        self.balances = {"USDT": Decimal(100), "BTC": Decimal(0.1)}
+        self.balances = {"USDT": Decimal(200), "BTC": Decimal(0)}
         # self.balances = {"USDT": Decimal(500), "BTC": Decimal(0.012)}
         self.orders_history = []
         self.total_paid_commission = 0

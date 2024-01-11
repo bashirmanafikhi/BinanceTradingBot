@@ -22,8 +22,8 @@ class TradingSystem:
         strategy: TradingStrategy,
         trading_client: TradingClient,
         # should be between 0 and 1
-        trade_quote_percentage=0.2,
-        trade_quote_size = 50
+        trade_quote_percentage= 0.9,
+        trade_quote_size = 200
     ):
         self.strategy = strategy
         self.trading_client = trading_client
@@ -35,6 +35,7 @@ class TradingSystem:
         self.max_level = 0
         self.levels = []
         self.trades_count = 0
+        self.last_quantity = None
         self.register_handlers()
         self.initialize_symbol_info(symbol)
         self.initialize_balance()
@@ -42,13 +43,26 @@ class TradingSystem:
     def run_strategy(self, data):
         signals = self.strategy.execute(data)
         return signals
+    
+    def getTotalProfit(self):
+        initial_base_balance = Decimal(self.initial_base_balance)
+        initial_quote_balance = Decimal(self.initial_quote_balance)
+
+        base_balance_change = self.final_base_balance - initial_base_balance
+        quote_balance_change = self.final_quote_balance - initial_quote_balance
+        
+        # Calculate the profit or loss amounts
+        profit_loss_base = base_balance_change * Decimal(self.last_price)
+        profit_loss_quote = quote_balance_change * 1  # Adjust this based on your quote asset pricing
+        total_profit = round(profit_loss_base + profit_loss_quote, 4)
+        return total_profit
 
     def register_handlers(self):
         self.strategy.buy_command.set_handler(self.handle_buy)
         self.strategy.sell_command.set_handler(self.handle_sell)
-        self.strategy.strategy_disabled_event.add_handler(self.handle_strategy_disabled)
+        self.strategy.trade_closed_event.add_handler(self.handle_trade_closed)
 
-    def handle_strategy_disabled(self):
+    def handle_trade_closed(self):
         self.calculate_profit_loss()
         
     
@@ -62,6 +76,9 @@ class TradingSystem:
 
         final_base_balance = Decimal(self.trading_client.get_asset_balance(self.base_asset))
         final_quote_balance = Decimal(self.trading_client.get_asset_balance(self.quote_asset))
+        
+        self.final_quote_balance = final_quote_balance
+        self.final_base_balance = final_base_balance
 
         # Calculate the changes in balances
         base_balance_change = final_base_balance - initial_base_balance
@@ -90,8 +107,11 @@ class TradingSystem:
         profit_loss_quote = quote_balance_change * 1  # Adjust this based on your quote asset pricing
         total_profit = round(profit_loss_base + profit_loss_quote, 4)
         
-        logging.info(f"Total Profit: {total_profit} $")
+        profit_percentage = (total_profit / initial_quote_balance) * 100
+        
         logging.info(f"Total Trades Count: {self.trades_count}")
+        logging.info(f"Profit Percentage: {profit_percentage} %")
+        logging.info(f"Total Profit: {total_profit} $")
         logging.info("-------------------------------")
 
 
@@ -105,7 +125,7 @@ class TradingSystem:
 
     def create_order(self, action, type, price, quantity):
         level = quantity
-        quantity = self.calculate_quantity(price, quantity)
+        quantity = self.calculate_quantity(action, price, quantity)
 
         logging.info(f"{action} {quantity} {self.base_asset} at {price}")
 
@@ -129,8 +149,13 @@ class TradingSystem:
 
         return False
 
-    def calculate_quantity(self, price, quantity_percentage):
+    def calculate_quantity(self, action, price, quantity_percentage):
         try:
+            
+            if (action == ACTION_SELL and self.last_quantity is not None):
+                return self.last_quantity
+                
+                
             # Convert numbers to decimal before dividing
             price = decimal.Decimal(str(price))
             quantity_percentage = decimal.Decimal(str(quantity_percentage))
@@ -141,7 +166,7 @@ class TradingSystem:
 
             # Calculate quantity using decimal arithmetic
             if(self.trade_quote_size is None):
-                size = Decimal(self.initial_quote_balance) * Decimal(self.trade_quote_percentage)
+                size = Decimal(self.final_quote_balance) * Decimal(self.trade_quote_percentage)
             else:
                 size = Decimal(self.trade_quote_size)
                 
@@ -153,6 +178,7 @@ class TradingSystem:
             round_quantity = round(quantity, 8)
             step_size = Decimal(self.symbol_info["filters"][1]["stepSize"])
             round_quantity = self.round_to_nearest_multiple(round_quantity, step_size)
+            self.last_quantity = round_quantity
             return round_quantity
 
         except (ValueError, decimal.InvalidOperation) as e:
@@ -188,3 +214,6 @@ class TradingSystem:
         # Get the balance from the trading client
         self.initial_base_balance = self.trading_client.get_asset_balance(self.base_asset)
         self.initial_quote_balance = self.trading_client.get_asset_balance(self.quote_asset)
+        
+        self.final_base_balance = self.initial_base_balance
+        self.final_quote_balance = self.initial_quote_balance

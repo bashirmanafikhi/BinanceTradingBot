@@ -50,7 +50,7 @@ def add_moving_average(signals, short_window, long_window):
 
 def plot_signals(signals):
     # Apply the function to fill the 'positions' column
-    signals['positions'] = signals['trades'].apply(map_action_to_position)
+    signals['positions'] = signals['signal'].apply(map_action_to_position)
 
     signals = add_moving_average(signals, 9, 21)
     
@@ -85,15 +85,13 @@ def plot_signals(signals):
 
     ax1.set_title('Moving Average Crossover Strategy')
     plt.show()
-    plt.show()
 
     
 # Define a function to map 'ACTION_BUY' to 1, 'ACTION_SELL' to -1, and others to 0
-def map_action_to_position(trade_list):
-    if trade_list and len(trade_list) > 0:
-        first_trade = trade_list[0]
-        if first_trade['action'] == ACTION_BUY:
-            return 1
-        elif first_trade['action'] == ACTION_SELL:
-            return -1
-    return 0
+def map_action_to_position(signal):
+    if signal is None:
+        return 0
+    elif signal['action'] == ACTION_BUY:
+        return 1
+    elif signal['action'] == ACTION_SELL:
+        return -1
