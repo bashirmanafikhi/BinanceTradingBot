@@ -8,7 +8,7 @@
             "name": "Web : Module",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/app/web_run.py",
+            "program": "${workspaceFolder}/app/run_web.py",
             "cwd": "${workspaceFolder}",
             "justMyCode": true
         },
@@ -16,7 +16,7 @@
             "name": "Console : Module",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/app/main.py",
+            "program": "${workspaceFolder}/app/run_console.py",
             "cwd": "${workspaceFolder}",
             "justMyCode": true
         }
