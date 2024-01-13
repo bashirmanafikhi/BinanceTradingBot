@@ -3,4 +3,5 @@ matplotlib
 python-binance
 pandas-ta
 numpy
-PyQt5
+Flask
+gunicorn

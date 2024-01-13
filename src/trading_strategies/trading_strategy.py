@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 # an interface for the trading strategy
 class TradingStrategy(ABC):
     QUANTITY = 1
+    PLOT_WINDOW = 100
     
     def __init__(self, stop_lose_range = 20, take_profit_range = 40):
         self.stop_lose_range = stop_lose_range
@@ -87,7 +88,7 @@ class TradingStrategy(ABC):
       
     
                 
-    def live_plot(self, signals):
+    def live_plot(self, all_signals):
         if not hasattr(self, 'fig'):
             #plt.ion()
             self.fig, self.ax = plt.subplots()
@@ -95,10 +96,12 @@ class TradingStrategy(ABC):
             self.bbu_line, = self.ax.plot([], [], label='Upper Band', linestyle='--')
             self.bbl_line, = self.ax.plot([], [], label='Lower Band', linestyle='--')
             self.ax.legend()
-
-        x_data = signals.index
         
+        signals = all_signals.tail(self.PLOT_WINDOW)
+        
+        x_data = signals.index
         y_data_close = signals['close'] 
+        
         self.lines.set_xdata(x_data)
         self.lines.set_ydata(y_data_close)
         

@@ -26,6 +26,9 @@ class BinanceWebSocketService:
     def start_kline_socket(self, symbol, callback):
 
         def convert_kline_to_dataframe(kline_data):
+            if((kline_data is None) or ('k' not in kline_data)):
+                return
+            
             kline = kline_data['k']
 
             # Extracting data from the kline dictionary
