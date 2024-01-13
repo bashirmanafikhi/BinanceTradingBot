@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 # an interface for the trading strategy
 class TradingStrategy(ABC):
     QUANTITY = 1
-    PLOT_WINDOW = 100
+    PLOT_WINDOW = 50
     
     def __init__(self, stop_lose_range = 20, take_profit_range = 40):
         self.stop_lose_range = stop_lose_range
@@ -115,14 +115,18 @@ class TradingStrategy(ABC):
             self.bbu_line.set_xdata(x_data)
             self.bbu_line.set_ydata(y_data_bbu)
         
-        # Iterate through the "signal" column and annotate buy/sell points
-        for i, signal in enumerate(signals['signal']):
-            if signal is not None:
-                action = signal.get("action", "")
-                if action == ACTION_BUY:
-                    self.ax.scatter(x_data[i], y_data_close[i], marker='o', color='green', s=20, zorder=5)
-                elif action == ACTION_SELL:
-                    self.ax.scatter(x_data[i], y_data_close[i], marker='o', color='red', s=20, zorder=5)
+        # Iterate through signals and annotate buy/sell points
+        for index, signal_row in signals.iterrows():
+            if signal_row.signal is not None:
+                action = signal_row.signal.get("action", "")
+                try:
+                    if action == ACTION_BUY:
+                        self.ax.scatter(index, signal_row.close, marker='o', color='green', s=20, zorder=5)
+                    elif action == ACTION_SELL:
+                        self.ax.scatter(index, signal_row.close, marker='o', color='red', s=20, zorder=5)    
+                except:
+                    print("error while drawing action scatter")
+                
                     
         self.ax.relim()
         self.ax.autoscale_view()

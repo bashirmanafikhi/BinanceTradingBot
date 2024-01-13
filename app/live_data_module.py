@@ -10,7 +10,7 @@ def live_data_example():
     fake_client = trading_client_factory.create_fake_trading_client()
     binance_client = trading_client_factory.create_binance_trading_client()
 
-    strategy = BollingerRSIStrategyEdited(10, 1, 10, 50, 50)
+    strategy = BollingerRSIStrategyEdited(30,2,13,70,30)
 
     trading_system = TradingSystem(symbol, strategy, binance_client)
     binance_client.start_kline_socket(symbol=symbol, callback=lambda data: trading_system.run_strategy(data))
