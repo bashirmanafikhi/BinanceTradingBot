@@ -10,8 +10,8 @@ class TradingDataService:
         self.data = None
 
 
-    def load_data(self, data_dir = 'src\\bitcoin_historical_data\\2019-2023', file_name = 'chunk_20201223_20210323.csv'):
-    #def load_data(self, data_dir = 'src\\bitcoin_historical_data\\Bitcoin Historical Dataset', file_name = 'BTC-2021min.csv'):
+    def load_data(self, data_dir = 'app\\bitcoin_historical_data\\2019-2023', file_name = 'chunk_20201223_20210323.csv'):
+    #def load_data(self, data_dir = 'app\\bitcoin_historical_data\\Bitcoin Historical Dataset', file_name = 'BTC-2021min.csv'):
         try:
             file_path = os.path.join(data_dir, file_name)
             data = pd.read_csv(file_path, engine="c")

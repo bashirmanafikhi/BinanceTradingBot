@@ -12,7 +12,7 @@ class BollingerRSIStrategyEdited(TradingStrategy):
         self.rsi_window = rsi_window
         self.rsi_overbought = rsi_overbought
         self.rsi_oversold = rsi_oversold
-        self.last_action = ACTION_SELL
+        #self.last_action = ACTION_SELL
 
     def calculate_bollinger_rsi(self, data):
         try:

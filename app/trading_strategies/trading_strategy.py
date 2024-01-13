@@ -120,10 +120,10 @@ class TradingStrategy(ABC):
             if signal is not None:
                 action = signal.get("action", "")
                 if action == ACTION_BUY:
-                    self.ax.annotate("Buy", (x_data[i], y_data_close[i]), textcoords="offset points", xytext=(0, 10), ha='center', fontsize=8, color='green')
+                    self.ax.scatter(x_data[i], y_data_close[i], marker='o', color='green', s=20, zorder=5)
                 elif action == ACTION_SELL:
-                    self.ax.annotate("Sell", (x_data[i], y_data_close[i]), textcoords="offset points", xytext=(0, -10), ha='center', fontsize=8, color='red')
-
+                    self.ax.scatter(x_data[i], y_data_close[i], marker='o', color='red', s=20, zorder=5)
+                    
         self.ax.relim()
         self.ax.autoscale_view()
         plt.pause(2)

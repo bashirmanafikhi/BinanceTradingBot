@@ -9,7 +9,7 @@ $SSHCommand = @"
     cd $SERVER_PATH
 
     # Check if the directory exists
-    if [ -d "src" ]; then
+    if [ -d "app" ]; then
         # Directory exists, pull latest changes
         git pull origin main
     else
@@ -26,14 +26,14 @@ $SSHCommand = @"
     # Install Python dependencies
     pip install -r requirements.txt
 
-    # Run any database migrations if needed
-    # flask db upgrade
+    cd app
 
-    cd src
+    # Find and kill the existing process running on port 5000
+    lsof -t -i :5000 | xargs kill -9
 
     # Start Gunicorn in the background
     gunicorn -w 4 -b 0.0.0.0:5000 app:app -D
 "@
 
 # Run SSH command
-ssh -i "~/.ssh/id_rsa" "$SERVER_USER@$SERVER_HOST" $SSHCommand
+ssh -i "~/.ssh/id_rsa" "$SERVER_USER@$SERVER_HOST" "$SSHCommand"

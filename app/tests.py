@@ -2,7 +2,7 @@ import csv
 import os
 import pandas as pd
 
-def split_and_save_data(data_dir='src\\bitcoin_historical_data\\2019-2023', file_name='candlesticks-S.csv', interval_months=3):
+def split_and_save_data(data_dir='app\\bitcoin_historical_data\\2019-2023', file_name='candlesticks-S.csv', interval_months=3):
     try:
         file_path = os.path.join(data_dir, file_name)
 

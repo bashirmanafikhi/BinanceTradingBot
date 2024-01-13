@@ -5,10 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Module",
+            "name": "Web : Module",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/src/app.py",
+            "program": "${workspaceFolder}/app/web_run.py",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
+        },
+        {
+            "name": "Console : Module",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/app/main.py",
             "cwd": "${workspaceFolder}",
             "justMyCode": true
         }
