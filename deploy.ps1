@@ -8,11 +8,17 @@ $SSHCommand = @"
     # Navigate to the server path
     cd $SERVER_PATH
 
-    # Clone your Git repository (replace with your repository URL)
-    git clone https://github.com/bashirmanafikhi/BinanceTradingBot.git .
+    # Check if the directory exists
+    if [ -d "src" ]; then
+        # Directory exists, pull latest changes
+        git pull origin main
+    else
+        # Directory does not exist, clone the Git repository
+        git clone https://github.com/bashirmanafikhi/BinanceTradingBot.git .
 
-    # Create a virtual environment (assuming Python3 is installed)
-    python3 -m venv venv
+        # Create a virtual environment (assuming Python3 is installed)
+        python3 -m venv venv
+    fi
     
     # Activate the virtual environment
     source venv/bin/activate
@@ -20,11 +26,10 @@ $SSHCommand = @"
     # Install Python dependencies
     pip install -r requirements.txt
 
-    # Navigate to the 'src' folder
-    cd src
-
     # Run any database migrations if needed
     # flask db upgrade
+
+    cd src
 
     # Start Gunicorn in the background
     gunicorn -w 4 -b 0.0.0.0:5000 app:app -D

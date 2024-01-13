@@ -6,6 +6,10 @@ app = Flask(__name__)
 def hello_world():
     return 'Hello, World!'
 
+@app.route('/test500')
+def test_500():
+    return render_template('errors/500.html')
+
 
 # Custom error handler for internal server errors (HTTP 500)
 @app.errorhandler(500)
