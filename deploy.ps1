@@ -5,6 +5,19 @@ $SERVER_PATH = "/home/langora/htdocs/www.langora.online/"
 
 # SSH into the server and run commands
 $SSHCommand = @"
+
+    # # Navigate to the server path
+    # cd $SERVER_PATH
+
+    # # go back to parent folder
+    # cd ..
+
+    # # Remove the www.langora.online folder and its subfolders
+    # rm -rf www.langora.online
+
+    # # Recreate the directory
+    # mkdir www.langora.online
+
     # Navigate to the server path
     cd $SERVER_PATH
 
@@ -28,7 +41,9 @@ $SSHCommand = @"
 
     cd app
 
-    # Find and kill the existing process running on port 5000
+    # lsof -i :5000
+
+    # # Find and kill the existing process running on port 5000
     lsof -t -i :5000 | xargs kill -9
 
     # Start Gunicorn in the background
