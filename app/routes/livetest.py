@@ -10,6 +10,14 @@ from trading_system import TradingSystem
 livetest_bp = Blueprint("livetest", __name__)
 
 
+@livetest_bp.route("/livetest")
+def main():
+    binance_manager_status = "Running" if is_binance_manager_alive() else "Stopped"
+    return render_template(
+        "livetest/main.html", binance_manager_status=binance_manager_status
+    )
+
+
 def get_current_binance_manager():
     if "binance_manager" not in current_app.extensions:
         return get_new_binance_manager()
@@ -29,14 +37,6 @@ def create_trading_system():
     strategy = BollingerRSIStrategyEdited(30, 2, 13, 70, 30)
 
     return TradingSystem(symbol, strategy, binance_client)
-
-
-@livetest_bp.route("/livetest")
-def main():
-    binance_manager_status = "Running" if is_binance_manager_alive() else "Stopped"
-    return render_template(
-        "livetest/main.html", binance_manager_status=binance_manager_status
-    )
 
 
 def is_binance_manager_alive():

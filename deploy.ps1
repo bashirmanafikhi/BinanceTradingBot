@@ -41,10 +41,13 @@ $SSHCommand = @"
 
     cd app
 
+    # Check if the process is running on port 5000
     # lsof -i :5000
-
-    # # Find and kill the existing process running on port 5000
-    lsof -t -i :5000 | xargs kill -9
+    if lsof -t -i :5000 > /dev/null 2>&1; then
+        # If running, find and kill the existing process
+        lsof -t -i :5000 | xargs kill -9
+    fi
+    
 
     # Start Gunicorn in the background
     gunicorn -w 4 -b 0.0.0.0:5000 run_web:app -D
