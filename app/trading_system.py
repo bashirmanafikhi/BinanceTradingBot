@@ -31,6 +31,7 @@ class TradingSystem:
         self.trade_quote_percentage = trade_quote_percentage
         self.trade_quote_size = trade_quote_size
         self.last_price = 0
+        self.total_profit = 0
         self.max_quantity = 0
         self.max_quote_quantity = 0
         self.max_level = 0
@@ -43,7 +44,7 @@ class TradingSystem:
 
     def run_strategy(self, data):
         signals = self.strategy.execute(data)
-        return signals
+        return signals, self.total_profit, self.trades_count
     
     def getTotalProfit(self):
         initial_base_balance = Decimal(self.initial_base_balance)
@@ -106,13 +107,13 @@ class TradingSystem:
         # Calculate the profit or loss amounts
         profit_loss_base = base_balance_change * Decimal(self.last_price)
         profit_loss_quote = quote_balance_change * 1  # Adjust this based on your quote asset pricing
-        total_profit = round(profit_loss_base + profit_loss_quote, 4)
+        self.total_profit = round(profit_loss_base + profit_loss_quote, 4)
         
-        profit_percentage = (total_profit / initial_quote_balance) * 100
+        profit_percentage = (self.total_profit / initial_quote_balance) * 100
         
         logging.info(f"Total Trades Count: {self.trades_count}")
         logging.info(f"Profit Percentage: {profit_percentage} %")
-        logging.info(f"Total Profit: {total_profit} $")
+        logging.info(f"Total Profit: {self.total_profit} $")
         logging.info("****************************")
 
 

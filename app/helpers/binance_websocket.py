@@ -57,7 +57,7 @@ class BinanceWebSocketService:
 
             callback(df)
 
-        self.twm.start_kline_socket(callback=convert_kline_to_dataframe,
+        return self.twm.start_kline_socket(callback=convert_kline_to_dataframe,
                                     symbol=symbol)
 
     def start_depth_socket(self, symbol, callback):
@@ -68,9 +68,15 @@ class BinanceWebSocketService:
 
     def start(self):
         self.twm.start()
+        
+    def stop(self):
+        self.twm.stop()
 
     def join(self):
         self.twm.join()
+        
+    def is_alive(self):
+        return self.twm.is_alive()
 
 
 

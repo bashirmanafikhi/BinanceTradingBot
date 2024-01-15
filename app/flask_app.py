@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 
-socketio = SocketIO()
+socketio = SocketIO(cors_allowed_origins="*")
 
 def create_app(debug=False):
     """Create an application."""

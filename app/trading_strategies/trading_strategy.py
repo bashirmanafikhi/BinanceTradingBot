@@ -67,7 +67,7 @@ class TradingStrategy(ABC):
             # Apply execute_candle to each row and update the "signal" column
             signals["signal"] = signals.apply(self.execute_candle, axis=1)
         
-        self.live_plot(signals)
+        #self.live_plot(signals)
 
         # Return the resulting DataFrame with signals
         return signals
@@ -80,7 +80,7 @@ class TradingStrategy(ABC):
         
         try:
             self.enable_processing()
-
+            
             return self.process_row(candle)
 
         finally:
@@ -164,7 +164,6 @@ class TradingStrategy(ABC):
         is_succeed = self.create_order(action, price, self.QUANTITY)
 
         if is_succeed:
-            logging.info(f"Trade: {action} - Quantity: {self.QUANTITY} - Price: {price}")
             if(set_stop_limits):
                 self.set_profit_lose_limits(action, price)
             self.last_action = action

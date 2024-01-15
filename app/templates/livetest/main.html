@@ -6,5 +6,39 @@
 
 {% block content %}
     <h1>This is Live Data Page</h1>
-    <!-- Add page-specific content here -->
+    
+    <div>
+        <p>Status: {{ binance_manager_status }}</p>
+        
+        <form action="{{ url_for('livetest.start_binance_websocket') }}" method="get">
+            <button type="submit" {% if binance_manager_status == 'Running' %}disabled{% endif %}>
+                Start Binance WebSocket
+            </button>
+        </form>
+        
+        <form action="{{ url_for('livetest.stop_binance_websocket') }}" method="get">
+            <button type="submit" {% if binance_manager_status == 'Stopped' %}disabled{% endif %}>
+                Stop Binance WebSocket
+            </button>
+        </form>
+    </div>
+    
+
+    <p>Total Trades: <span id="total_trades"></span></p>
+    <p>Total Profit: <span id="total_profit"></span></p>
+    
+    <script>
+        var socket = io.connect('http://127.0.0.1:5000/livetest');
+
+        socket.on('connect', function(data) {
+            console.log('connected')
+        });
+
+        socket.on('update_data', function(data) {
+            console.log(data)
+            document.getElementById('total_trades').innerHTML = data.total_trades_count;
+            document.getElementById('total_profit').innerHTML = data.total_profit;
+        });
+        
+    </script>
 {% endblock %}
