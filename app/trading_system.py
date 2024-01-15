@@ -7,6 +7,7 @@ from helpers.settings.constants import (
     ACTION_BUY,
     ACTION_SELL,
     ORDER_STATUS_FILLED,
+    ORDER_STATUS_NEW,
     ORDER_TYPE_LIMIT,
     ORDER_TYPE_MARKET,
 )
@@ -84,15 +85,15 @@ class TradingSystem:
         base_balance_change = final_base_balance - initial_base_balance
         quote_balance_change = final_quote_balance - initial_quote_balance
 
-        logging.info("-------------------------------------")
+        logging.info("")
         logging.info(f"{self.base_asset} initial balance : {initial_base_balance}")
         logging.info(f"{self.base_asset} final balance: {final_base_balance}")
         logging.info(f"{self.base_asset} balance change: {base_balance_change}")
-        logging.info("-------------------------------------")
+        logging.info("")
         logging.info(f"{self.quote_asset} initial balance : {initial_quote_balance}")
         logging.info(f"{self.quote_asset} final balance: {final_quote_balance}")
         logging.info(f"{self.quote_asset} balance change: {quote_balance_change}")
-        logging.info("-------------------------------------")
+        logging.info("")
 
         logging.info(f"Max {self.base_asset} Quantity: {self.max_quantity}")
         logging.info(f"Max Quote Quantity: {self.max_quote_quantity}")
@@ -112,7 +113,7 @@ class TradingSystem:
         logging.info(f"Total Trades Count: {self.trades_count}")
         logging.info(f"Profit Percentage: {profit_percentage} %")
         logging.info(f"Total Profit: {total_profit} $")
-        logging.info("-------------------------------")
+        logging.info("****************************")
 
 
 
@@ -196,6 +197,8 @@ class TradingSystem:
         try:
             if order["status"] == ORDER_STATUS_FILLED:
                 return float(order["fills"][0]["price"])
+            elif order["status"] == ORDER_STATUS_NEW:
+                return ORDER_STATUS_NEW
             else:
                 logging.info(f"Order status not filled.. it's {order['status']}")
                 return None

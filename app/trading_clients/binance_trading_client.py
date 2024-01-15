@@ -183,6 +183,7 @@ class BinanceTradingClient(TradingClient):
                      price,
                      quoteOrderQty=None):
         try:
+            #timeInForce = self.client.TIME_IN_FORCE_GTC
             timeInForce = self.client.TIME_IN_FORCE_FOK
             if type == self.client.ORDER_TYPE_MARKET:
                 timeInForce = None

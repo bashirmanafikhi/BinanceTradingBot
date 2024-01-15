@@ -4,13 +4,13 @@ import pandas as pd
 from helpers.ddd.buy_command import BuyCommand
 from helpers.ddd.event import Event
 from helpers.ddd.sell_command import SellCommand
-from helpers.settings.constants import ACTION_BUY, ACTION_SELL, ORDER_TYPE_LIMIT
+from helpers.settings.constants import ACTION_BUY, ACTION_SELL, ORDER_TYPE_LIMIT, ORDER_TYPE_MARKET
 import matplotlib.pyplot as plt
 
 # an interface for the trading strategy
 class TradingStrategy(ABC):
     QUANTITY = 1
-    PLOT_WINDOW = 50
+    PLOT_WINDOW = 100
     
     def __init__(self, stop_lose_range = 20, take_profit_range = 40):
         self.stop_lose_range = stop_lose_range
@@ -136,7 +136,7 @@ class TradingStrategy(ABC):
             
             
             
-    def create_order(self, action, price, quantity, type=ORDER_TYPE_LIMIT):
+    def create_order(self, action, price, quantity, type=ORDER_TYPE_MARKET):
         if(action == ACTION_BUY):
             return self.buy_command(price, quantity, type)
         elif(action == ACTION_SELL):
