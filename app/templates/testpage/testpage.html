@@ -5,4 +5,22 @@
 {% block content %}
     <h1>Test Page</h1>
 
+    <p>Environment: {{ environment }}</p>
+
+    
+
+    <p>Counter: <span id="counterValue">{{counter}}</span></p>
+    <button onclick="incrementCounter()">Increment Counter</button>
+    
+    <script>
+        function incrementCounter() {
+            socket.emit('increment_counter');
+        }
+
+        var socket = io.connect('{{socket_url}}');
+
+        socket.on('update_counter', function(data) {
+            document.getElementById('counterValue').innerHTML = data.counter;
+        });
+    </script>
 {% endblock %}

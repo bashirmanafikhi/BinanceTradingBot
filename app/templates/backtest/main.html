@@ -6,19 +6,4 @@
 
 {% block content %}
     <h1>Backtest Example Page</h1>
-
-    <p>Counter: <span id="counterValue">0</span></p>
-    <button onclick="incrementCounter()">Increment Counter</button>
-    
-    <script>
-        var socket = io.connect('http://localhost:5000/backtest');
-
-        socket.on('update_counter', function(data) {
-            document.getElementById('counterValue').innerHTML = data.counter;
-        });
-
-        function incrementCounter() {
-            socket.emit('increment_counter');
-        }
-    </script>
 {% endblock %}

@@ -14,7 +14,7 @@ livetest_bp = Blueprint("livetest", __name__)
 def livetest():
     binance_manager_status = "Running" if is_binance_manager_alive() else "Stopped"
     return render_template(
-        "livetest/livetest.html", binance_manager_status=binance_manager_status
+        "livetest/livetest.html", binance_manager_status=binance_manager_status, socket_url = f"{current_app.config['SERVER_URL']}livetest"
     )
 
 

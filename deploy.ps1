@@ -19,6 +19,9 @@ $SSHCommand = @"
     # # Recreate the directory
     # mkdir www.langora.online
 
+    # set environment variable
+    export FLASK_ENV=production
+
     # Navigate to the server path
     cd $SERVER_PATH
 
