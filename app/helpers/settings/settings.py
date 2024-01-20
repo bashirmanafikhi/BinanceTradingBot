@@ -1,6 +1,6 @@
 import json
 
-import_path = "app/helpers/settings/settings.json"
+import_path = "helpers/settings/settings.json"
 
 
 class BinanceSettings:

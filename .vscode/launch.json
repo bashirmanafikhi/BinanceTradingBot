@@ -9,7 +9,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/app/run_web.py",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/app",
             "justMyCode": true
         },
         {
@@ -17,7 +17,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/app/run_console.py",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/app",
             "justMyCode": true
         }
     ]
