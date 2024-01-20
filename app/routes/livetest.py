@@ -11,10 +11,10 @@ livetest_bp = Blueprint("livetest", __name__)
 
 
 @livetest_bp.route("/livetest")
-def main():
+def livetest():
     binance_manager_status = "Running" if is_binance_manager_alive() else "Stopped"
     return render_template(
-        "livetest/main.html", binance_manager_status=binance_manager_status
+        "livetest/livetest.html", binance_manager_status=binance_manager_status
     )
 
 

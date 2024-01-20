@@ -1,5 +1,6 @@
 # Define server details
-$SERVER_USER = "bashir-ssh"
+$SERVER_USER = "root"
+#$SERVER_USER = "bashir-ssh"
 $SERVER_HOST = "154.56.60.12"
 $SERVER_PATH = "/home/langora/htdocs/www.langora.online/"
 

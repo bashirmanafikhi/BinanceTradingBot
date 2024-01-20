@@ -15,9 +15,11 @@ def create_app(debug=False):
 
     from routes.livetest import livetest_bp
     from routes.backtest import backtest_bp
+    from routes.testpage import testpage_bp
     
-    app.register_blueprint(livetest_bp)
     app.register_blueprint(backtest_bp)
+    app.register_blueprint(livetest_bp)
+    app.register_blueprint(testpage_bp)
 
     socketio.init_app(app)
     return app
