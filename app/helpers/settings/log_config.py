@@ -28,10 +28,3 @@ def configure_logging():
     root_logger.addHandler(file_handler)
     root_logger.addHandler(console_handler)
 
-# Configure logging
-configure_logging()
-
-# Example usage
-logging.debug('This is a debug message.')
-logging.info('This is an info message.')
-

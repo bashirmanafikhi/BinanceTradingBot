@@ -55,8 +55,11 @@ $SSHCommand = @"
         lsof -t -i :5000 | xargs kill -9
     fi
     
+    #uwsgi --http 0.0.0.0:5000 --http-websockets --master -p 4 -w run_web:app --enable-threads
+    
+    
     # Start Gunicorn in the background
-    gunicorn -w 4 -b 0.0.0.0:5000 run_web:app -D
+    gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app -D
 "@
 
 # Run SSH command

@@ -6,3 +6,4 @@ numpy
 Flask
 flask-socketio
 gunicorn
+uwsgi
