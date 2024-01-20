@@ -19,14 +19,14 @@ $SSHCommand = @"
     # # Recreate the directory
     # mkdir www.langora.online
 
-    # set environment variable
-    export FLASK_ENV=production
 
     # Navigate to the server path
     cd $SERVER_PATH
 
     # Check if the directory exists
     if [ -d "app" ]; then
+        # discard local changes
+        git restore .
         # Directory exists, pull latest changes
         git pull origin main
     else
@@ -39,6 +39,9 @@ $SSHCommand = @"
     
     # Activate the virtual environment
     source venv/bin/activate
+
+    # set environment variable
+    export FLASK_ENV=production
 
     # Install Python dependencies
     pip install -r requirements.txt

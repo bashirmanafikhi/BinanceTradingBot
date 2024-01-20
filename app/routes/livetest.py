@@ -12,9 +12,11 @@ livetest_bp = Blueprint("livetest", __name__)
 
 @livetest_bp.route("/livetest")
 def livetest():
-    binance_manager_status = "Running" if is_binance_manager_alive() else "Stopped"
+    # binance_manager_status = "Running" if is_binance_manager_alive() else "Stopped"
     return render_template(
-        "livetest/livetest.html", binance_manager_status=binance_manager_status, socket_url = f"{current_app.config['SERVER_URL']}livetest"
+        "livetest/livetest.html",
+        #binance_manager_status=binance_manager_status,
+        socket_url=f"{current_app.config['SERVER_URL']}livetest",
     )
 
 
@@ -43,11 +45,12 @@ def is_binance_manager_alive():
     return get_current_binance_manager().is_alive()
 
 
-@socketio.on('connect', namespace='/livetest')
+@socketio.on("connect", namespace="/livetest")
 def handle_connect():
     print(f"handle_connect livetest")
 
-@socketio.on('disconnect', namespace='/livetest')
+
+@socketio.on("disconnect", namespace="/livetest")
 def handle_disconnect():
     print(f"handle_disconnect livetest")
 
@@ -59,7 +62,7 @@ def on_kline_data_callback(trading_system, data):
         "total_profit": float(total_profit),
         "total_trades_count": total_trades_count,
     }
-    
+
     socketio.emit("update_data", data, namespace="/livetest")
 
 
