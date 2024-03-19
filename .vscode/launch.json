@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "Web : Module",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/app/run_web.py",
             "cwd": "${workspaceFolder}/app",
@@ -14,7 +14,7 @@
         },
         {
             "name": "Console : Module",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/app/run_console.py",
             "cwd": "${workspaceFolder}/app",

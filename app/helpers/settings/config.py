@@ -1,7 +1,6 @@
 # config.py
 import os
 
-
 class Config:
     ENVIRONMENT = 'development'
     SERVER_URL = 'http://localhost:5000/'

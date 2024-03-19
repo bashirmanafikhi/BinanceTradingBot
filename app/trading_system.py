@@ -24,7 +24,7 @@ class TradingSystem:
         trading_client: TradingClient,
         # should be between 0 and 1
         trade_quote_percentage= 0.9,
-        trade_quote_size = 200
+        trade_quote_size = None
     ):
         self.strategy = strategy
         self.trading_client = trading_client
