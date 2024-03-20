@@ -26,6 +26,10 @@
 
     <p>Total Trades: <span id="total_trades"></span></p>
     <p>Total Profit: <span id="total_profit"></span></p>
+    <br/>
+
+    
+    <div id="live-plot"></div>
     
     <script>
         var socket = io.connect('{{socket_url}}');
@@ -38,6 +42,34 @@
             console.log(data)
             document.getElementById('total_trades').innerHTML = data.total_trades_count;
             document.getElementById('total_profit').innerHTML = data.total_profit;
+
+            var close_trace = {
+                x: data.x_data,
+                y: data.close,
+                type: 'scatter'
+            };
+
+            var bbl_trace = {
+                x: data.x_data,
+                y: data.bbl,
+                type: 'scatter',
+                line: {dash: 'dot', color: 'blue'}
+            };
+
+            var bbu_trace = {
+                x: data.x_data,
+                y: data.bbu,
+                type: 'scatter',
+                line: {dash: 'dot', color: 'red'}
+            };
+
+            var layout = {
+                title: 'Live Plot',
+                xaxis: {title: 'X-axis'},
+                yaxis: {title: 'Y-axis'}
+            };
+
+            Plotly.newPlot('live-plot', [close_trace, bbl_trace, bbu_trace], layout);
         });
         
     </script>

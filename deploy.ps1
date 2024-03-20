@@ -6,6 +6,20 @@ $SERVER_PATH = "/home/langora/htdocs/www.langora.online/"
 
 # SSH into the server and run commands
 $SSHCommand = @"
+
+    # # Navigate to the server path
+    # cd $SERVER_PATH
+
+    # # go back to parent folder
+    # cd ..
+
+    # # Remove the www.langora.online folder and its subfolders
+    # rm -rf www.langora.online
+
+    # # Recreate the directory
+    # mkdir www.langora.online
+
+
     # Navigate to the server path
     cd $SERVER_PATH
 
@@ -41,9 +55,11 @@ $SSHCommand = @"
         lsof -t -i :5000 | xargs kill -9
     fi
     
+    #uwsgi --http 0.0.0.0:5000 --http-websockets --master -p 4 -w run_web:app --enable-threads
+    
     # Start Gunicorn in the background
-    #gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app --access-logfile /log/gunicornaccess.log  --error-logfile /log/gunicornerror.log -D
-    gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app -D
+    gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app --log-level info --error-logfile log/gunicorn_error.log --capture-output -D
+    #gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app -D
 "@
 
 # Run SSH command

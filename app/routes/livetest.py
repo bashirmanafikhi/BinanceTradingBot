@@ -6,6 +6,7 @@ from trading_clients.trading_client_factory import TradingClientFactory
 from trading_strategies.bollinger_rsi_strategy import BollingerRSIStrategyEdited
 from trading_strategies.trading_strategy import TradingStrategy
 from trading_system import TradingSystem
+import math
 
 livetest_bp = Blueprint("livetest", __name__)
 
@@ -58,12 +59,35 @@ def handle_disconnect():
 def on_kline_data_callback(trading_system, data):
     signals, total_profit, total_trades_count = trading_system.run_strategy(data)
 
-    data = {
-        "total_profit": float(total_profit),
-        "total_trades_count": total_trades_count,
-    }
 
-    socketio.emit("update_data", data, namespace="/livetest")
+
+    # Check if 'BBL' and 'BBU' columns exist in the DataFrame
+    if 'BBL' in signals.columns and 'BBU' in signals.columns:
+        # Drop rows with NaN values in 'BBL', 'BBU', and 'close' columns, then take the last 60 rows
+        signals = signals.dropna(subset=['BBL', 'BBU', 'close']).tail(60)
+
+        # Convert data to lists
+        x_data = signals.index.tolist()
+        close = signals['close'].tolist()
+        bbl = signals['BBL'].tolist()
+        bbu = signals['BBU'].tolist()
+
+        # Prepare data dictionary
+        data = {
+            "total_profit": float(total_profit),
+            "total_trades_count": total_trades_count,
+            "x_data": x_data,
+            "close": close,
+            "bbl": bbl,
+            "bbu": bbu
+        }
+
+        # Emit the data via socketio
+        socketio.emit("update_data", data, namespace="/livetest")
+    else:
+        # If 'BBL' or 'BBU' columns do not exist, handle the situation accordingly
+        print("Error: 'BBL' or 'BBU' columns do not exist in the DataFrame.")
+
 
 
 @livetest_bp.route("/start-binance-websocket")

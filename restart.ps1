@@ -6,10 +6,9 @@ $SERVER_PATH = "/home/langora/htdocs/www.langora.online/"
 
 # SSH into the server and run commands
 $SSHCommand = @"
-
     # Navigate to the server path
     cd $SERVER_PATH
-    
+
     # Activate the virtual environment
     source venv/bin/activate
 
@@ -24,10 +23,11 @@ $SSHCommand = @"
         # If running, find and kill the existing process
         lsof -t -i :5000 | xargs kill -9
     fi
-    
+
     # Start Gunicorn in the background
-    gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app -D
+    #gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app --log-level info --error-logfile log/gunicorn_error.log --capture-output -D
+    #gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app -D
 "@
 
 # Run SSH command
-ssh  "$SERVER_USER@$SERVER_HOST" "$SSHCommand"
+ssh -i "~/.ssh/id_rsa" "$SERVER_USER@$SERVER_HOST" "$SSHCommand"
