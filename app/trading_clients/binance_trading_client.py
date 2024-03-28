@@ -35,6 +35,19 @@ class BinanceTradingClient(TradingClient):
         except Exception as e:
             logging.info(f"An error occurred: {e}")
             return None
+        
+    def set_usdt_balance(self, amount):
+        symbol = "BTCUSDT"
+        
+        # Get current balances
+        balance = self.get_asset_balance("USDT")
+        
+        
+        self.create_market_order(side="SELL", symbol=symbol,
+                                        quantity=None,
+                                        price=None,
+                                        quoteOrderQty=amount)
+    
 
     def start_kline_socket(self, symbol, callback):
         # Create an instance of BinanceWebSocketService

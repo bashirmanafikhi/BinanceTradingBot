@@ -17,7 +17,9 @@ class TradingStrategy(ABC):
         self.take_profit_range = take_profit_range
         self.high_close_limit = None
         self.low_close_limit = None
-        self.last_action = None
+        self.last_action = ACTION_SELL
+        self.should_buy = False
+        self.should_sell = False
                 
         self.buy_command = BuyCommand()
         self.sell_command = SellCommand()
@@ -91,11 +93,17 @@ class TradingStrategy(ABC):
     def live_plot(self, all_signals):
         if not hasattr(self, 'fig'):
             #plt.ion()
-            self.fig, self.ax = plt.subplots()
+            self.fig, (self.ax, self.ax_rsi) = plt.subplots(2, 1, gridspec_kw={'height_ratios': [3, 1]})
             self.lines, = self.ax.plot([], [], label='Close Price')
             self.bbu_line, = self.ax.plot([], [], label='Upper Band', linestyle='--')
             self.bbl_line, = self.ax.plot([], [], label='Lower Band', linestyle='--')
             self.ax.legend()
+
+            self.ax_rsi.plot([], [], label='RSI', color='purple')
+            self.ax_rsi.axhline(70, linestyle='--', color='orange')  # Overbought threshold
+            self.ax_rsi.axhline(30, linestyle='--', color='blue')    # Oversold threshold
+            self.ax_rsi.set_ylabel('RSI')
+            self.ax_rsi.legend()
         
         signals = all_signals.tail(self.PLOT_WINDOW)
         
@@ -115,6 +123,13 @@ class TradingStrategy(ABC):
             self.bbu_line.set_xdata(x_data)
             self.bbu_line.set_ydata(y_data_bbu)
         
+        # Plot RSI
+        if 'RSI' in signals.columns:
+            x_data_rsi = signals.index
+            y_data_rsi = signals['RSI']
+            self.ax_rsi.lines[0].set_xdata(x_data_rsi)
+            self.ax_rsi.lines[0].set_ydata(y_data_rsi)
+        
         # Iterate through signals and annotate buy/sell points
         for index, signal_row in signals.iterrows():
             if signal_row.signal is not None:
@@ -127,9 +142,12 @@ class TradingStrategy(ABC):
                 except:
                     print("error while drawing action scatter")
                 
-                    
         self.ax.relim()
         self.ax.autoscale_view()
+
+        self.ax_rsi.relim()
+        self.ax_rsi.autoscale_view()
+
         plt.pause(2)
             
             
@@ -157,8 +175,6 @@ class TradingStrategy(ABC):
             
         return result
     
-    
-
     def create_trade_action(self, action, price, set_stop_limits = True):
         # Create an order with a fixed quantity
         is_succeed = self.create_order(action, price, self.QUANTITY)
@@ -167,6 +183,8 @@ class TradingStrategy(ABC):
             if(set_stop_limits):
                 self.set_profit_lose_limits(action, price)
             self.last_action = action
+            self.should_buy = False
+            self.should_sell = False
             return {"action": action, "quantity": self.QUANTITY}
         else:
             return None

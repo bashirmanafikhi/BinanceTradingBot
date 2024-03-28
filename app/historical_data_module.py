@@ -24,12 +24,13 @@ def get_historical_data(year):
 def historical_data_example():
     symbol = "BTCUSDT"
     trading_client_factory = TradingClientFactory()
-    years = [2017, 2018, 2019, 2020, 2021]
+    years = [2017, 2018, 2019, 2020, 2021] 
+    years = [2021]
 
     for year in years:
         data = get_historical_data(year)
         fake_client = trading_client_factory.create_fake_trading_client()
-        strategy = BollingerRSIStrategyEdited(60, 2, 13, 70, 30)
+        strategy = BollingerRSIStrategyEdited(600, 2, 14, 75, 35)
         trading_system = TradingSystem(symbol, strategy, fake_client)
 
         signals = trading_system.run_strategy(data)

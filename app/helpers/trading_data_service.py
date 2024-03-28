@@ -10,10 +10,10 @@ class TradingDataService:
         self.data = None
 
 
-    def load_data(self, data_dir = 'app\\bitcoin_historical_data\\2019-2023', file_name = 'chunk_20201223_20210323.csv'):
+    def load_data(self, data_dir = 'bitcoin_historical_data\\2019-2023', file_name = 'chunk_20201223_20210323.csv'):
     #def load_data(self, data_dir = 'app\\bitcoin_historical_data\\Bitcoin Historical Dataset', file_name = 'BTC-2021min.csv'):
+        file_path = os.path.join(data_dir, file_name)
         try:
-            file_path = os.path.join(data_dir, file_name)
             data = pd.read_csv(file_path, engine="c")
             
             # Inverse data order
@@ -32,7 +32,7 @@ class TradingDataService:
             self.data = data
             return True
         except FileNotFoundError:
-            logging.info(f"File not found: {self.file_path}")
+            logging.info(f"File not found: {file_path}")
             return False
 
 

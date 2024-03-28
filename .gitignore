@@ -1,6 +1,8 @@
 # my folders
 bitcoin_historical_data/
 my-secrets.txt
+settings.dev.json
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

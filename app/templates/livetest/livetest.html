@@ -1,76 +1,179 @@
 <!-- templates/livetest.html -->
 
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block title %}Live Data Page - My Website{%
+endblock %} {% block content %}
+<h1>This is Live Data Page</h1>
 
-{% block title %}Live Data Page - My Website{% endblock %}
 
-{% block content %}
-    <h1>This is Live Data Page</h1>
-    
-    <div>
-        <p>Status: {{ binance_manager_status }}</p>
-        
-        <form action="{{ url_for('livetest.start_binance_websocket') }}" method="get">
-            <button type="submit" {% if binance_manager_status == 'Running' %}disabled{% endif %}>
-                Start Binance WebSocket
-            </button>
+<div class="accordion" id="accordionExample">
+
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingOne">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+        aria-expanded="false" aria-controls="collapseOne">
+        Strategy Control
+      </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
+      data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+
+        <form action="{{ url_for('livetest.start_binance_websocket') }}" method="post">
+          <div class="form-group">
+            <label for="symbol">Symbol:</label>
+            <input type="text" class="form-control" id="symbol" name="symbol" value="BTCUSDT" required />
+          </div>
+
+          <div class="form-group">
+            <label for="bollinger_window">Bollinger Window:</label>
+            <input type="number" class="form-control" id="bollinger_window" name="bollinger_window" value="20"
+              required />
+          </div>
+
+          <div class="form-group">
+            <label for="bollinger_dev">Bollinger Deviation:</label>
+            <input type="number" class="form-control" id="bollinger_dev" name="bollinger_dev" value="2" required />
+          </div>
+
+          <div class="form-group">
+            <label for="rsi_window">RSI Window:</label>
+            <input type="number" class="form-control" id="rsi_window" name="rsi_window" value="10" required />
+          </div>
+
+          <div class="form-group">
+            <label for="rsi_overbought">RSI Overbought Threshold:</label>
+            <input type="number" class="form-control" id="rsi_overbought" name="rsi_overbought" value="70" required />
+          </div>
+
+          <div class="form-group">
+            <label for="rsi_oversold">RSI Oversold Threshold:</label>
+            <input type="number" class="form-control" id="rsi_oversold" name="rsi_oversold" value="30" required />
+          </div>
+
+          <button type="submit" class="btn btn-primary m2" {% if binance_manager_status=='Running' %}disabled{% endif
+            %}>
+            Start
+          </button>
         </form>
-        
-        <form action="{{ url_for('livetest.stop_binance_websocket') }}" method="get">
-            <button type="submit" {% if binance_manager_status == 'Stopped' %}disabled{% endif %}>
-                Stop Binance WebSocket
-            </button>
+        <form action="{{ url_for('livetest.stop_binance_websocket') }}" method="post">
+          <button type="submit" class="btn btn-danger m2" {% if binance_manager_status=='Stopped' %}disabled{% endif %}>
+            Stop
+          </button>
         </form>
+      </div>
     </div>
-    
+  </div>
 
-    <p>Total Trades: <span id="total_trades"></span></p>
-    <p>Total Profit: <span id="total_profit"></span></p>
-    <br/>
 
-    
-    <div id="live-plot"></div>
-    
-    <script>
-        var socket = io.connect('{{socket_url}}');
 
-        socket.on('connect', function(data) {
-            console.log('connected')
-        });
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingTwo">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo"
+        aria-expanded="false" aria-controls="collapseTwo">
+        Account Control
+      </button>
+    </h2>
+    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+      data-bs-parent="#accordionExample">
+      <div class="accordion-body">
 
-        socket.on('update_data', function(data) {
-            console.log(data)
-            document.getElementById('total_trades').innerHTML = data.total_trades_count;
-            document.getElementById('total_profit').innerHTML = data.total_profit;
+        <form action="{{ url_for('livetest.set_crypto_balances') }}" method="post">
+          <!-- <div class="form-group">
+            <label for="btcBalance">Bitcoin:</label>
+            <input type="number" class="form-control" id="btcBalance" name="btcBalance" placeholder="Enter balance">
+          </div> -->
+          <div class="form-group">
+            <label for="UsdtBalance">Usdt:</label>
+            <input type="number" class="form-control" id="UsdtBalance" name="UsdtBalance" placeholder="Enter balance">
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
 
-            var close_trace = {
-                x: data.x_data,
-                y: data.close,
-                type: 'scatter'
-            };
 
-            var bbl_trace = {
-                x: data.x_data,
-                y: data.bbl,
-                type: 'scatter',
-                line: {dash: 'dot', color: 'blue'}
-            };
+      </div>
+    </div>
+  </div>
 
-            var bbu_trace = {
-                x: data.x_data,
-                y: data.bbu,
-                type: 'scatter',
-                line: {dash: 'dot', color: 'red'}
-            };
 
-            var layout = {
-                title: 'Live Plot',
-                xaxis: {title: 'X-axis'},
-                yaxis: {title: 'Y-axis'}
-            };
+</div>
 
-            Plotly.newPlot('live-plot', [close_trace, bbl_trace, bbu_trace], layout);
-        });
-        
-    </script>
+<br />
+
+<div id="live-plot"></div>
+
+<br />
+<p>Status: {{ binance_manager_status }}</p>
+<p>Total Trades: <span id="total_trades"></span></p>
+<p>Total Profit: <span id="total_profit"></span></p>
+<br />
+
+<script>
+  var socket = io.connect("{{socket_url}}");
+
+  socket.on("connect", function (data) {
+    console.log("connected");
+  });
+
+  socket.on("update_data", function (data) {
+
+    document.getElementById("total_trades").innerHTML = data.total_trades_count;
+    document.getElementById("total_profit").innerHTML = data.total_profit;
+
+    var close_trace = {
+      x: data.price_x_data,
+      y: data.price_y_data,
+      type: "scatter",
+      name: "Price"
+    };
+
+    var bbu_trace = {
+      x: data.bbl_bbu_x_data,
+      y: data.bbu_y_data,
+      type: "scatter",
+      line: { dash: "dot", color: "LightCoral" },
+      name: "BBU"
+    };
+
+    var bbl_trace = {
+      x: data.bbl_bbu_x_data,
+      y: data.bbl_y_data,
+      type: "scatter",
+      line: { dash: "dot", color: "DarkCyan" },
+      name: "BBL"
+    };
+
+
+    var buy_signal_trace = {
+      x: data.buy_signal_x_data,
+      y: data.buy_signal_y_data,
+      mode: 'markers',
+      name: 'Buy',
+      marker: {
+        color: 'green',
+        size: 12
+      }
+    };
+
+    var sell_signal_trace = {
+      x: data.sell_signal_x_data,
+      y: data.sell_signal_y_data,
+      mode: 'markers',
+      name: 'SELL',
+      marker: {
+        color: 'red',
+        size: 12
+      }
+    };
+
+
+    var layout = {
+      title: "Strategy Live Plot",
+      xaxis: { title: "Tick index" },
+      yaxis: { title: "Price" },
+    };
+
+    Plotly.newPlot("live-plot", [close_trace, bbu_trace, bbl_trace, buy_signal_trace, sell_signal_trace], layout);
+  });
+</script>
 {% endblock %}
+</div>

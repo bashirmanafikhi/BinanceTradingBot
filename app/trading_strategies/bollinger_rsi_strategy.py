@@ -12,29 +12,37 @@ class BollingerRSIStrategyEdited(TradingStrategy):
         self.rsi_window = rsi_window
         self.rsi_overbought = rsi_overbought
         self.rsi_oversold = rsi_oversold
-        #self.last_action = ACTION_SELL
 
-    def calculate_bollinger_rsi(self, data):
+    def calculate_bollinger(self, data):
         try:
             bb_result = ta.bbands(data["close"], length=self.bollinger_window, std=self.bollinger_dev)
-            rsi_result = ta.rsi(data["close"], length=self.rsi_window)
             
             data["BBL"] = bb_result["BBL_%d_%d.0" % (self.bollinger_window, self.bollinger_dev)]
             data["BBU"] = bb_result["BBU_%d_%d.0" % (self.bollinger_window, self.bollinger_dev)]
+            
+        except TypeError as e:
+            logging.error(f"Error during Bollinger Bands calculation: {e}")
+            
+        return data
+
+    def calculate_rsi(self, data):
+        try:
+            rsi_result = ta.rsi(data["close"], length=self.rsi_window)
             data["RSI"] = rsi_result
             
         except TypeError as e:
-            logging.error(f"Error during Bollinger Bands and RSI calculation: {e}")
+            logging.error(f"Error during RSI calculation: {e}")
             
         return data
 
     def process_all(self, data):
-        # Wait for at least bollinger_window + rsi_window rows to form
-        if len(data) < self.bollinger_window: # + self.rsi_window:
-            return data
 
         # Calculate Bollinger Bands and RSI
-        data = self.calculate_bollinger_rsi(data)
+        if len(data) >= self.bollinger_window:
+            data = self.calculate_bollinger(data)
+
+        if len(data) >= self.rsi_window:
+            data = self.calculate_rsi(data)
         
         return data
 
@@ -49,14 +57,17 @@ class BollingerRSIStrategyEdited(TradingStrategy):
             and row["RSI"] < self.rsi_oversold
             and (self.last_action == ACTION_SELL or self.last_action is None)
         ):
-            return self.create_trade_action(ACTION_BUY, price, False)
-
+            self.should_buy = True
         elif (
             price > row["BBU"]
             and row["RSI"] > self.rsi_overbought
             and (self.last_action == ACTION_BUY or self.last_action is None)
         ):
-            return self.create_trade_action(ACTION_SELL, price, False)
-
+            self.should_sell = True
         else:
-            return None
+            if(self.should_buy and price > row["BBL"]):
+                return self.create_trade_action(ACTION_BUY, price, False)
+            elif(self.should_sell and price < row["BBU"]):
+                return self.create_trade_action(ACTION_SELL, price, False)
+            else:
+                return None
