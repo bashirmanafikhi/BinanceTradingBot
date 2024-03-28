@@ -119,8 +119,8 @@ def start_binance_websocket():
         binance_manager = get_new_binance_websocket_manager()
 
         trading_client_factory = TradingClientFactory()
-        #binance_client = trading_client_factory.create_binance_trading_client()
-        binance_client = trading_client_factory.create_fake_trading_client()
+        binance_client = trading_client_factory.create_binance_trading_client()
+        #binance_client = trading_client_factory.create_fake_trading_client()
 
         strategy = BollingerRSIStrategyEdited(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, rsi_oversold)
 
