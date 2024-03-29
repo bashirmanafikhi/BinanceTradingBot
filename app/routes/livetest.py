@@ -12,10 +12,10 @@ livetest_bp = Blueprint("livetest", __name__)
 
 @livetest_bp.route("/livetest")
 def livetest():
-    # binance_manager_status = "Running" if is_binance_manager_alive() else "Stopped"
+    binance_manager_status = "Running" if is_binance_manager_alive() else "Stopped"
     return render_template(
         "livetest/livetest.html",
-        #binance_manager_status=binance_manager_status,
+        binance_manager_status=binance_manager_status,
         socket_url=f"{current_app.config['SERVER_URL']}livetest",
     )
 
@@ -49,14 +49,28 @@ def handle_disconnect():
 def on_kline_data_callback(trading_system, data):
     signals, total_profit, total_trades_count = trading_system.run_strategy(data)
 
-    signals = signals.tail(100)
+    plot_size = 200
+    signals = signals.tail(plot_size)
+    last_signal = signals.iloc[-1]
+    last_price = last_signal["close"]
 
     # Convert data to lists
     close_x_data = signals.index.tolist()
     close_y_data = signals['close'].tolist()
 
+    trading_system.initial_base_balance
+    trading_system.initial_quote_balance
+    trading_system.final_base_balance
+    trading_system.final_quote_balance
+    
     # Prepare data dictionary
     data = {
+        "last_price": float(last_price),
+        "last_signal": last_signal.to_json(),
+        "initial_base_balance": float(trading_system.initial_base_balance),
+        "initial_quote_balance": float(trading_system.initial_quote_balance),
+        "final_base_balance": float(trading_system.final_base_balance),
+        "final_quote_balance": float(trading_system.final_quote_balance),
         "total_profit": float(total_profit),
         "total_trades_count": total_trades_count,
         "price_x_data": close_x_data,
@@ -69,7 +83,7 @@ def on_kline_data_callback(trading_system, data):
         bollinger_signals = signals[['BBL', 'BBU']].dropna()
 
         # Take the last 60 rows
-        bollinger_signals = bollinger_signals.tail(60)
+        bollinger_signals = bollinger_signals
 
         # Extract x data
         data["bbl_bbu_x_data"] = bollinger_signals.index.tolist()

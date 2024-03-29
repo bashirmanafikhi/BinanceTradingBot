@@ -19,42 +19,55 @@ endblock %} {% block content %}
       <div class="accordion-body">
 
         <form action="{{ url_for('livetest.start_binance_websocket') }}" method="post">
-          <div class="form-group">
-            <label for="symbol">Symbol:</label>
-            <input type="text" class="form-control" id="symbol" name="symbol" value="BTCUSDT" required />
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="symbol">Symbol:</label>
+                <input type="text" class="form-control" id="symbol" name="symbol" value="BTCUSDT" required />
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="bollinger_window">Bollinger Window:</label>
+                <input type="number" class="form-control" id="bollinger_window" name="bollinger_window" value="500" required />
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="bollinger_dev">Bollinger Deviation:</label>
+                <input type="number" class="form-control" id="bollinger_dev" name="bollinger_dev" value="2" required />
+              </div>
+            </div>
           </div>
-
-          <div class="form-group">
-            <label for="bollinger_window">Bollinger Window:</label>
-            <input type="number" class="form-control" id="bollinger_window" name="bollinger_window" value="20"
-              required />
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="rsi_window">RSI Window:</label>
+                <input type="number" class="form-control" id="rsi_window" name="rsi_window" value="20" required />
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="rsi_overbought">RSI Overbought Threshold:</label>
+                <input type="number" class="form-control" id="rsi_overbought" name="rsi_overbought" value="70" required />
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="rsi_oversold">RSI Oversold Threshold:</label>
+                <input type="number" class="form-control" id="rsi_oversold" name="rsi_oversold" value="30" required />
+              </div>
+            </div>
           </div>
-
-          <div class="form-group">
-            <label for="bollinger_dev">Bollinger Deviation:</label>
-            <input type="number" class="form-control" id="bollinger_dev" name="bollinger_dev" value="2" required />
+          <div class="row">
+            <div class="col-md-12">
+              <button type="submit" class="btn btn-primary m-2" {% if binance_manager_status=='Running' %}disabled{% endif %}>
+                Start
+              </button>
+            </div>
           </div>
-
-          <div class="form-group">
-            <label for="rsi_window">RSI Window:</label>
-            <input type="number" class="form-control" id="rsi_window" name="rsi_window" value="10" required />
-          </div>
-
-          <div class="form-group">
-            <label for="rsi_overbought">RSI Overbought Threshold:</label>
-            <input type="number" class="form-control" id="rsi_overbought" name="rsi_overbought" value="70" required />
-          </div>
-
-          <div class="form-group">
-            <label for="rsi_oversold">RSI Oversold Threshold:</label>
-            <input type="number" class="form-control" id="rsi_oversold" name="rsi_oversold" value="30" required />
-          </div>
-
-          <button type="submit" class="btn btn-primary m2" {% if binance_manager_status=='Running' %}disabled{% endif
-            %}>
-            Start
-          </button>
         </form>
+        
         <form action="{{ url_for('livetest.stop_binance_websocket') }}" method="post">
           <button type="submit" class="btn btn-danger m2" {% if binance_manager_status=='Stopped' %}disabled{% endif %}>
             Stop
@@ -102,9 +115,16 @@ endblock %} {% block content %}
 <div id="live-plot"></div>
 
 <br />
+<p>Last Price: <span id="last_price"></span></p>
+<br />
 <p>Status: {{ binance_manager_status }}</p>
 <p>Total Trades: <span id="total_trades"></span></p>
 <p>Total Profit: <span id="total_profit"></span></p>
+
+<p>Initial base balance: <span id="initial_base_balance"></span></p>
+<p>Initial quote balance: <span id="initial_quote_balance"></span></p>
+<p>Final base balance: <span id="final_base_balance"></span></p>
+<p>Final quote balance: <span id="final_quote_balance"></span></p>
 <br />
 
 <script>
@@ -116,8 +136,17 @@ endblock %} {% block content %}
 
   socket.on("update_data", function (data) {
 
+    var last_signal = JSON.parse(data.last_signal);
+    document.getElementById("last_price").innerHTML = data.last_price;
+    document.getElementById("last_price").innerHTML = last_signal.close;
+
     document.getElementById("total_trades").innerHTML = data.total_trades_count;
     document.getElementById("total_profit").innerHTML = data.total_profit;
+
+    document.getElementById("initial_base_balance").innerHTML = data.initial_base_balance;
+    document.getElementById("initial_quote_balance").innerHTML = data.initial_quote_balance;
+    document.getElementById("final_base_balance").innerHTML = data.final_base_balance;
+    document.getElementById("final_quote_balance").innerHTML = data.final_quote_balance;
 
     var close_trace = {
       x: data.price_x_data,
