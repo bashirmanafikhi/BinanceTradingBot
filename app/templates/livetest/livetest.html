@@ -115,16 +115,22 @@ endblock %} {% block content %}
 <div id="live-plot"></div>
 
 <br />
-<p>Last Price: <span id="last_price"></span></p>
+<p>Price: <span id="last_close"></span></p>
 <br />
-<p>Status: {{ binance_manager_status }}</p>
+
 <p>Total Trades: <span id="total_trades"></span></p>
 <p>Total Profit: <span id="total_profit"></span></p>
+<p>Last action: <span id="last_action"></span></p>
+<p>Last action price: <span id="last_price"></span></p>
+<br />
 
 <p>Initial base balance: <span id="initial_base_balance"></span></p>
 <p>Initial quote balance: <span id="initial_quote_balance"></span></p>
 <p>Final base balance: <span id="final_base_balance"></span></p>
 <p>Final quote balance: <span id="final_quote_balance"></span></p>
+<br />
+
+<p>Status: {{ binance_manager_status }}</p>
 <br />
 
 <script>
@@ -137,8 +143,10 @@ endblock %} {% block content %}
   socket.on("update_data", function (data) {
 
     var last_signal = JSON.parse(data.last_signal);
+    document.getElementById("last_close").innerHTML = last_signal.close;
+
+    document.getElementById("last_action").innerHTML = data.last_action;
     document.getElementById("last_price").innerHTML = data.last_price;
-    document.getElementById("last_price").innerHTML = last_signal.close;
 
     document.getElementById("total_trades").innerHTML = data.total_trades_count;
     document.getElementById("total_profit").innerHTML = data.total_profit;

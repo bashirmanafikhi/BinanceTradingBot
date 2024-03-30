@@ -29,6 +29,7 @@ class TradingSystem:
         self.trading_client = trading_client
         self.trade_quote_percentage = trade_quote_percentage
         self.trade_quote_size = trade_quote_size
+        self.last_action = None
         self.last_price = 0
         self.total_profit = 0
         self.max_quantity = 0
@@ -138,6 +139,7 @@ class TradingSystem:
         order_price = self.extract_price_from_order(order)
         if order_price is not None:
             self.last_price = price
+            self.last_action = action
             if(self.max_quantity < quantity):
                 self.max_quantity = quantity
                 self.max_level = level

@@ -49,23 +49,19 @@ def handle_disconnect():
 def on_kline_data_callback(trading_system, data):
     signals, total_profit, total_trades_count = trading_system.run_strategy(data)
 
-    plot_size = 500
-    #signals = signals.tail(plot_size)
+    plot_size = 5000
+    signals = signals.tail(plot_size)
     last_signal = signals.iloc[-1]
     last_price = last_signal["close"]
 
     # Convert data to lists
     close_x_data = signals.index.tolist()
     close_y_data = signals['close'].tolist()
-
-    trading_system.initial_base_balance
-    trading_system.initial_quote_balance
-    trading_system.final_base_balance
-    trading_system.final_quote_balance
     
     # Prepare data dictionary
     data = {
-        "last_price": float(last_price),
+        "last_price": trading_system.last_price,
+        "last_action": trading_system.last_action,
         "last_signal": last_signal.to_json(),
         "initial_base_balance": float(trading_system.initial_base_balance),
         "initial_quote_balance": float(trading_system.initial_quote_balance),
