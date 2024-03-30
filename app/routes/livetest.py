@@ -121,6 +121,9 @@ def start_binance_websocket():
     rsi_window = float(request.form.get('rsi_window'))
     rsi_overbought = float(request.form.get('rsi_overbought'))
     rsi_oversold = float(request.form.get('rsi_oversold'))
+    trade_percentage = float(request.form.get('trade_percentage'))
+    trade_size = request.form.get('trade_size')
+    trade_size = None if trade_size == '' else trade_size
 
     try:
         if is_binance_manager_alive():
@@ -134,7 +137,7 @@ def start_binance_websocket():
 
         strategy = BollingerRSIStrategyEdited(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, rsi_oversold)
 
-        trading_system = TradingSystem(symbol, strategy, binance_client)
+        trading_system = TradingSystem(symbol, strategy, binance_client, trade_percentage, trade_size)
 
         binance_manager.start()
 
