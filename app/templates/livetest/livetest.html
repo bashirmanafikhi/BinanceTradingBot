@@ -23,19 +23,19 @@ endblock %} {% block content %}
             <div class="col-md-4">
               <div class="form-group">
                 <label for="symbol">Symbol:</label>
-                <input type="text" class="form-control" id="symbol" name="symbol" value="BTCUSDT" required />
+                <input type="text" class="form-control" id="symbol" name="symbol" value="{{strategy_details.symbol}}" required />
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
                 <label for="bollinger_window">Bollinger Window:</label>
-                <input type="number" step="0.01" class="form-control" id="bollinger_window" name="bollinger_window" value="500" required />
+                <input type="number" step="0.01" class="form-control" id="bollinger_window" name="bollinger_window" value="{{strategy_details.bollinger_window}}" required />
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
                 <label for="bollinger_dev">Bollinger Deviation:</label>
-                <input type="number" step="0.01" class="form-control" id="bollinger_dev" name="bollinger_dev" value="2" required />
+                <input type="number" step="0.01" class="form-control" id="bollinger_dev" name="bollinger_dev" value="{{strategy_details.bollinger_dev}}" required />
               </div>
             </div>
           </div>
@@ -43,40 +43,44 @@ endblock %} {% block content %}
             <div class="col-md-4">
               <div class="form-group">
                 <label for="rsi_window">RSI Window:</label>
-                <input type="number" step="0.01" class="form-control" id="rsi_window" name="rsi_window" value="20" required />
+                <input type="number" step="0.01" class="form-control" id="rsi_window" name="rsi_window" value="{{strategy_details.rsi_window}}" required />
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
                 <label for="rsi_overbought">RSI Overbought Threshold:</label>
-                <input type="number" step="0.01" class="form-control" id="rsi_overbought" name="rsi_overbought" value="70" required />
+                <input type="number" step="0.01" class="form-control" id="rsi_overbought" name="rsi_overbought" value="{{strategy_details.rsi_overbought}}" required />
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
                 <label for="rsi_oversold">RSI Oversold Threshold:</label>
-                <input type="number" step="0.01" class="form-control" id="rsi_oversold" name="rsi_oversold" value="30" required />
+                <input type="number" step="0.01" class="form-control" id="rsi_oversold" name="rsi_oversold" value="{{strategy_details.rsi_oversold}}" required />
               </div>
             </div>
             
             <div class="col-md-4">
               <div class="form-group">
                 <label for="trade_percentage">Trade Percentage:</label>
-                <input type="number" step="0.01" class="form-control" id="trade_percentage" name="trade_percentage" value="0.95" required  max="1" min="0"/>
+                <input type="number" step="0.01" class="form-control" id="trade_percentage" name="trade_percentage" value="{{strategy_details.trade_percentage}}" required  max="1" min="0"/>
               </div>
             </div>
             
             <div class="col-md-4">
               <div class="form-group">
                 <label for="trade_size">Trade Size (will override the percentage):</label>
-                <input type="number" step="0.01" class="form-control" id="trade_size" name="trade_size" />
+                <input type="number" step="0.01" class="form-control" id="trade_size" name="trade_size" value="{{strategy_details.trade_size}}" />
               </div>
             </div>
           </div>
           <div class="row">
             <div class="col-md-12">
-              <button type="submit" class="btn btn-primary m-2" {% if binance_manager_status=='Running' %}disabled{% endif %}>
-                Start
+              <button type="submit" class="btn btn-primary m-2">
+                {% if binance_manager_status == 'Running' %}
+                  Update
+                {% else %}
+                  Start
+                {% endif %}
               </button>
             </div>
           </div>

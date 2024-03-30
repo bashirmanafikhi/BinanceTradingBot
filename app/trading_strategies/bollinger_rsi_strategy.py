@@ -13,12 +13,18 @@ class BollingerRSIStrategyEdited(TradingStrategy):
         self.rsi_overbought = rsi_overbought
         self.rsi_oversold = rsi_oversold
 
+    def format_one_zero_decimal(self,num):
+        formatted = "%g" % num
+        if '.' not in formatted:
+            formatted += '.0'
+        return formatted
+        
     def calculate_bollinger(self, data):
         try:
             bb_result = ta.bbands(data["close"], length=self.bollinger_window, std=self.bollinger_dev)
             
-            data["BBL"] = bb_result["BBL_%d_%g" % (self.bollinger_window, self.bollinger_dev)]
-            data["BBU"] = bb_result["BBU_%d_%g" % (self.bollinger_window, self.bollinger_dev)]
+            data["BBL"] = bb_result["BBL_%d_%s" % (self.bollinger_window, self.format_one_zero_decimal(self.bollinger_dev))]
+            data["BBU"] = bb_result["BBU_%d_%s" % (self.bollinger_window, self.format_one_zero_decimal(self.bollinger_dev))]
             
         except TypeError as e:
             my_logger.error(f"Error during Bollinger Bands calculation: {e}")

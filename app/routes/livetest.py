@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, current_app,request
+from flask import Blueprint, render_template, current_app,request,redirect
 from flask_app import socketio
 from binance import ThreadedWebsocketManager
 from helpers.binance_websocket import get_binance_websocket_service
@@ -13,20 +13,44 @@ livetest_bp = Blueprint("livetest", __name__)
 @livetest_bp.route("/livetest")
 def livetest():
     binance_manager_status = "Running" if is_binance_manager_alive() else "Stopped"
+
+
     return render_template(
         "livetest/livetest.html",
         binance_manager_status=binance_manager_status,
         socket_url=f"{current_app.config['SERVER_URL']}livetest",
+        strategy_details= get_strategy_details()
     )
 
-
-
+def get_strategy_details():
+    trading_system = get_current_trading_system()
+    if(trading_system is None):
+        return {
+            "symbol":"BTCUSDT",
+            "trade_percentage":0.9,
+            "trade_size":None,
+            "bollinger_window":500,
+            "bollinger_dev":2,
+            "rsi_window":14,
+            "rsi_overbought":70,
+            "rsi_oversold":30,
+        }
+    else:
+        return {
+            "symbol": trading_system.symbol,
+            "trade_percentage":trading_system.trade_quote_percentage,
+            "trade_size":trading_system.trade_quote_size,
+            "bollinger_window":trading_system.strategy.bollinger_window,
+            "bollinger_dev":trading_system.strategy.bollinger_dev,
+            "rsi_window":trading_system.strategy.rsi_window,
+            "rsi_overbought":trading_system.strategy.rsi_overbought,
+            "rsi_oversold":trading_system.strategy.rsi_oversold,
+        }
 
 def get_current_binance_manager():
     if "binance_manager" not in current_app.extensions:
         return get_new_binance_websocket_manager()
     return current_app.extensions["binance_manager"]
-
 
 def get_new_binance_websocket_manager():
     current_app.extensions["binance_manager"] = get_binance_websocket_service()
@@ -44,6 +68,12 @@ def handle_connect():
 @socketio.on("disconnect", namespace="/livetest")
 def handle_disconnect():
     print(f"handle_disconnect livetest")
+
+
+def get_current_trading_system():
+    if "trading_system" in current_app.extensions:
+        return current_app.extensions["trading_system"]
+    return None
 
 
 def on_kline_data_callback(trading_system, data):
@@ -114,7 +144,6 @@ def on_kline_data_callback(trading_system, data):
 
 @livetest_bp.route("/start-binance-websocket", methods=['POST'])
 def start_binance_websocket():
-
     symbol = request.form.get('symbol')
     bollinger_window = float(request.form.get('bollinger_window'))
     bollinger_dev = float(request.form.get('bollinger_dev'))
@@ -125,10 +154,30 @@ def start_binance_websocket():
     trade_size = request.form.get('trade_size')
     trade_size = None if trade_size == '' else trade_size
 
-    try:
-        if is_binance_manager_alive():
-            return "Binance WebSocket service is already running"
+    if is_binance_manager_alive():
+            return update_strategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, rsi_oversold, trade_percentage, trade_size)
+    
+    return start_strategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, rsi_oversold, symbol, trade_percentage, trade_size)
+    
+def update_strategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, rsi_oversold, trade_percentage, trade_size):    
+    trading_system = get_current_trading_system()
+    strategy = trading_system.strategy
 
+    trading_system.trade_quote_percentage = trade_percentage
+    trading_system.trade_quote_size = trade_size
+
+    strategy.bollinger_window = bollinger_window
+    strategy.bollinger_dev = bollinger_dev
+    strategy.rsi_window = rsi_window
+    strategy.rsi_overbought = rsi_overbought
+    strategy.rsi_oversold = rsi_oversold
+
+    # Redirect back to the same page
+    return redirect(request.referrer)
+
+
+def start_strategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, rsi_oversold, symbol, trade_percentage, trade_size):    
+    try:
         binance_manager = get_new_binance_websocket_manager()
 
         trading_client_factory = TradingClientFactory()
@@ -146,6 +195,7 @@ def start_binance_websocket():
             callback=lambda data: on_kline_data_callback(trading_system, data),
         )
 
+        current_app.extensions["trading_system"] = trading_system
         # Return a response message
         return "WebSocket connection started successfully.", 200
 
