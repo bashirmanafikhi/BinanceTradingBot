@@ -49,8 +49,8 @@ def handle_disconnect():
 def on_kline_data_callback(trading_system, data):
     signals, total_profit, total_trades_count = trading_system.run_strategy(data)
 
-    plot_size = 200
-    signals = signals.tail(plot_size)
+    plot_size = 500
+    #signals = signals.tail(plot_size)
     last_signal = signals.iloc[-1]
     last_price = last_signal["close"]
 
@@ -120,11 +120,11 @@ def on_kline_data_callback(trading_system, data):
 def start_binance_websocket():
 
     symbol = request.form.get('symbol')
-    bollinger_window = int(request.form.get('bollinger_window'))
-    bollinger_dev = int(request.form.get('bollinger_dev'))
-    rsi_window = int(request.form.get('rsi_window'))
-    rsi_overbought = int(request.form.get('rsi_overbought'))
-    rsi_oversold = int(request.form.get('rsi_oversold'))
+    bollinger_window = float(request.form.get('bollinger_window'))
+    bollinger_dev = float(request.form.get('bollinger_dev'))
+    rsi_window = float(request.form.get('rsi_window'))
+    rsi_overbought = float(request.form.get('rsi_overbought'))
+    rsi_oversold = float(request.form.get('rsi_oversold'))
 
     try:
         if is_binance_manager_alive():
@@ -133,8 +133,8 @@ def start_binance_websocket():
         binance_manager = get_new_binance_websocket_manager()
 
         trading_client_factory = TradingClientFactory()
-        binance_client = trading_client_factory.create_binance_trading_client()
-        #binance_client = trading_client_factory.create_fake_trading_client()
+        #binance_client = trading_client_factory.create_binance_trading_client()
+        binance_client = trading_client_factory.create_fake_trading_client()
 
         strategy = BollingerRSIStrategyEdited(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, rsi_oversold)
 

@@ -1,7 +1,7 @@
 import pandas as pd
 import pandas_ta as ta
 import numpy as np
-import logging
+import helpers.my_logger as my_logger
 from trading_strategies.trading_strategy import TradingStrategy
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL
 
@@ -27,7 +27,7 @@ class MACDStrategy(TradingStrategy):
             self.candles.ta.macd(append=True)
         except TypeError as e:
             pass
-            #logging.info("Error during MACD calculation:", e)
+            #my_logger.info("Error during MACD calculation:", e)
         
         
         if 'MACD_12_26_9' not in self.candles.columns:

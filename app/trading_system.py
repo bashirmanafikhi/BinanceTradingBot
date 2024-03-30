@@ -1,8 +1,7 @@
 from decimal import ROUND_HALF_UP, Decimal
 import decimal
-import logging
+import helpers.my_logger as my_logger
 import pandas as pd
-import logging
 from helpers.settings.constants import (
     ACTION_BUY,
     ACTION_SELL,
@@ -70,7 +69,7 @@ class TradingSystem:
     
     def calculate_profit_loss(self):
         if(self.trades_count == 0):
-            logging.info("No Trades Happened")
+            my_logger.info("No Trades Happened")
             return
         
         initial_base_balance = Decimal(self.initial_base_balance)
@@ -86,22 +85,22 @@ class TradingSystem:
         base_balance_change = final_base_balance - initial_base_balance
         quote_balance_change = final_quote_balance - initial_quote_balance
 
-        logging.info("")
-        logging.info(f"{self.base_asset} initial balance : {initial_base_balance}")
-        logging.info(f"{self.base_asset} final balance: {final_base_balance}")
-        logging.info(f"{self.base_asset} balance change: {base_balance_change}")
-        logging.info("")
-        logging.info(f"{self.quote_asset} initial balance : {initial_quote_balance}")
-        logging.info(f"{self.quote_asset} final balance: {final_quote_balance}")
-        logging.info(f"{self.quote_asset} balance change: {quote_balance_change}")
-        logging.info("")
+        my_logger.info("")
+        my_logger.info(f"{self.base_asset} initial balance : {initial_base_balance}")
+        my_logger.info(f"{self.base_asset} final balance: {final_base_balance}")
+        my_logger.info(f"{self.base_asset} balance change: {base_balance_change}")
+        my_logger.info("")
+        my_logger.info(f"{self.quote_asset} initial balance : {initial_quote_balance}")
+        my_logger.info(f"{self.quote_asset} final balance: {final_quote_balance}")
+        my_logger.info(f"{self.quote_asset} balance change: {quote_balance_change}")
+        my_logger.info("")
 
-        logging.info(f"Max {self.base_asset} Quantity: {self.max_quantity}")
-        logging.info(f"Max Quote Quantity: {self.max_quote_quantity}")
-        logging.info(f"Max Level: {self.max_level}")
+        my_logger.info(f"Max {self.base_asset} Quantity: {self.max_quantity}")
+        my_logger.info(f"Max Quote Quantity: {self.max_quote_quantity}")
+        my_logger.info(f"Max Level: {self.max_level}")
         average = sum(self.levels) / len(self.levels)
-        logging.info(f"Levels Average:{average}")
-        logging.info(f"Last Price: {self.last_price}")
+        my_logger.info(f"Levels Average:{average}")
+        my_logger.info(f"Last Price: {self.last_price}")
         
         
         # Calculate the profit or loss amounts
@@ -111,10 +110,10 @@ class TradingSystem:
         
         profit_percentage = (self.total_profit / initial_quote_balance) * 100
         
-        logging.info(f"Total Trades Count: {self.trades_count}")
-        logging.info(f"Profit Percentage: {profit_percentage} %")
-        logging.info(f"Total Profit: {self.total_profit} $")
-        logging.info("****************************")
+        my_logger.info(f"Total Trades Count: {self.trades_count}")
+        my_logger.info(f"Profit Percentage: {profit_percentage} %")
+        my_logger.info(f"Total Profit: {self.total_profit} $")
+        my_logger.info("****************************")
 
 
 
@@ -129,7 +128,7 @@ class TradingSystem:
         level = quantity
         quantity = self.calculate_quantity(action, price, quantity)
 
-        logging.info(f"{action} {quantity} {self.base_asset} at {price}")
+        my_logger.info(f"{action} {quantity} {self.base_asset} at {price}")
 
         order = self.trading_client.create_order(
             action, type, self.symbol, quantity, price
@@ -144,7 +143,7 @@ class TradingSystem:
                 self.max_level = level
                 self.max_quote_quantity = quantity * Decimal(price)
                 self.levels.append(level)
-            logging.info(f"{action} order placed at: {order_price}")
+            my_logger.info(f"{action} order placed at: {order_price}")
             self.trades_count += 1
             self.calculate_profit_loss()
             return True
@@ -185,7 +184,7 @@ class TradingSystem:
 
         except (ValueError, decimal.InvalidOperation) as e:
             # Handle exceptions, such as invalid values or division by zero
-            logging.info(f"Error calculating quantity: {e}")
+            my_logger.info(f"Error calculating quantity: {e}")
             return None
 
     def round_to_nearest_multiple(self, original_number, multiple):
@@ -201,10 +200,10 @@ class TradingSystem:
             elif order["status"] == ORDER_STATUS_NEW:
                 return ORDER_STATUS_NEW
             else:
-                logging.info(f"Order status not filled.. it's {order['status']}")
+                my_logger.info(f"Order status not filled.. it's {order['status']}")
                 return None
         except (KeyError, IndexError, ValueError, Exception) as e:
-            #logging.info(f"Error extracting price from order: {e}")
+            #my_logger.info(f"Error extracting price from order: {e}")
             return None
         
     def initialize_symbol_info(self, symbol):

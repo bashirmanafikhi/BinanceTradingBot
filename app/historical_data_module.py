@@ -1,7 +1,7 @@
 # historical_data_module.py
 from datetime import datetime, timedelta
 import pandas as pd
-import logging
+import helpers.my_logger as my_logger
 from helpers.trading_data_service import TradingDataService
 from trading_clients.trading_client_factory import TradingClientFactory
 from trading_strategies.bollinger_rsi_strategy import BollingerRSIStrategyEdited
@@ -18,7 +18,7 @@ def get_historical_data(year):
         end_date = start_date + timedelta(days=2000)
         return trading_data_service.query_data()
     else:
-        logging.info("Data didn't load.")
+        my_logger.info("Data didn't load.")
         return pd.DataFrame()
 
 def historical_data_example():

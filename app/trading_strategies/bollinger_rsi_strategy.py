@@ -1,7 +1,7 @@
 import pandas_ta as ta
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL
 from trading_strategies.trading_strategy import TradingStrategy
-import logging
+import helpers.my_logger as my_logger
 
 class BollingerRSIStrategyEdited(TradingStrategy):
     
@@ -17,11 +17,11 @@ class BollingerRSIStrategyEdited(TradingStrategy):
         try:
             bb_result = ta.bbands(data["close"], length=self.bollinger_window, std=self.bollinger_dev)
             
-            data["BBL"] = bb_result["BBL_%d_%d.0" % (self.bollinger_window, self.bollinger_dev)]
-            data["BBU"] = bb_result["BBU_%d_%d.0" % (self.bollinger_window, self.bollinger_dev)]
+            data["BBL"] = bb_result["BBL_%d_%g" % (self.bollinger_window, self.bollinger_dev)]
+            data["BBU"] = bb_result["BBU_%d_%g" % (self.bollinger_window, self.bollinger_dev)]
             
         except TypeError as e:
-            logging.error(f"Error during Bollinger Bands calculation: {e}")
+            my_logger.error(f"Error during Bollinger Bands calculation: {e}")
             
         return data
 
@@ -31,7 +31,7 @@ class BollingerRSIStrategyEdited(TradingStrategy):
             data["RSI"] = rsi_result
             
         except TypeError as e:
-            logging.error(f"Error during RSI calculation: {e}")
+            my_logger.error(f"Error during RSI calculation: {e}")
             
         return data
 

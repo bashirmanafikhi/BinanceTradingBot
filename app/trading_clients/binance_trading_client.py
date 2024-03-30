@@ -1,7 +1,7 @@
-import logging
+import helpers.my_logger as my_logger
 from binance.client import Client
 import pandas as pd
-import logging
+import helpers.my_logger as my_logger
 from helpers.binance_websocket import get_binance_websocket_service
 
 from helpers.settings.settings import Settings
@@ -33,7 +33,7 @@ class BinanceTradingClient(TradingClient):
             return 0.0
 
         except Exception as e:
-            logging.info(f"An error occurred: {e}")
+            my_logger.info(f"An error occurred: {e}")
             return None
         
     def set_usdt_balance(self, amount):
@@ -91,15 +91,15 @@ class BinanceTradingClient(TradingClient):
             open_orders = self.client.get_open_orders()
 
             if not open_orders:
-                logging.info("No open trades.")
+                my_logger.info("No open trades.")
                 return
 
-            logging.info("Open Trades:")
+            my_logger.info("Open Trades:")
             for order in open_orders:
                 self.print_order_details(order)
 
         except Exception as e:
-            logging.info(f"An error occurred: {e}")
+            my_logger.info(f"An error occurred: {e}")
 
     def query_quote_asset_list(self, quote_asset_symbol):
         symbol_dictionary = self.client.get_exchange_info()
@@ -110,14 +110,14 @@ class BinanceTradingClient(TradingClient):
         return quote_symbol_dataframe
 
     def print_order_details(self, order):
-        logging.info(f"Symbol: {order['symbol']}")
-        logging.info(f"Order ID: {order['orderId']}")
-        logging.info(f"Side: {order['side']}")
-        logging.info(f"Type: {order['type']}")
-        logging.info(f"Price: {order['price']}")
-        logging.info(f"Quantity: {order['origQty']}")
-        logging.info(f"Time: {order['time']}")
-        logging.info("\n---\n")
+        my_logger.info(f"Symbol: {order['symbol']}")
+        my_logger.info(f"Order ID: {order['orderId']}")
+        my_logger.info(f"Side: {order['side']}")
+        my_logger.info(f"Type: {order['type']}")
+        my_logger.info(f"Price: {order['price']}")
+        my_logger.info(f"Quantity: {order['origQty']}")
+        my_logger.info(f"Time: {order['time']}")
+        my_logger.info("\n---\n")
 
     def get_symbol_info(self, symbol):
         return self.client.get_symbol_info(symbol)
@@ -129,10 +129,10 @@ class BinanceTradingClient(TradingClient):
         quote_asset = symbol_info["quoteAsset"]
         base_asset = symbol_info["baseAsset"]
         if symbol_info:
-            logging.info(f"Symbol Information for {symbol}:")
-            logging.info(symbol_info)
+            my_logger.info(f"Symbol Information for {symbol}:")
+            my_logger.info(symbol_info)
         else:
-            logging.info(f"Symbol {symbol} not found.")
+            my_logger.info(f"Symbol {symbol} not found.")
 
     def get_trade_fee(self, symbol=None):
         if symbol:
@@ -214,7 +214,7 @@ class BinanceTradingClient(TradingClient):
 
             return order
         except Exception as e:
-            logging.info(f"Error placing order: {e}")
+            my_logger.info(f"Error placing order: {e}")
             return None
 
     def extract_price_from_order(self, order):
@@ -224,7 +224,7 @@ class BinanceTradingClient(TradingClient):
             buy_price = float(first_fill["price"])
             return buy_price
         else:
-            logging.info("No fills information found in the order.")
+            my_logger.info("No fills information found in the order.")
             return None
     def cancel_open_orders(self, symbol=None):
         if symbol:

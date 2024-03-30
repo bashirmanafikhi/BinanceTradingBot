@@ -1,6 +1,5 @@
-import logging
+import helpers.my_logger as my_logger
 import os
-import logging
 import pandas as pd
 
 
@@ -32,7 +31,7 @@ class TradingDataService:
             self.data = data
             return True
         except FileNotFoundError:
-            logging.info(f"File not found: {file_path}")
+            my_logger.info(f"File not found: {file_path}")
             return False
 
 
@@ -40,7 +39,7 @@ class TradingDataService:
 
     def query_data(self, start_date=None, end_date=None):
         if self.data is None:
-            logging.info("Data not loaded. Use 'load_data()' to load the data first.")
+            my_logger.info("Data not loaded. Use 'load_data()' to load the data first.")
             return None
 
         queried_data = self.data

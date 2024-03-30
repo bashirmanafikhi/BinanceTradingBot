@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-import logging
+import helpers.my_logger as my_logger
 import pandas as pd
 from helpers.ddd.buy_command import BuyCommand
 from helpers.ddd.event import Event

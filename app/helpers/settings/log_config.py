@@ -1,6 +1,10 @@
 import logging
+import helpers.my_logger as my_logger
 
 def configure_logging():
+    # configure my_logger
+    my_logger.set_file("my_logfile.log")
+
     # Remove existing handlers from the root logger
     root_logger = logging.getLogger()
     for handler in root_logger.handlers:

@@ -1,7 +1,7 @@
 import pandas as pd
 from pandas_ta import *
 from datetime import datetime, timedelta
-import logging
+import helpers.my_logger as my_logger
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL
 
 from trading_strategies.trading_strategy import TradingStrategy
@@ -30,7 +30,7 @@ class BollingerRSIStrategyStopLimit(TradingStrategy):
             self.candles.ta.rsi(length=self.rsi_window, append=True)
         except TypeError as e:
             pass
-            # logging.info("Error during Bollinger Bands and RSI calculation:", e)
+            # my_logger.info("Error during Bollinger Bands and RSI calculation:", e)
 
         # Extract current and previous rows
         current_row = self.candles.iloc[-1]
