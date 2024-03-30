@@ -1,6 +1,7 @@
 # my_logger.py
 import os
 import logging
+import datetime
 
 log_file = None
 
@@ -30,8 +31,10 @@ def critical(message):
 def log(level, message):
     global log_file
     if log_file:
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(log_file, 'a') as f:
-            log_entry = f"[{level.upper()}] {message}\n"
+            log_entry = f"{current_time} [{level.upper()}] {message}\n"
             f.write(log_entry)
     # Also log using the built-in logging module
     getattr(logging, level)(message)
+
