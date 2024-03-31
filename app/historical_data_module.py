@@ -30,7 +30,7 @@ def historical_data_example():
     for year in years:
         data = get_historical_data(year)
         fake_client = trading_client_factory.create_fake_trading_client()
-        strategy = BollingerRSIStrategyEdited(600, 2, 14, 75, 35)
+        strategy = BollingerRSIStrategyEdited(300, 2, 100, 72, 28)
         trading_system = TradingSystem(symbol, strategy, fake_client)
 
         signals = trading_system.run_strategy(data)

@@ -27,13 +27,13 @@ def get_strategy_details():
     if(trading_system is None):
         return {
             "symbol":"BTCUSDT",
-            "trade_percentage":0.9,
+            "trade_percentage":0.95,
             "trade_size":None,
-            "bollinger_window":500,
+            "bollinger_window":750,
             "bollinger_dev":2,
-            "rsi_window":14,
-            "rsi_overbought":70,
-            "rsi_oversold":30,
+            "rsi_window":300,
+            "rsi_overbought":72,
+            "rsi_oversold":28,
         }
     else:
         return {

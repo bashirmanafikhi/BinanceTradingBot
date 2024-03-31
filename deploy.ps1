@@ -58,7 +58,7 @@ $SSHCommand = @"
     #uwsgi --http 0.0.0.0:5000 --http-websockets --master -p 4 -w run_web:app --enable-threads
     
     # Start Gunicorn in the background
-    gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app --log-level info --error-logfile log/gunicorn_error.log --capture-output -D
+    #gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app --log-level info --error-logfile log/gunicorn_error.log --capture-output -D
     #gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app -D
 "@
 

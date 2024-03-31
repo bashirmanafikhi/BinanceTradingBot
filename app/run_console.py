@@ -7,5 +7,5 @@ from live_data_module import live_data_example
 
 if __name__ == "__main__":
     configure_logging()
-    live_data_example()
-    # historical_data_example()
+    #live_data_example()
+    historical_data_example()
