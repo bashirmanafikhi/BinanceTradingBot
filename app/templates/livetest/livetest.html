@@ -1,9 +1,16 @@
 <!-- templates/livetest.html -->
 
-{% extends 'base.html' %} {% block title %}Live Data Page - My Website{%
-endblock %} {% block content %}
+{% extends 'base.html' %}
+{% block title %}
+Live Data Page - My Website
+{% endblock %}
+
+{% block content %}
 <h1>This is Live Data Page</h1>
 
+<style>
+
+</style>
 
 <div class="accordion" id="accordionExample">
 
@@ -21,55 +28,61 @@ endblock %} {% block content %}
         <form action="{{ url_for('livetest.start_binance_websocket') }}" method="post">
           <div class="row">
             <div class="col-md-4">
-              <div class="form-group">
-                <label for="symbol">Symbol:</label>
-                <input type="text" class="form-control" id="symbol" name="symbol" value="{{strategy_details.symbol}}" required />
+              <div class="mb-3">
+                <label for="symbol" class="form-label">Symbol:</label>
+                <input type="text" class="form-control" id="symbol" name="symbol" value="{{strategy_details.symbol}}"
+                  required>
               </div>
             </div>
             <div class="col-md-4">
-              <div class="form-group">
-                <label for="bollinger_window">Bollinger Window:</label>
-                <input type="number" step="0.01" class="form-control" id="bollinger_window" name="bollinger_window" value="{{strategy_details.bollinger_window}}" required />
+              <div class="mb-3">
+                <label for="bollinger_window" class="form-label">Bollinger Window:</label>
+                <input type="number" step="0.01" class="form-control" id="bollinger_window" name="bollinger_window"
+                  value="{{strategy_details.bollinger_window}}" required>
               </div>
             </div>
             <div class="col-md-4">
-              <div class="form-group">
-                <label for="bollinger_dev">Bollinger Deviation:</label>
-                <input type="number" step="0.01" class="form-control" id="bollinger_dev" name="bollinger_dev" value="{{strategy_details.bollinger_dev}}" required />
+              <div class="mb-3">
+                <label for="bollinger_dev" class="form-label">Bollinger Deviation:</label>
+                <input type="number" step="0.01" class="form-control" id="bollinger_dev" name="bollinger_dev"
+                  value="{{strategy_details.bollinger_dev}}" required>
               </div>
             </div>
           </div>
           <div class="row">
             <div class="col-md-4">
-              <div class="form-group">
-                <label for="rsi_window">RSI Window:</label>
-                <input type="number" step="0.01" class="form-control" id="rsi_window" name="rsi_window" value="{{strategy_details.rsi_window}}" required />
+              <div class="mb-3">
+                <label for="rsi_window" class="form-label">RSI Window:</label>
+                <input type="number" step="0.01" class="form-control" id="rsi_window" name="rsi_window"
+                  value="{{strategy_details.rsi_window}}" required>
               </div>
             </div>
             <div class="col-md-4">
-              <div class="form-group">
-                <label for="rsi_overbought">RSI Overbought Threshold:</label>
-                <input type="number" step="0.01" class="form-control" id="rsi_overbought" name="rsi_overbought" value="{{strategy_details.rsi_overbought}}" required />
+              <div class="mb-3">
+                <label for="rsi_overbought" class="form-label">RSI Overbought Threshold:</label>
+                <input type="number" step="0.01" class="form-control" id="rsi_overbought" name="rsi_overbought"
+                  value="{{strategy_details.rsi_overbought}}" required>
               </div>
             </div>
             <div class="col-md-4">
-              <div class="form-group">
-                <label for="rsi_oversold">RSI Oversold Threshold:</label>
-                <input type="number" step="0.01" class="form-control" id="rsi_oversold" name="rsi_oversold" value="{{strategy_details.rsi_oversold}}" required />
+              <div class="mb-3">
+                <label for="rsi_oversold" class="form-label">RSI Oversold Threshold:</label>
+                <input type="number" step="0.01" class="form-control" id="rsi_oversold" name="rsi_oversold"
+                  value="{{strategy_details.rsi_oversold}}" required>
               </div>
             </div>
-            
             <div class="col-md-4">
-              <div class="form-group">
-                <label for="trade_percentage">Trade Percentage:</label>
-                <input type="number" step="0.01" class="form-control" id="trade_percentage" name="trade_percentage" value="{{strategy_details.trade_percentage}}" required  max="1" min="0"/>
+              <div class="mb-3">
+                <label for="trade_percentage" class="form-label">Trade Percentage:</label>
+                <input type="number" step="0.01" class="form-control" id="trade_percentage" name="trade_percentage"
+                  value="{{strategy_details.trade_percentage}}" required min="0" max="1">
               </div>
             </div>
-            
             <div class="col-md-4">
-              <div class="form-group">
-                <label for="trade_size">Trade Size (will override the percentage):</label>
-                <input type="number" step="0.01" class="form-control" id="trade_size" name="trade_size" value="{{strategy_details.trade_size}}" />
+              <div class="mb-3">
+                <label for="trade_size" class="form-label">Trade Size (will override the percentage):</label>
+                <input type="number" step="0.01" class="form-control" id="trade_size" name="trade_size"
+                  value="{{strategy_details.trade_size}}">
               </div>
             </div>
           </div>
@@ -77,25 +90,22 @@ endblock %} {% block content %}
             <div class="col-md-12">
               <button type="submit" class="btn btn-primary m-2">
                 {% if binance_manager_status == 'Running' %}
-                  Update
+                Update
                 {% else %}
-                  Start
+                Start
                 {% endif %}
+              </button>
+              <button type="submit" class="btn btn-danger m-2"
+                formaction="{{ url_for('livetest.stop_binance_websocket') }}" {% if binance_manager_status=='Stopped'
+                %}disabled{% endif %}>
+                Stop
               </button>
             </div>
           </div>
         </form>
-        
-        <form action="{{ url_for('livetest.stop_binance_websocket') }}" method="post">
-          <button type="submit" class="btn btn-danger m2" {% if binance_manager_status=='Stopped' %}disabled{% endif %}>
-            Stop
-          </button>
-        </form>
       </div>
     </div>
   </div>
-
-
 
   <div class="accordion-item">
     <h2 class="accordion-header" id="headingTwo">
@@ -107,49 +117,73 @@ endblock %} {% block content %}
     <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
       data-bs-parent="#accordionExample">
       <div class="accordion-body">
-
         <form action="{{ url_for('livetest.set_crypto_balances') }}" method="post">
-          <!-- <div class="form-group">
-            <label for="btcBalance">Bitcoin:</label>
-            <input type="number" step="0.01" class="form-control" id="btcBalance" name="btcBalance" placeholder="Enter balance">
-          </div> -->
-          <div class="form-group">
-            <label for="UsdtBalance">Usdt:</label>
-            <input type="number" step="0.01" class="form-control" id="UsdtBalance" name="UsdtBalance" placeholder="Enter balance">
+          <div class="mb-3">
+            <label for="UsdtBalance" class="form-label">Usdt:</label>
+            <input type="number" step="0.01" class="form-control" id="UsdtBalance" name="UsdtBalance"
+              placeholder="Enter balance">
           </div>
           <button type="submit" class="btn btn-primary">Submit</button>
         </form>
-
-
       </div>
     </div>
   </div>
-
-
 </div>
 
-<br />
+<br>
 
 <div id="live-plot"></div>
 
-<br />
-<p>Price: <span id="last_close"></span></p>
-<br />
-
-<p>Total Trades: <span id="total_trades"></span></p>
-<p>Total Profit: <span id="total_profit"></span></p>
-<p>Last action: <span id="last_action"></span></p>
-<p>Last action price: <span id="last_price"></span></p>
-<br />
-
-<p>Initial base balance: <span id="initial_base_balance"></span></p>
-<p>Initial quote balance: <span id="initial_quote_balance"></span></p>
-<p>Final base balance: <span id="final_base_balance"></span></p>
-<p>Final quote balance: <span id="final_quote_balance"></span></p>
-<br />
-
 <p>Status: {{ binance_manager_status }}</p>
 <br />
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Price:</h5>
+          <p class="card-text"><span id="last_close"></span></p>
+          <h5 class="card-title">BBU:</h5>
+          <p class="card-text"><span id="last_bbu"></span></p>
+          <h5 class="card-title">BBL:</h5>
+          <p class="card-text"><span id="last_bbl"></span></p>
+          <h5 class="card-title">RSI:</h5>
+          <p class="card-text"><span id="last_rsi"></span></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Total Trades:</h5>
+          <p class="card-text"><span id="total_trades"></span></p>
+          <h5 class="card-title">Total Profit:</h5>
+          <p class="card-text"><span id="total_profit"></span></p>
+          <h5 class="card-title">Last action:</h5>
+          <p class="card-text"><span id="last_action"></span></p>
+          <h5 class="card-title">Last action price:</h5>
+          <p class="card-text"><span id="last_price"></span></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Initial base balance:</h5>
+          <p class="card-text"><span id="initial_base_balance"></span></p>
+          <h5 class="card-title">Final base balance:</h5>
+          <p class="card-text"><span id="final_base_balance"></span></p>
+          <h5 class="card-title">Initial quote balance:</h5>
+          <p class="card-text"><span id="initial_quote_balance"></span></p>
+          <h5 class="card-title">Final quote balance:</h5>
+          <p class="card-text"><span id="final_quote_balance"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script>
   var socket = io.connect("{{socket_url}}");
@@ -161,7 +195,10 @@ endblock %} {% block content %}
   socket.on("update_data", function (data) {
 
     var last_signal = JSON.parse(data.last_signal);
-    document.getElementById("last_close").innerHTML = last_signal.close;
+    document.getElementById("last_bbu").innerHTML = Math.round(last_signal.BBU * 100) / 100;
+    document.getElementById("last_close").innerHTML = Math.round(last_signal.close * 100) / 100;
+    document.getElementById("last_bbl").innerHTML = Math.round(last_signal.BBL * 100) / 100;
+    document.getElementById("last_rsi").innerHTML = Math.round(last_signal.RSI * 100) / 100;
 
     document.getElementById("last_action").innerHTML = data.last_action;
     document.getElementById("last_price").innerHTML = data.last_price;
@@ -230,5 +267,5 @@ endblock %} {% block content %}
     Plotly.newPlot("live-plot", [close_trace, bbu_trace, bbl_trace, buy_signal_trace, sell_signal_trace], layout);
   });
 </script>
+
 {% endblock %}
-</div>
