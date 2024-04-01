@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, current_app,request,redirect
+import helpers.my_logger as my_logger
 from flask_app import socketio
 from binance import ThreadedWebsocketManager
 from helpers.binance_websocket import get_binance_websocket_service
@@ -229,3 +230,8 @@ def set_crypto_balances():
         return binance_client.get_asset_balance("USDT")
 
     return "Balances received successfully"
+
+@livetest_bp.route('/show-logs', methods=['GET'])
+def show_logs():
+    logs = my_logger.read_logs()
+    return logs

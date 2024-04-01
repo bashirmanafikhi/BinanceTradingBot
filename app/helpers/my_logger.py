@@ -38,3 +38,12 @@ def log(level, message):
     # Also log using the built-in logging module
     getattr(logging, level)(message)
 
+# Function to read logs from a file
+def read_logs():
+    if os.path.exists(log_file):
+        with open(log_file, 'r') as file:
+            logs = file.read()
+        return logs
+    else:
+        return "Log file not found"
+
