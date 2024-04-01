@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, current_app,request,redirect
+from flask import Blueprint, render_template, current_app,request,redirect, Response
 import helpers.my_logger as my_logger
 from flask_app import socketio
 from binance import ThreadedWebsocketManager
@@ -83,7 +83,6 @@ def on_kline_data_callback(trading_system, data):
     plot_size = 5000
     signals = signals.tail(plot_size)
     last_signal = signals.iloc[-1]
-    last_price = last_signal["close"]
 
     # Convert data to lists
     close_x_data = signals.index.tolist()
@@ -109,15 +108,21 @@ def on_kline_data_callback(trading_system, data):
         # Drop rows with NaN values in 'BBL' and 'BBU' columns
         bollinger_signals = signals[['BBL', 'BBU']].dropna()
 
-        # Take the last 60 rows
-        bollinger_signals = bollinger_signals
-
         # Extract x data
         data["bbl_bbu_x_data"] = bollinger_signals.index.tolist()
 
         # Extract y data for 'BBL' and 'BBU'
         data["bbl_y_data"] = bollinger_signals['BBL'].tolist()
         data["bbu_y_data"] = bollinger_signals['BBU'].tolist()
+
+    # Check if 'RSI' column exist in the DataFrame
+    if 'RSI' in signals.columns:
+        # Replace rows with NaN values
+        rsi_signals = signals[['RSI']].fillna(50)
+
+        # Extract x and y data
+        data["rsi_x_data"] = rsi_signals.index.tolist()
+        data["rsi_y_data"] = rsi_signals['RSI'].tolist()
 
     # action signals
     
@@ -234,4 +239,4 @@ def set_crypto_balances():
 @livetest_bp.route('/show-logs', methods=['GET'])
 def show_logs():
     logs = my_logger.read_logs()
-    return logs
+    return Response(logs, content_type='text/plain')

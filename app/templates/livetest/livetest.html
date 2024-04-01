@@ -6,7 +6,8 @@ Live Data Page - My Website
 {% endblock %}
 
 {% block content %}
-<h1>This is Live Data Page</h1>
+
+<h1>Live Strategy</h1>
 
 <style>
 
@@ -130,12 +131,24 @@ Live Data Page - My Website
   </div>
 </div>
 
-<br>
-
-<div id="live-plot"></div>
-
 <div class="container">
   <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col">
+              <form action="{{ url_for('livetest.show_logs') }}" method="GET">
+                <button type="submit" class="btn btn-primary">Show Logs</button>
+              </form>
+            </div>
+            <div class="col">
+              <p>Status: {{ binance_manager_status }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="col-md-4">
       <div class="card">
         <div class="card-body">
@@ -178,24 +191,17 @@ Live Data Page - My Website
         </div>
       </div>
     </div>
-    <div class="col-md-12">
-      <div class="card">
-        <div class="card-body">
-          <form action="{{ url_for('livetest.show_logs') }}" method="GET">
-            <button type="submit" class="btn btn-primary">Show Logs</button>
-          </form>
-          <br />
-          <p>Status: {{ binance_manager_status }}</p>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 
-
+<div id="live-plot"></div>
+<div id="rsi-plot"></div>
 
 <script>
   var socket = io.connect("{{socket_url}}");
+  var rsiOversold = '{{ strategy_details.rsi_oversold }}';
+  var rsiOverbought = '{{ strategy_details.rsi_overbought }}';
+
 
   socket.on("connect", function (data) {
     console.log("connected");
@@ -267,13 +273,40 @@ Live Data Page - My Website
     };
 
 
-    var layout = {
-      title: "Strategy Live Plot",
-      xaxis: { title: "Tick index" },
-      yaxis: { title: "Price" },
+    var rsi_trace = {
+      x: data.rsi_x_data,
+      y: data.rsi_y_data,
+      xaxis: 'x2',
+      yaxis: 'y2',
+      type: "scatter",
+      line: { color: "DarkRed" },
+      name: "RSI"
     };
 
-    Plotly.newPlot("live-plot", [close_trace, bbu_trace, bbl_trace, buy_signal_trace, sell_signal_trace], layout);
+    var layout = {
+      height: 800,
+      grid: {
+        rows: 2,
+        columns: 1,
+        pattern: 'independent'
+      },
+      
+      yaxis: { 
+        domain: [0.3, 1] 
+      },
+      yaxis2: {
+        domain: [0, 0.2],
+        tickvals: [rsiOversold, rsiOverbought],
+        gridcolor: 'rgba(100, 100, 100, 0.5)'
+      },
+      xaxis2:{
+        matches:'x',
+        showgrid: false
+      }
+    };
+
+    Plotly.react("live-plot", [close_trace, bbu_trace, bbl_trace, buy_signal_trace, sell_signal_trace, rsi_trace], layout);
+
   });
 </script>
 
