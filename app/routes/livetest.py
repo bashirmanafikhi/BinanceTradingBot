@@ -4,7 +4,7 @@ from flask_app import socketio
 from binance import ThreadedWebsocketManager
 from helpers.binance_websocket import get_binance_websocket_service
 from trading_clients.trading_client_factory import TradingClientFactory
-from trading_strategies.bollinger_rsi_strategy import BollingerRSIStrategyEdited
+from trading_strategies.bollinger_rsi_strategy import BollingerRSIStrategy
 from trading_strategies.trading_strategy import TradingStrategy
 from trading_system import TradingSystem
 import math
@@ -28,13 +28,13 @@ def get_strategy_details():
     if(trading_system is None):
         return {
             "symbol":"BTCUSDT",
-            "trade_percentage":0.95,
+            "trade_percentage":0.90,
             "trade_size":None,
             "bollinger_window":750,
             "bollinger_dev":2,
-            "rsi_window":300,
-            "rsi_overbought":72,
-            "rsi_oversold":28,
+            "rsi_window":250,
+            "rsi_overbought":70,
+            "rsi_oversold":30,
         }
     else:
         return {
@@ -190,7 +190,7 @@ def start_strategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, 
         binance_client = trading_client_factory.create_binance_trading_client()
         #binance_client = trading_client_factory.create_fake_trading_client()
 
-        strategy = BollingerRSIStrategyEdited(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, rsi_oversold)
+        strategy = BollingerRSIStrategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, rsi_oversold)
 
         trading_system = TradingSystem(symbol, strategy, binance_client, trade_percentage, trade_size)
 
@@ -221,22 +221,3 @@ def stop_binance_websocket():
         return "Binance WebSocket service stopped"
     except Exception as e:
         return f"Error stopping Binance WebSocket service: {str(e)}"
-
-
-@livetest_bp.route('/set-crypto-balances', methods=['POST'])
-def set_crypto_balances():
-    #btc_balance = request.form.get('btcBalance')
-    usdt_balance = request.form.get('UsdtBalance')
-    
-    if(usdt_balance is not None):
-        trading_client_factory = TradingClientFactory()
-        binance_client = trading_client_factory.create_binance_trading_client()
-        binance_client.set_usdt_balance(usdt_balance)
-        return binance_client.get_asset_balance("USDT")
-
-    return "Balances received successfully"
-
-@livetest_bp.route('/show-logs', methods=['GET'])
-def show_logs():
-    logs = my_logger.read_logs()
-    return Response(logs, content_type='text/plain')

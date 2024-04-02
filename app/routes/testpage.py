@@ -1,5 +1,7 @@
-from flask import Blueprint, current_app, render_template
+from flask import Blueprint, render_template, current_app,request,redirect, Response
 from flask_app import socketio
+import helpers.my_logger as my_logger
+from trading_clients.trading_client_factory import TradingClientFactory
 
 testpage_bp = Blueprint("testpage", __name__)
 
@@ -25,3 +27,23 @@ def handle_increment_counter():
     counter += 1
     data = {"counter": counter}
     socketio.emit("update_counter", data, namespace="/testpage")
+
+    
+
+@testpage_bp.route('/set-crypto-balances', methods=['POST'])
+def set_crypto_balances():
+    #btc_balance = request.form.get('btcBalance')
+    usdt_balance = request.form.get('UsdtBalance')
+    
+    if(usdt_balance is not None):
+        trading_client_factory = TradingClientFactory()
+        binance_client = trading_client_factory.create_binance_trading_client()
+        binance_client.set_usdt_balance(usdt_balance)
+        return binance_client.get_asset_balance("USDT")
+
+    return "Balances received successfully"
+
+@testpage_bp.route('/show-logs', methods=['GET'])
+def show_logs():
+    logs = my_logger.read_logs()
+    return Response(logs, content_type='text/plain')

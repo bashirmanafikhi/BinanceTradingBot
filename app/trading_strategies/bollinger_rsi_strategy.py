@@ -3,7 +3,7 @@ from helpers.settings.constants import ACTION_BUY, ACTION_SELL
 from trading_strategies.trading_strategy import TradingStrategy
 import helpers.my_logger as my_logger
 
-class BollingerRSIStrategyEdited(TradingStrategy):
+class BollingerRSIStrategy(TradingStrategy):
     
     def __init__(self, bollinger_window=20, bollinger_dev=2, rsi_window=14, rsi_overbought=70, rsi_oversold=30):
         super().__init__()

@@ -3,24 +3,36 @@
 {% block title %}Test Page Example Page{% endblock %}
 
 {% block content %}
-    <h1>Test Page</h1>
+<h1>Test Page</h1>
 
-    <p>Environment: {{ environment }}</p>
+<p>Environment: {{ environment }}</p>
 
-    
 
-    <p>Counter: <span id="counterValue">{{counter}}</span></p>
-    <button onclick="incrementCounter()">Increment Counter</button>
-    
-    <script>
-        function incrementCounter() {
-            socket.emit('increment_counter');
-        }
 
-        var socket = io.connect('{{socket_url}}');
+<p>Counter: <span id="counterValue">{{counter}}</span></p>
+<button onclick="incrementCounter()">Increment Counter</button>
+<form action="{{ url_for('testpage.show_logs') }}" method="GET">
+    <button type="submit" class="btn btn-primary">Show Logs</button>
+</form>
 
-        socket.on('update_counter', function(data) {
-            document.getElementById('counterValue').innerHTML = data.counter;
-        });
-    </script>
+<form action="{{ url_for('testpage.set_crypto_balances') }}" method="post">
+    <div class="mb-3">
+        <label for="UsdtBalance" class="form-label">Usdt:</label>
+        <input type="number" step="0.01" class="form-control" id="UsdtBalance" name="UsdtBalance"
+            placeholder="Enter balance">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<script>
+    function incrementCounter() {
+        socket.emit('increment_counter');
+    }
+
+    var socket = io.connect('{{socket_url}}');
+
+    socket.on('update_counter', function (data) {
+        document.getElementById('counterValue').innerHTML = data.counter;
+    });
+</script>
 {% endblock %}

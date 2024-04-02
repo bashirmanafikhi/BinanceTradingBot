@@ -167,15 +167,19 @@ class TradingSystem:
             if price == 0:
                 raise ValueError("Price should not be zero.")
 
-            # Calculate quantity using decimal arithmetic
-            if(self.trade_quote_size is None):
-                size = Decimal(self.final_quote_balance) * Decimal(self.trade_quote_percentage)
+            if (action == ACTION_SELL and self.trade_quote_size is None):
+                    size = Decimal(self.final_base_balance) * Decimal(self.trade_quote_percentage)
+                    quantity = size
             else:
-                size = Decimal(self.trade_quote_size)
-                
-            quantity = (
-                size * quantity_percentage / price
-            )
+                # Calculate quantity using decimal arithmetic
+                if(self.trade_quote_size is None):
+                    size = Decimal(self.final_quote_balance) * Decimal(self.trade_quote_percentage)
+                else:
+                    size = Decimal(self.trade_quote_size)
+                    
+                quantity = (
+                    size * quantity_percentage / price
+                )
 
             # Round the quantity to an appropriate number of decimal places
             round_quantity = round(quantity, 8)

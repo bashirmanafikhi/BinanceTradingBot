@@ -4,7 +4,7 @@ import pandas as pd
 import helpers.my_logger as my_logger
 from helpers.trading_data_service import TradingDataService
 from trading_clients.trading_client_factory import TradingClientFactory
-from trading_strategies.bollinger_rsi_strategy import BollingerRSIStrategyEdited
+from trading_strategies.bollinger_rsi_strategy import BollingerRSIStrategy
 from trading_strategies.trading_strategy import TradingStrategy
 from trading_system import TradingSystem
 
@@ -30,7 +30,7 @@ def historical_data_example():
     for year in years:
         data = get_historical_data(year)
         fake_client = trading_client_factory.create_fake_trading_client()
-        strategy = BollingerRSIStrategyEdited(300, 2, 100, 72, 28)
+        strategy = BollingerRSIStrategy(300, 2, 100, 72, 28)
         trading_system = TradingSystem(symbol, strategy, fake_client)
 
         signals = trading_system.run_strategy(data)
