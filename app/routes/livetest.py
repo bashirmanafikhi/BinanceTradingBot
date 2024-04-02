@@ -15,7 +15,6 @@ livetest_bp = Blueprint("livetest", __name__)
 def livetest():
     binance_manager_status = "Running" if is_binance_manager_alive() else "Stopped"
 
-
     return render_template(
         "livetest/livetest.html",
         binance_manager_status=binance_manager_status,
@@ -60,22 +59,18 @@ def get_new_binance_websocket_manager():
 def is_binance_manager_alive():
     return get_current_binance_manager().is_alive()
 
-
 @socketio.on("connect", namespace="/livetest")
 def handle_connect():
     print(f"handle_connect livetest")
-
 
 @socketio.on("disconnect", namespace="/livetest")
 def handle_disconnect():
     print(f"handle_disconnect livetest")
 
-
 def get_current_trading_system():
     if "trading_system" in current_app.extensions:
         return current_app.extensions["trading_system"]
     return None
-
 
 def on_kline_data_callback(trading_system, data):
     signals, total_profit, total_trades_count = trading_system.run_strategy(data)
@@ -146,8 +141,6 @@ def on_kline_data_callback(trading_system, data):
     # Emit the data via socketio
     socketio.emit("update_data", data, namespace="/livetest")
 
-
-
 @livetest_bp.route("/start-binance-websocket", methods=['POST'])
 def start_binance_websocket():
     symbol = request.form.get('symbol')
@@ -181,7 +174,6 @@ def update_strategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought,
     # Redirect back to the same page
     return redirect(request.referrer)
 
-
 def start_strategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, rsi_oversold, symbol, trade_percentage, trade_size):    
     try:
         binance_manager = get_new_binance_websocket_manager()
@@ -207,7 +199,6 @@ def start_strategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, 
 
     except Exception as e:
         return f"Error starting Binance WebSocket service: {str(e)}"
-
 
 @livetest_bp.route("/stop-binance-websocket", methods=['POST'])
 def stop_binance_websocket():

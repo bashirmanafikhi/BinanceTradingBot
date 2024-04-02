@@ -19,8 +19,7 @@ Live Data Page - My Website
     <div class="col-md-4">
       <div class="mb-3">
         <label for="symbol" class="form-label">Symbol:</label>
-        <input type="text" class="form-control" id="symbol" name="symbol" value="{{strategy_details.symbol}}"
-          required>
+        <input type="text" class="form-control" id="symbol" name="symbol" value="{{strategy_details.symbol}}" required>
       </div>
     </div>
     <div class="col-md-4">
@@ -84,9 +83,8 @@ Live Data Page - My Website
         Start
         {% endif %}
       </button>
-      <button type="submit" class="btn btn-danger m-2"
-        formaction="{{ url_for('livetest.stop_binance_websocket') }}" {% if binance_manager_status=='Stopped'
-        %}disabled{% endif %}>
+      <button type="submit" class="btn btn-danger m-2" formaction="{{ url_for('livetest.stop_binance_websocket') }}" {%
+        if binance_manager_status=='Stopped' %}disabled{% endif %}>
         Stop
       </button>
     </div>
@@ -238,17 +236,17 @@ Live Data Page - My Website
         columns: 1,
         pattern: 'independent'
       },
-      
-      yaxis: { 
-        domain: [0.3, 1] 
+
+      yaxis: {
+        domain: [0.3, 1]
       },
       yaxis2: {
         domain: [0, 0.2],
-        tickvals: [rsiOversold, rsiOverbought],
+        tickvals: [rsiOversold, 40, 50, 60, rsiOverbought],
         gridcolor: 'rgba(100, 100, 100, 0.5)'
       },
-      xaxis2:{
-        matches:'x',
+      xaxis2: {
+        matches: 'x',
         showgrid: false
       }
     };
