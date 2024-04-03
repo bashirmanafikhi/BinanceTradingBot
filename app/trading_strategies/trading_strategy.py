@@ -20,11 +20,13 @@ class TradingStrategy(ABC):
         self.last_action = ACTION_SELL
         self.should_buy = False
         self.should_sell = False
-                
+            
         self.buy_command = BuyCommand()
         self.sell_command = SellCommand()
         self.trade_closed_event = Event()
         
+        self.create_order_tries_limit = 3
+        self.create_order_tries_counter = 0
         self.set_processing(False)
         
     
@@ -90,65 +92,65 @@ class TradingStrategy(ABC):
       
     
                 
-    def live_plot(self, all_signals):
-        if not hasattr(self, 'fig'):
-            #plt.ion()
-            self.fig, (self.ax, self.ax_rsi) = plt.subplots(2, 1, gridspec_kw={'height_ratios': [3, 1]})
-            self.lines, = self.ax.plot([], [], label='Close Price')
-            self.bbu_line, = self.ax.plot([], [], label='Upper Band', linestyle='--')
-            self.bbl_line, = self.ax.plot([], [], label='Lower Band', linestyle='--')
-            self.ax.legend()
+    # def live_plot(self, all_signals):
+    #     if not hasattr(self, 'fig'):
+    #         #plt.ion()
+    #         self.fig, (self.ax, self.ax_rsi) = plt.subplots(2, 1, gridspec_kw={'height_ratios': [3, 1]})
+    #         self.lines, = self.ax.plot([], [], label='Close Price')
+    #         self.bbu_line, = self.ax.plot([], [], label='Upper Band', linestyle='--')
+    #         self.bbl_line, = self.ax.plot([], [], label='Lower Band', linestyle='--')
+    #         self.ax.legend()
 
-            self.ax_rsi.plot([], [], label='RSI', color='purple')
-            self.ax_rsi.axhline(70, linestyle='--', color='orange')  # Overbought threshold
-            self.ax_rsi.axhline(30, linestyle='--', color='blue')    # Oversold threshold
-            self.ax_rsi.set_ylabel('RSI')
-            self.ax_rsi.legend()
+    #         self.ax_rsi.plot([], [], label='RSI', color='purple')
+    #         self.ax_rsi.axhline(70, linestyle='--', color='orange')  # Overbought threshold
+    #         self.ax_rsi.axhline(30, linestyle='--', color='blue')    # Oversold threshold
+    #         self.ax_rsi.set_ylabel('RSI')
+    #         self.ax_rsi.legend()
         
-        signals = all_signals.tail(self.PLOT_WINDOW)
+    #     signals = all_signals.tail(self.PLOT_WINDOW)
         
-        x_data = signals.index
-        y_data_close = signals['close'] 
+    #     x_data = signals.index
+    #     y_data_close = signals['close'] 
         
-        self.lines.set_xdata(x_data)
-        self.lines.set_ydata(y_data_close)
+    #     self.lines.set_xdata(x_data)
+    #     self.lines.set_ydata(y_data_close)
         
-        if 'BBL' in signals.columns:
-            y_data_bbl = signals['BBL']
-            self.bbl_line.set_xdata(x_data)
-            self.bbl_line.set_ydata(y_data_bbl)
+    #     if 'BBL' in signals.columns:
+    #         y_data_bbl = signals['BBL']
+    #         self.bbl_line.set_xdata(x_data)
+    #         self.bbl_line.set_ydata(y_data_bbl)
             
-        if 'BBU' in signals.columns:
-            y_data_bbu = signals['BBU']
-            self.bbu_line.set_xdata(x_data)
-            self.bbu_line.set_ydata(y_data_bbu)
+    #     if 'BBU' in signals.columns:
+    #         y_data_bbu = signals['BBU']
+    #         self.bbu_line.set_xdata(x_data)
+    #         self.bbu_line.set_ydata(y_data_bbu)
         
-        # Plot RSI
-        if 'RSI' in signals.columns:
-            x_data_rsi = signals.index
-            y_data_rsi = signals['RSI']
-            self.ax_rsi.lines[0].set_xdata(x_data_rsi)
-            self.ax_rsi.lines[0].set_ydata(y_data_rsi)
+    #     # Plot RSI
+    #     if 'RSI' in signals.columns:
+    #         x_data_rsi = signals.index
+    #         y_data_rsi = signals['RSI']
+    #         self.ax_rsi.lines[0].set_xdata(x_data_rsi)
+    #         self.ax_rsi.lines[0].set_ydata(y_data_rsi)
         
-        # Iterate through signals and annotate buy/sell points
-        for index, signal_row in signals.iterrows():
-            if signal_row.signal is not None:
-                action = signal_row.signal.get("action", "")
-                try:
-                    if action == ACTION_BUY:
-                        self.ax.scatter(index, signal_row.close, marker='o', color='green', s=20, zorder=5)
-                    elif action == ACTION_SELL:
-                        self.ax.scatter(index, signal_row.close, marker='o', color='red', s=20, zorder=5)    
-                except:
-                    print("error while drawing action scatter")
+    #     # Iterate through signals and annotate buy/sell points
+    #     for index, signal_row in signals.iterrows():
+    #         if signal_row.signal is not None:
+    #             action = signal_row.signal.get("action", "")
+    #             try:
+    #                 if action == ACTION_BUY:
+    #                     self.ax.scatter(index, signal_row.close, marker='o', color='green', s=20, zorder=5)
+    #                 elif action == ACTION_SELL:
+    #                     self.ax.scatter(index, signal_row.close, marker='o', color='red', s=20, zorder=5)    
+    #             except:
+    #                 print("error while drawing action scatter")
                 
-        self.ax.relim()
-        self.ax.autoscale_view()
+    #     self.ax.relim()
+    #     self.ax.autoscale_view()
 
-        self.ax_rsi.relim()
-        self.ax_rsi.autoscale_view()
+    #     self.ax_rsi.relim()
+    #     self.ax_rsi.autoscale_view()
 
-        plt.pause(2)
+    #     plt.pause(2)
             
             
             
@@ -176,6 +178,7 @@ class TradingStrategy(ABC):
         return result
     
     def create_trade_action(self, action, price, set_stop_limits = True):
+        self.create_order_tries_counter += 1
         # Create an order with a fixed quantity
         is_succeed = self.create_order(action, price, self.QUANTITY)
 
@@ -185,8 +188,14 @@ class TradingStrategy(ABC):
             self.last_action = action
             self.should_buy = False
             self.should_sell = False
+            self.create_order_tries_counter = 0
             return {"action": action, "quantity": self.QUANTITY}
         else:
+            if(self.create_order_tries_counter == self.create_order_tries_limit):
+                self.should_buy = False
+                self.should_sell = False
+                self.create_order_tries_counter = 0
+                my_logger.warning(f"create order failed {self.create_order_tries_counter} times, we will not try again.")
             return None
 
     def set_profit_lose_limits(self, action,  price):
