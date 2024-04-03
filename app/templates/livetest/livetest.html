@@ -14,12 +14,12 @@ Live Data Page - My Website
 </style>
 
 
-<form action="{{ url_for('livetest.start_binance_websocket') }}" method="post">
+<form action="{{ url_for('livetest.start_strategy') }}" method="post">
   <div class="row">
     <div class="col-md-4">
       <div class="mb-3">
         <label for="symbol" class="form-label">Symbol:</label>
-        <input type="text" class="form-control" id="symbol" name="symbol" value="{{strategy_details.symbol}}" required>
+        <input type="text" class="form-control" id="symbol" name="symbol" value="{{strategy_details.symbol}}" required readonly>
       </div>
     </div>
     <div class="col-md-4">
@@ -70,7 +70,7 @@ Live Data Page - My Website
       <div class="mb-3">
         <label for="trade_size" class="form-label">Trade Size (will override the percentage):</label>
         <input type="number" step="0.01" class="form-control" id="trade_size" name="trade_size"
-          value="{{strategy_details.trade_size}}">
+          value="{{ strategy_details.trade_size if strategy_details.trade_size is not none else '' }}">
       </div>
     </div>
   </div>
@@ -83,14 +83,18 @@ Live Data Page - My Website
         Start
         {% endif %}
       </button>
-      <button type="submit" class="btn btn-danger m-2" formaction="{{ url_for('livetest.stop_binance_websocket') }}" {%
-        if binance_manager_status=='Stopped' %}disabled{% endif %}>
-        Stop
-      </button>
+      
+    
     </div>
   </div>
 </form>
 
+<form method="post" action="{{ url_for('livetest.stop_strategy') }}">
+  <input type="hidden" name="symbol" value="{{ strategy_details.symbol }}">
+  <button type="submit" class="btn btn-danger m-2" {% if binance_manager_status=='Stopped' %}disabled{% endif %}>
+      Stop
+  </button>
+</form>
 <p>Status: {{ binance_manager_status }}</p>
 
 <div class="container">
@@ -153,8 +157,7 @@ Live Data Page - My Website
     console.log("connected");
   });
 
-  socket.on("update_data", function (data) {
-
+  socket.on("update_data_{{ strategy_details.symbol }}", function (data) {
     var last_signal = JSON.parse(data.last_signal);
     document.getElementById("last_bbu").innerHTML = Math.round(last_signal.BBU * 100) / 100;
     document.getElementById("last_close").innerHTML = Math.round(last_signal.close * 100) / 100;

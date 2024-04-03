@@ -16,7 +16,7 @@ class FakeTradingClient(TradingClient):
     COMMISSION_RATE = 0.1
 
     def __init__(self):
-        self.balances = {"USDT": Decimal(200), "BTC": Decimal(0)}
+        self.balances = {"USDT": Decimal(200), "BTC": Decimal(0), "SOL": Decimal(0), "ETH": Decimal(0)}
         # self.balances = {"USDT": Decimal(500), "BTC": Decimal(0.012)}
         self.orders_history = []
         self.total_paid_commission = 0
@@ -179,6 +179,28 @@ class FakeTradingClient(TradingClient):
                         "filterType": "PRICE_FILTER",
                         "minPrice": "0.0001",
                         "maxPrice": "100.0",
+                        "tickSize": "0.0001",
+                    },
+                    {
+                        "filterType": "LOT_SIZE",
+                        "minQty": "0.00001000",
+                        "maxQty": "9000.00000000",
+                        "stepSize": "0.00001000",
+                    },
+                ],
+            },
+            {
+                "symbol":
+                "SOLUSDT",
+                "baseAsset":
+                "SOL",
+                "quoteAsset":
+                "USDT",
+                "filters": [
+                    {
+                        "filterType": "PRICE_FILTER",
+                        "minPrice": "0.00001",
+                        "maxPrice": "10000.0",
                         "tickSize": "0.0001",
                     },
                     {

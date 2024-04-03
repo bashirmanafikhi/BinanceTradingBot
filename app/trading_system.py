@@ -44,7 +44,7 @@ class TradingSystem:
 
     def run_strategy(self, data):
         signals = self.strategy.execute(data)
-        return signals, self.total_profit, self.trades_count
+        return signals
     
     def getTotalProfit(self):
         initial_base_balance = Decimal(self.initial_base_balance)
@@ -99,22 +99,25 @@ class TradingSystem:
         my_logger.info(f"Max {self.base_asset} Quantity: {self.max_quantity}")
         my_logger.info(f"Max Quote Quantity: {self.max_quote_quantity}")
         my_logger.info(f"Max Level: {self.max_level}")
-        average = sum(self.levels) / len(self.levels)
-        my_logger.info(f"Levels Average:{average}")
+        if(len(self.levels) > 0):
+            average = sum(self.levels) / len(self.levels)
+            my_logger.info(f"Levels Average:{average}")
         my_logger.info(f"Last Price: {self.last_price}")
         
         
         # Calculate the profit or loss amounts
         profit_loss_base = base_balance_change * Decimal(self.last_price)
         profit_loss_quote = quote_balance_change * 1  # Adjust this based on your quote asset pricing
-        self.total_profit = round(profit_loss_base + profit_loss_quote, 4)
+        self.total_profit = Decimal(round(profit_loss_base + profit_loss_quote, 4))
         
-        profit_percentage = (self.total_profit / initial_quote_balance) * 100
+        profit_percentage = None
+        if initial_quote_balance != 0:
+            profit_percentage = (self.total_profit / initial_quote_balance) * 100
         
         my_logger.info(f"Total Trades Count: {self.trades_count}")
         my_logger.info(f"Profit Percentage: {profit_percentage} %")
         my_logger.info(f"Total Profit: {self.total_profit} $")
-        my_logger.info("****************************")
+        my_logger.info("\n\n****************************\n")
 
 
 
@@ -128,6 +131,10 @@ class TradingSystem:
     def create_order(self, action, type, price, quantity):
         level = quantity
         quantity = self.calculate_quantity(action, price, quantity)
+        if(quantity == 0):
+            my_logger.error("Quantity should not be zero.")
+            
+        quantity = Decimal(quantity)
 
         my_logger.info(f"{action} {quantity} {self.base_asset} at {price}")
 
@@ -194,9 +201,11 @@ class TradingSystem:
             return None
 
     def round_to_nearest_multiple(self, original_number, multiple):
-        rounded_number = round(Decimal(original_number) / Decimal(multiple)) * Decimal(
-            multiple
-        )
+        # Ensure original_number is positive
+        original_number = abs(original_number)
+        
+        # Calculate the rounded number
+        rounded_number = (Decimal(original_number) // Decimal(multiple)) * Decimal(multiple)
         return rounded_number
 
     def extract_price_from_order(self, order):
