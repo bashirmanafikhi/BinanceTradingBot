@@ -18,8 +18,7 @@ class TradingStrategy(ABC):
         self.high_close_limit = None
         self.low_close_limit = None
         self.last_action = ACTION_SELL
-        self.should_buy = False
-        self.should_sell = False
+        self.current_signal = None
             
         self.buy_command = BuyCommand()
         self.sell_command = SellCommand()
@@ -186,16 +185,14 @@ class TradingStrategy(ABC):
             if(set_stop_limits):
                 self.set_profit_lose_limits(action, price)
             self.last_action = action
-            self.should_buy = False
-            self.should_sell = False
+            self.current_signal = None
             self.create_order_tries_counter = 0
             return {"action": action, "quantity": self.QUANTITY}
         else:
             if(self.create_order_tries_counter == self.create_order_tries_limit):
-                self.should_buy = False
-                self.should_sell = False
-                self.create_order_tries_counter = 0
                 my_logger.warning(f"create order failed {self.create_order_tries_counter} times, we will not try again.")
+                self.current_signal = None
+                self.create_order_tries_counter = 0
             return None
 
     def set_profit_lose_limits(self, action,  price):

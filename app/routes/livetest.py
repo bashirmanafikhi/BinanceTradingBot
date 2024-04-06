@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, current_app,request,redirect, Response
+from trading_strategies.bollinger_rsi_strategy_simplified import BollingerRSIStrategySimplified
 import helpers.my_logger as my_logger
 from flask_app import socketio
 from binance import ThreadedWebsocketManager
@@ -45,11 +46,11 @@ def get_strategy_details(symbol):
             "symbol": trading_system.symbol,
             "trade_percentage":trading_system.trade_quote_percentage,
             "trade_size":trading_system.trade_quote_size,
-            "bollinger_window":trading_system.strategy.bollinger_window,
-            "bollinger_dev":trading_system.strategy.bollinger_dev,
-            "rsi_window":trading_system.strategy.rsi_window,
-            "rsi_overbought":trading_system.strategy.rsi_overbought,
-            "rsi_oversold":trading_system.strategy.rsi_oversold,
+            "bollinger_window":trading_system.strategy.bollinger_condition.bollinger_window,
+            "bollinger_dev":trading_system.strategy.bollinger_condition.bollinger_dev,
+            "rsi_window":trading_system.strategy.rsi_condition.rsi_window,
+            "rsi_overbought":trading_system.strategy.rsi_condition.rsi_overbought,
+            "rsi_oversold":trading_system.strategy.rsi_condition.rsi_oversold,
         }
     
 def get_trading_system(symbol):
@@ -176,11 +177,11 @@ def update_strategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought,
     trading_system.trade_quote_percentage = trade_percentage
     trading_system.trade_quote_size = trade_size
 
-    strategy.bollinger_window = bollinger_window
-    strategy.bollinger_dev = bollinger_dev
-    strategy.rsi_window = rsi_window
-    strategy.rsi_overbought = rsi_overbought
-    strategy.rsi_oversold = rsi_oversold
+    strategy.bollinger_condition.bollinger_window = bollinger_window
+    strategy.bollinger_condition.bollinger_dev = bollinger_dev
+    strategy.rsi_condition.rsi_window = rsi_window
+    strategy.rsi_condition.rsi_overbought = rsi_overbought
+    strategy.rsi_condition.rsi_oversold = rsi_oversold
 
     # Redirect back to the same page
     return redirect(request.referrer)
@@ -190,10 +191,10 @@ def start_strategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, 
         binance_manager = get_binance_websocket_manager(symbol)
 
         trading_client_factory = TradingClientFactory()
-        binance_client = trading_client_factory.create_binance_trading_client()
-        #binance_client = trading_client_factory.create_fake_trading_client()
+        #binance_client = trading_client_factory.create_binance_trading_client()
+        binance_client = trading_client_factory.create_fake_trading_client()
 
-        strategy = BollingerRSIStrategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, rsi_oversold)
+        strategy = BollingerRSIStrategySimplified(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, rsi_oversold)
 
         trading_system = TradingSystem(symbol, strategy, binance_client, trade_percentage, trade_size)
 
@@ -210,6 +211,10 @@ def start_strategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, 
         return "WebSocket connection started successfully.", 200
 
     except Exception as e:
+        if symbol in websocket_managers:
+            websocket_managers.pop(symbol, "not found")
+            trading_systems.pop(symbol, "not found")
+
         return f"Error starting Binance WebSocket service: {str(e)}"
 
 @livetest_bp.route("/stop-strategy", methods=['POST'])

@@ -232,6 +232,9 @@ class TradingSystem:
         # Get the balance from the trading client
         self.initial_base_balance = self.trading_client.get_asset_balance(self.base_asset)
         self.initial_quote_balance = self.trading_client.get_asset_balance(self.quote_asset)
+
+        if(self.initial_base_balance is None or self.initial_quote_balance is None):
+            raise ValueError("Couldn't initialize balance")
         
         self.final_base_balance = self.initial_base_balance
         self.final_quote_balance = self.initial_quote_balance
