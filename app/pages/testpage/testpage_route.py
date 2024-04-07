@@ -2,15 +2,17 @@ from flask import Blueprint, render_template, current_app,request,redirect, Resp
 from flask_app import socketio
 import helpers.my_logger as my_logger
 from trading_clients.trading_client_factory import TradingClientFactory
+from flask_login import login_required
 
 testpage_bp = Blueprint("testpage", __name__)
 
 
 # routes
 @testpage_bp.route("/testpage")
+@login_required
 def testpage():
     return render_template(
-        "testpage/testpage.html",
+        "/testpage/testpage.html",
         socket_url=f"{current_app.config['SERVER_URL']}testpage",
         environment=current_app.config["ENVIRONMENT"],
         counter = counter
@@ -31,6 +33,7 @@ def handle_increment_counter():
     
 
 @testpage_bp.route('/set-crypto-balances', methods=['POST'])
+@login_required
 def set_crypto_balances():
     #btc_balance = request.form.get('btcBalance')
     usdt_balance = request.form.get('UsdtBalance')
@@ -44,6 +47,7 @@ def set_crypto_balances():
     return "Balances received successfully"
 
 @testpage_bp.route('/show-logs', methods=['GET'])
+@login_required
 def show_logs():
     logs = my_logger.read_logs()
     return Response(logs, content_type='text/plain')

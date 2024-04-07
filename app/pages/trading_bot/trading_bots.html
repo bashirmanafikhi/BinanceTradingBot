@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1 class="mb-4">Trading Bots</h1>
+    <a href="{{ url_for('trading_bot.create_trading_bot') }}" class="btn btn-primary mb-3">Add TradingBot</a>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Symbol</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trading_bot in trading_bots %}
+                    <tr>
+                        <td>{{ trading_bot.name }}</td>
+                        <td>{{ trading_bot.symbol }}</td>
+                        <td>
+                            <a href="{{ url_for('trading_bot.update_trading_bot', id=trading_bot.id) }}" class="btn btn-sm btn-info">Update</a>
+                            <form method="post" action="{{ url_for('trading_bot.delete_trading_bot', id=trading_bot.id) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this trading_bot?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

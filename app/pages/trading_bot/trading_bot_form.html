@@ -1,0 +1,22 @@
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.name.label }} {{ form.name(size=32, class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.symbol.label }} {{ form.symbol(size=32, class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.exchange_id.label }} 
+        <select name="exchange_id" class="form-control">
+            {% for value, label in form.exchange_id.choices %}
+                {% if value == form.exchange_id.data %}
+                    <option value="{{ value }}" selected>{{ label }}</option>
+                {% else %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>

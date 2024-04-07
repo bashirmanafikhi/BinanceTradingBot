@@ -7,8 +7,8 @@ from helpers.binance_websocket import get_binance_websocket_service
 from trading_clients.trading_client_factory import TradingClientFactory
 from trading_strategies.bollinger_rsi_strategy import BollingerRSIStrategy
 from trading_strategies.trading_strategy import TradingStrategy
+from flask_login import current_user, login_required
 from trading_system import TradingSystem
-import math
 
 livetest_bp = Blueprint("livetest", __name__)
 
@@ -18,11 +18,12 @@ trading_systems = {}
 
 
 @livetest_bp.route("/livetest/<symbol>")
+@login_required
 def livetest(symbol):
     binance_manager_status = "Running" if is_binance_websocket_manager_alive(symbol) else "Stopped"
 
     return render_template(
-        "livetest/livetest.html",
+        "/livetest/livetest.html",
         binance_manager_status=binance_manager_status,
         socket_url=f"{current_app.config['SERVER_URL']}livetest",
         strategy_details= get_strategy_details(symbol)
@@ -151,6 +152,7 @@ def send_chart_details(trading_system, signals):
     socketio.emit(f"update_data_{trading_system.symbol}", data, namespace="/livetest")
 
 @livetest_bp.route("/start-strategy", methods=['POST'])
+@login_required
 def start_strategy():
     symbol = request.form.get('symbol')
     bollinger_window = float(request.form.get('bollinger_window'))
@@ -218,6 +220,7 @@ def start_strategy(bollinger_window, bollinger_dev, rsi_window, rsi_overbought, 
         return f"Error starting Binance WebSocket service: {str(e)}"
 
 @livetest_bp.route("/stop-strategy", methods=['POST'])
+@login_required
 def stop_strategy():
     symbol = request.form.get('symbol')
     if(symbol not in websocket_managers):

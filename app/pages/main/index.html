@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block head %} {{ super() }}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename= 'extended_beauty.css') }}"
+/>
+{% endblock %}
+
+{% block content %}
+<div id="intro">
+  {% with messages = get_flashed_messages() %} {% if messages %}
+  <div class="notification is-success">
+    {{ messages[0] }}
+  </div>
+  {% endif %} {% endwith %}
+  <h1>
+    Hello!
+  </h1>
+  <div>
+    <img
+      src="{{ url_for('static', filename= 'images/cryptocurrency-trading-bot.png') }}"
+      alt="push-ups boi"
+      height="200px"
+    />
+  </div>
+  <p>
+    Welcome to your Crypto Bot Trader! <br />
+  </p>
+</div>
+{% endblock %}
