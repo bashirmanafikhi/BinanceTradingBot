@@ -18,5 +18,38 @@
             {% endfor %}
         </select>
     </div>
+    
+    
+    <div class="form-group">
+        {{ form.use_bollinger_bands.label }} {{ form.use_bollinger_bands() }}
+    </div>
+    <div class="form-group">
+        {{ form.bollinger_bands_period.label }} {{ form.bollinger_bands_period(size=32, class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.bollinger_bands_stddev.label }} {{ form.bollinger_bands_stddev(size=32, class="form-control") }}
+    </div>
+    
+
+    <div class="form-group">
+        {{ form.use_rsi.label }} {{ form.use_rsi() }}
+    </div>
+    <div class="form-group">
+        {{ form.rsi_period.label }} {{ form.rsi_period(size=32, class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.rsi_overbought.label }} {{ form.rsi_overbought(size=32, class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.rsi_oversold.label }} {{ form.rsi_oversold(size=32, class="form-control") }}
+    </div>
+
+    
+    <div class="form-group">
+        {{ form.trade_percentage.label }} {{ form.trade_percentage(size=32, class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.trade_size.label }} {{ form.trade_size(size=32, class="form-control") }}
+    </div>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>

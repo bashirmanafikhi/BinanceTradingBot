@@ -32,7 +32,7 @@ def create_exchange():
         db.session.commit()
         flash('Exchange created successfully!', 'success')
         return redirect(url_for('exchange.user_exchanges'))
-    return render_template('/exchange/exchange_create_form.html', form=form, exchange_types=ExchangeType)
+    return render_template('/exchange/exchange_create.html', form=form, exchange_types=ExchangeType)
 
 @exchange_bp.route("/update/<int:id>", methods=['GET', 'POST'])
 @login_required
@@ -45,7 +45,7 @@ def update_exchange(id):
         db.session.commit()
         flash('Exchange updated successfully!', 'success')
         return redirect(url_for('exchange.user_exchanges'))
-    return render_template('exchange/exchange_update_form.html', form=form)
+    return render_template('exchange/exchange_update.html', form=form)
 
 @exchange_bp.route("/delete/<int:id>", methods=['POST'])
 @login_required

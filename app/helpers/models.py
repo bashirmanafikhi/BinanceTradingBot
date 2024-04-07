@@ -4,6 +4,8 @@ from helpers.enums import ExchangeType
 from flask_app import db
 from sqlalchemy import Enum
 from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy import Float
+import json
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)  # primary keys are required by SQLAlchemy
@@ -20,8 +22,19 @@ class TradingBot(db.Model):
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     name = db.Column(db.String(255), nullable=False)
     symbol = db.Column(db.String(255), nullable=False)
-    #bollinger_bands = db.Column(MutableDict.as_mutable(db.JSON), nullable=True)
+    trade_percentage = db.Column(db.Float, nullable=True)
+    trade_size = db.Column(db.Float, nullable=True)
 
+    # Bollinger Bands Columns
+    use_bollinger_bands = db.Column(db.Boolean, nullable=False, default=True)
+    bollinger_bands_period = db.Column(db.Float, nullable=False, default=20)
+    bollinger_bands_stddev = db.Column(db.Float, nullable=False, default=2)
+    
+    # RSI Columns
+    use_rsi = db.Column(db.Boolean, nullable=False, default=True)
+    rsi_period = db.Column(db.Float, nullable=False, default=14)
+    rsi_overbought = db.Column(db.Float, nullable=False, default=70)
+    rsi_oversold =db. Column(db.Float, nullable=False, default=30)
 
 class Exchange(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -33,5 +46,4 @@ class Exchange(db.Model):
     api_Secret = db.Column(db.Text, nullable=False)
     is_test = db.Column(db.Boolean, nullable=False)
     trading_bots = db.relationship('TradingBot', backref='exchange', lazy=False)
-
     

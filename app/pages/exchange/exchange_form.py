@@ -8,7 +8,7 @@ class ExchangeForm(FlaskForm):
     type = SelectField('Type', validators=[DataRequired()], coerce=int)
     api_Key = StringField('API Key', validators=[DataRequired()])
     api_Secret = StringField('API Secret', validators=[DataRequired()])
-    is_test = BooleanField('Is Test API', default=False)
+    is_test = BooleanField('Is Test API', default=True)
 
     def __init__(self, *args, **kwargs):
         super(ExchangeForm, self).__init__(*args, **kwargs)
