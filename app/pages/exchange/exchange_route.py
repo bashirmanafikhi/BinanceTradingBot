@@ -23,8 +23,8 @@ def create_exchange():
         exchange = Exchange(
             name=form.name.data, 
             type=ExchangeType(form.type.data),
-            api_Key=form.api_Key.data,
-            api_Secret=form.api_Secret.data,
+            api_key=form.api_key.data,
+            api_secret=form.api_secret.data,
             is_test=form.is_test.data,
             user=current_user
         )

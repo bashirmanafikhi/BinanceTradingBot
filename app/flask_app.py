@@ -1,5 +1,6 @@
 from flask import Config, Flask, render_template
 from flask_socketio import SocketIO
+from current_app_manager import CurrentAppManager
 from helpers.settings.log_config import configure_logging
 from helpers.settings.config import get_config
 from flask_sqlalchemy import SQLAlchemy
@@ -43,6 +44,7 @@ def create_app(debug=False):
     app.register_blueprint(livetest_bp)
     app.register_blueprint(testpage_bp)
 
+    CurrentAppManager.initialize_objects(app)
 
     # Create the database tables
     with app.app_context():

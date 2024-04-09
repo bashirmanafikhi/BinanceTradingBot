@@ -17,6 +17,7 @@
                         <td>{{ trading_bot.name }}</td>
                         <td>{{ trading_bot.symbol }}</td>
                         <td>
+                            <a href="{{ url_for('trading_bot.details', id=trading_bot.id) }}" class="btn btn-sm btn-warning">Details</a>
                             <a href="{{ url_for('trading_bot.update_trading_bot', id=trading_bot.id) }}" class="btn btn-sm btn-info">Update</a>
                             <form method="post" action="{{ url_for('trading_bot.delete_trading_bot', id=trading_bot.id) }}" style="display: inline;">
                                 <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this trading_bot?')">Delete</button>

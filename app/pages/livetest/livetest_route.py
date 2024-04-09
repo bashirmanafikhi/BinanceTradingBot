@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, current_app,request,redirect, Response
+from trading_clients.web_socket_services.my_binance_threaded_websocket_manager import get_my_binance_threaded_websocket_manager
 from trading_strategies.bollinger_rsi_strategy_simplified import BollingerRSIStrategySimplified
 import helpers.my_logger as my_logger
 from flask_app import socketio
 from binance import ThreadedWebsocketManager
-from helpers.binance_websocket import get_binance_websocket_service
 from trading_clients.trading_client_factory import TradingClientFactory
 from trading_strategies.bollinger_rsi_strategy import BollingerRSIStrategy
 from trading_strategies.trading_strategy import TradingStrategy
@@ -61,7 +61,7 @@ def get_trading_system(symbol):
 
 def get_binance_websocket_manager(symbol):
     if symbol not in websocket_managers:
-        websocket_managers[symbol] = get_binance_websocket_service()
+        websocket_managers[symbol] = get_my_binance_threaded_websocket_manager()
     return websocket_managers[symbol]
 
 def is_binance_websocket_manager_alive(symbol):

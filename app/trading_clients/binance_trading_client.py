@@ -2,7 +2,7 @@ import helpers.my_logger as my_logger
 from binance.client import Client
 import pandas as pd
 import helpers.my_logger as my_logger
-from helpers.binance_websocket import get_binance_websocket_service
+from trading_clients.web_socket_services.my_binance_threaded_websocket_manager import get_my_binance_threaded_websocket_manager
 
 from helpers.settings.settings import Settings
 from trading_clients.trading_client import TradingClient
@@ -51,7 +51,7 @@ class BinanceTradingClient(TradingClient):
 
     def start_kline_socket(self, symbol, callback):
         # Create an instance of BinanceWebSocketService
-        binanceWebSocket = get_binance_websocket_service()
+        binanceWebSocket = get_my_binance_threaded_websocket_manager()
         # Start the WebSocket service
         binanceWebSocket.start()
         # Start Kline (candlestick) socket with custom message handling

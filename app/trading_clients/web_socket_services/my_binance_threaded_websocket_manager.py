@@ -4,17 +4,17 @@ from binance import ThreadedWebsocketManager
 
 from helpers.settings.settings import Settings
 
-def get_binance_websocket_service():
+def get_my_binance_threaded_websocket_manager():
     settings = Settings()
 
     api_key = settings.binance.api_key
     api_secret = settings.binance.api_secret
     api_testnet = settings.binance.api_testnet
 
-    return BinanceWebSocketService(api_key, api_secret, api_testnet)
+    return MyBinanceThreadedWebsocketManager(api_key, api_secret, api_testnet)
 
 
-class BinanceWebSocketService:
+class MyBinanceThreadedWebsocketManager:
 
     def __init__(self, api_key, api_secret, api_testnet):
         self.api_key = api_key
@@ -44,7 +44,8 @@ class BinanceWebSocketService:
                 "number_of_trades": kline['n'],
                 "taker_buy_base_asset_volume": float(kline['V']),
                 "taker_buy_quote_asset_volume": float(kline['Q']),
-                "ignore": kline['B']
+                "ignore": kline['B'],
+                "symbol": kline_data['s']
             }
 
             # Create a DataFrame

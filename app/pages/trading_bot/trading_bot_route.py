@@ -6,6 +6,8 @@ from pages.trading_bot.trading_bot_form import TradingBotForm
 
 trading_bot_bp = Blueprint('trading_bot', __name__, url_prefix='/trading_bot')
 
+from . import trading_bot_details_route
+
 @trading_bot_bp.route("/list")
 @login_required
 def user_trading_bots():

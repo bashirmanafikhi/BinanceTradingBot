@@ -1,55 +1,72 @@
-import csv
-import os
-import pandas as pd
+import asyncio
+import time
 
-def split_and_save_data(data_dir='app\\bitcoin_historical_data\\2019-2023', file_name='candlesticks-S.csv', interval_months=3):
-    try:
-        file_path = os.path.join(data_dir, file_name)
+async def myWork():
+    print("Starting Work")
+    time.sleep(5)
+    print("Finishing Work")
 
-        with open(file_path, 'r') as file:
-            reader = csv.reader(file)
-            header = next(reader)  # Read the header
+loop = asyncio.get_event_loop()
+loop2 = asyncio.get_event_loop()
 
-            data = []
-            current_chunk_start_date = None
-            current_chunk_end_date = None
+try:
+    loop2.run_until_complete(myWork())
+    loop.run_until_complete(myWork())
+finally:
+    loop.close()
 
-            for row in reader:
-                # Skip rows where the value in the third column is 'NaN'
-                if row[2] == 'NaN':
-                    continue
-                timestamp = pd.to_datetime(row[0], unit='ms')
+# import csv
+# import os
+# import pandas as pd
 
-                if current_chunk_start_date is None:
-                    current_chunk_start_date = timestamp
+# def split_and_save_data(data_dir='app\\bitcoin_historical_data\\2019-2023', file_name='candlesticks-S.csv', interval_months=3):
+#     try:
+#         file_path = os.path.join(data_dir, file_name)
 
-                if current_chunk_end_date is None or timestamp <= current_chunk_end_date:
-                    data.append(row)
-                else:
-                    save_chunk_to_file(data, header, current_chunk_start_date, current_chunk_end_date, data_dir)
-                    data = [row]
-                    current_chunk_start_date = timestamp
+#         with open(file_path, 'r') as file:
+#             reader = csv.reader(file)
+#             header = next(reader)  # Read the header
 
-                current_chunk_end_date = current_chunk_start_date + pd.DateOffset(months=interval_months)
+#             data = []
+#             current_chunk_start_date = None
+#             current_chunk_end_date = None
 
-            # Save the last chunk
-            save_chunk_to_file(data, header, current_chunk_start_date, current_chunk_end_date, data_dir)
+#             for row in reader:
+#                 # Skip rows where the value in the third column is 'NaN'
+#                 if row[2] == 'NaN':
+#                     continue
+#                 timestamp = pd.to_datetime(row[0], unit='ms')
 
-    except Exception as e:
-        print(f"Error splitting and saving data: {e}")
+#                 if current_chunk_start_date is None:
+#                     current_chunk_start_date = timestamp
 
-def save_chunk_to_file(data, header, start_date, end_date, data_dir):
-    chunk_data = pd.DataFrame(data, columns=header)
-    chunk_data["date"] = pd.to_datetime(chunk_data["timestamp"], unit='ms')
-    chunk_data = chunk_data.iloc[::-1]
+#                 if current_chunk_end_date is None or timestamp <= current_chunk_end_date:
+#                     data.append(row)
+#                 else:
+#                     save_chunk_to_file(data, header, current_chunk_start_date, current_chunk_end_date, data_dir)
+#                     data = [row]
+#                     current_chunk_start_date = timestamp
 
-    output_file_name = f"chunk_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv"
-    output_file_path = os.path.join(data_dir, output_file_name)
+#                 current_chunk_end_date = current_chunk_start_date + pd.DateOffset(months=interval_months)
 
-    chunk_data.to_csv(output_file_path, index=False)
-    print(f"Chunk data ({start_date} to {end_date}) saved to {output_file_path}")
+#             # Save the last chunk
+#             save_chunk_to_file(data, header, current_chunk_start_date, current_chunk_end_date, data_dir)
+
+#     except Exception as e:
+#         print(f"Error splitting and saving data: {e}")
+
+# def save_chunk_to_file(data, header, start_date, end_date, data_dir):
+#     chunk_data = pd.DataFrame(data, columns=header)
+#     chunk_data["date"] = pd.to_datetime(chunk_data["timestamp"], unit='ms')
+#     chunk_data = chunk_data.iloc[::-1]
+
+#     output_file_name = f"chunk_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv"
+#     output_file_path = os.path.join(data_dir, output_file_name)
+
+#     chunk_data.to_csv(output_file_path, index=False)
+#     print(f"Chunk data ({start_date} to {end_date}) saved to {output_file_path}")
 
 
 
-# Example usage
-split_and_save_data()
+# # Example usage
+# split_and_save_data()

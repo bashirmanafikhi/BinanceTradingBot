@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-4">{{trading_bot.name}}</h1>
+
+<a href="{{ url_for('trading_bot.update_trading_bot', id=trading_bot.id) }}" class="btn btn-sm btn-info">Update Trading
+    Bot</a>
+
+<form method="post" action="{{ url_for('trading_bot.start_bot') }}">
+    <input type="hidden" id="id" name="id" value="{{trading_bot.id}}">
+    <button type="submit" class="btn btn-primary m-2">
+        Start
+    </button>
+</form>
+<form method="post" action="{{ url_for('trading_bot.stop_bot') }}">
+    <input type="hidden" id="id" name="id" value="{{trading_bot.id}}">
+    <button type="submit" class="btn btn-danger m-2">
+        Stop
+    </button>
+</form>
+
+<p>current price: <span id="current_price"></span></p>
+
+<script>
+    var socket = io.connect("{{socket_url}}");
+
+
+
+    socket.on("send_current_price", function (data) {
+        console.log(data);
+        document.getElementById("current_price").innerHTML = data.current_price
+    });
+
+    socket.on("connect", function (data) {
+        console.log("connected");
+    });
+
+</script>
+{% endblock %}

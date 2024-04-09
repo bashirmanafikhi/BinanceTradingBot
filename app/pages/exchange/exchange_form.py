@@ -6,8 +6,8 @@ from helpers.enums import ExchangeType  # Import your Enum
 class ExchangeForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     type = SelectField('Type', validators=[DataRequired()], coerce=int)
-    api_Key = StringField('API Key', validators=[DataRequired()])
-    api_Secret = StringField('API Secret', validators=[DataRequired()])
+    api_key = StringField('API Key', validators=[DataRequired()])
+    api_secret = StringField('API Secret', validators=[DataRequired()])
     is_test = BooleanField('Is Test API', default=True)
 
     def __init__(self, *args, **kwargs):
