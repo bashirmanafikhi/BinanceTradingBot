@@ -11,7 +11,7 @@ socketio = SocketIO(cors_allowed_origins="*")
 
 def create_app(debug=False):
     """Create an application."""
-    app = Flask(__name__, template_folder='pages')
+    app = Flask(__name__, template_folder='pages', static_url_path='/static', static_folder='static')
     app.debug = debug
     
     # Use the appropriate configuration based on the environment

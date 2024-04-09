@@ -56,6 +56,7 @@ def update_trading_bot(id):
 @trading_bot_bp.route("/delete/<int:id>", methods=['POST'])
 @login_required
 def delete_trading_bot(id):
+    #todo: prevent remove if the bot is running.
     trading_bot = TradingBot.query.get_or_404(id)
     db.session.delete(trading_bot)
     db.session.commit()

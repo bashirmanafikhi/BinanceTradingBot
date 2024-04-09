@@ -2,6 +2,8 @@
 {% block content %}
 <h1 class="mb-4">{{trading_bot.name}}</h1>
 
+<h2>Is running: {{ is_running }}</h2>
+
 <a href="{{ url_for('trading_bot.update_trading_bot', id=trading_bot.id) }}" class="btn btn-sm btn-info">Update Trading
     Bot</a>
 

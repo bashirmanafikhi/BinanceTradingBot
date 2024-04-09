@@ -15,7 +15,9 @@ def details(id):
     trading_bot = TradingBot.query.get_or_404(id)
     start_kline_socket(trading_bot)
     
-    return render_template('/trading_bot/trading_bot_details.html', trading_bot=trading_bot, socket_url = f"{current_app.config['SERVER_URL']}trading_bot_details")
+    trading_system = CurrentAppManager.get_trading_system(trading_bot.id)
+    
+    return render_template('/trading_bot/trading_bot_details.html', trading_bot=trading_bot, is_running= (trading_system is not None), socket_url = f"{current_app.config['SERVER_URL']}trading_bot_details")
 
 def start_kline_socket(trading_bot):
     try:
@@ -40,6 +42,11 @@ def start_bot():
     id = request.form.get('id')
     trading_bot = TradingBot.query.get_or_404(id)
     
+    trading_system = CurrentAppManager.get_trading_system(trading_bot.id)
+    if(trading_system is not None):
+        return "Already running!"
+    
+    
     start_kline_socket(trading_bot)
     
     exchange = trading_bot.exchange
@@ -47,6 +54,7 @@ def start_bot():
     binance_client = BinanceTradingClient(exchange.api_key, exchange.api_secret, exchange.is_test)
     strategy = trading_bot.get_strategy()
     trading_system = TradingSystem(trading_bot.symbol, strategy, binance_client, trading_bot.trade_percentage, trading_bot.trade_size)
+    
     CurrentAppManager.set_trading_system(trading_bot.id, trading_system)
 
     return "Started successfully.", 200
@@ -58,17 +66,18 @@ def stop_bot():
     id = request.form.get('id')
     trading_bot = TradingBot.query.get_or_404(id)
     
+    trading_system = CurrentAppManager.get_trading_system(trading_bot.id)
+    if(trading_system is not None):
+        CurrentAppManager.remove_trading_system(trading_bot.id)
+        # do what you need with trading_system
+        
+        
     # Stop Kline Socket and it's thread
     binance_websocket_manager = CurrentAppManager.get_websocket_manager(trading_bot.id)
     if(binance_websocket_manager is not None):
         binance_websocket_manager.stop_kline_socket()
         CurrentAppManager.remove_websocket_manager(trading_bot.id)
         
-    
-    trading_system = CurrentAppManager.get_trading_system(trading_bot.id)
-    if(trading_system is not None):
-        CurrentAppManager.remove_trading_system(trading_bot.id)
-        # do what you need with trading_system
 
     return "Stopped successfully.", 200
 
