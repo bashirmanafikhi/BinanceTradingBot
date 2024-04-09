@@ -61,8 +61,8 @@ def start_bot():
     
     exchange = trading_bot.exchange
     
-    #binance_client = BinanceTradingClient(exchange.api_key, exchange.api_secret, exchange.is_test)
-    binance_client = FakeTradingClient()
+    binance_client = BinanceTradingClient(exchange.api_key, exchange.api_secret, exchange.is_test)
+    #binance_client = FakeTradingClient()
     strategy = trading_bot.get_strategy()
     trading_system = TradingSystem(trading_bot.symbol, strategy, binance_client, trading_bot.trade_percentage, trading_bot.trade_size)
     
