@@ -20,21 +20,167 @@
     </button>
 </form>
 
-<p>current price: <span id="current_price"></span></p>
+<div class="container">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Price:</h5>
+            <p class="card-text"><span id="last_close"></span></p>
+            <h5 class="card-title">BBU:</h5>
+            <p class="card-text"><span id="last_bbu"></span></p>
+            <h5 class="card-title">BBL:</h5>
+            <p class="card-text"><span id="last_bbl"></span></p>
+            <h5 class="card-title">RSI:</h5>
+            <p class="card-text"><span id="last_rsi"></span></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Total Trades:</h5>
+            <p class="card-text"><span id="total_trades"></span></p>
+            <h5 class="card-title">Total Profit:</h5>
+            <p class="card-text"><span id="total_profit"></span></p>
+            <h5 class="card-title">Last action:</h5>
+            <p class="card-text"><span id="last_action"></span></p>
+            <h5 class="card-title">Last action price:</h5>
+            <p class="card-text"><span id="last_price"></span></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Initial base balance:</h5>
+            <p class="card-text"><span id="initial_base_balance"></span></p>
+            <h5 class="card-title">Final base balance:</h5>
+            <p class="card-text"><span id="final_base_balance"></span></p>
+            <h5 class="card-title">Initial quote balance:</h5>
+            <p class="card-text"><span id="initial_quote_balance"></span></p>
+            <h5 class="card-title">Final quote balance:</h5>
+            <p class="card-text"><span id="final_quote_balance"></span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="live-plot"></div>
+  <div id="rsi-plot"></div>
 
 <script>
-    var socket = io.connect("{{socket_url}}");
+    var socket = io.connect('{{socket_url}}');
 
-
-
-    socket.on("send_current_price", function (data) {
-        console.log(data);
-        document.getElementById("current_price").innerHTML = data.current_price
-    });
-
+    var rsiOversold = '{{trading_bot.rsi_oversold}}';
+    var rsiOverbought = '{{trading_bot.rsi_overbought}}';
+  
+    console.log("{{socket_url}}");
     socket.on("connect", function (data) {
-        console.log("connected");
+      console.log("connected");
+      
     });
-
-</script>
+  
+    socket.on("update_data_{{ trading_bot.id }}", function (data) {
+      var last_signal = JSON.parse(data.last_signal);
+      document.getElementById("last_bbu").innerHTML = Math.round(last_signal.BBU * 100) / 100;
+      document.getElementById("last_close").innerHTML = Math.round(last_signal.close * 100) / 100;
+      document.getElementById("last_bbl").innerHTML = Math.round(last_signal.BBL * 100) / 100;
+      document.getElementById("last_rsi").innerHTML = Math.round(last_signal.RSI * 100) / 100;
+  
+      document.getElementById("last_action").innerHTML = data.last_action;
+      document.getElementById("last_price").innerHTML = data.last_price;
+  
+      document.getElementById("total_trades").innerHTML = data.total_trades_count;
+      document.getElementById("total_profit").innerHTML = data.total_profit;
+  
+      document.getElementById("initial_base_balance").innerHTML = data.initial_base_balance;
+      document.getElementById("initial_quote_balance").innerHTML = data.initial_quote_balance;
+      document.getElementById("final_base_balance").innerHTML = data.final_base_balance;
+      document.getElementById("final_quote_balance").innerHTML = data.final_quote_balance;
+  
+      var close_trace = {
+        x: data.price_x_data,
+        y: data.price_y_data,
+        type: "scatter",
+        name: "Price"
+      };
+  
+      var bbu_trace = {
+        x: data.bbl_bbu_x_data,
+        y: data.bbu_y_data,
+        type: "scatter",
+        line: { dash: "dot", color: "LightCoral" },
+        name: "BBU"
+      };
+  
+      var bbl_trace = {
+        x: data.bbl_bbu_x_data,
+        y: data.bbl_y_data,
+        type: "scatter",
+        line: { dash: "dot", color: "DarkCyan" },
+        name: "BBL"
+      };
+  
+  
+      var buy_signal_trace = {
+        x: data.buy_signal_x_data,
+        y: data.buy_signal_y_data,
+        mode: 'markers',
+        name: 'Buy',
+        marker: {
+          color: 'green',
+          size: 12
+        }
+      };
+  
+      var sell_signal_trace = {
+        x: data.sell_signal_x_data,
+        y: data.sell_signal_y_data,
+        mode: 'markers',
+        name: 'SELL',
+        marker: {
+          color: 'red',
+          size: 12
+        }
+      };
+  
+  
+      var rsi_trace = {
+        x: data.rsi_x_data,
+        y: data.rsi_y_data,
+        xaxis: 'x2',
+        yaxis: 'y2',
+        type: "scatter",
+        line: { color: "DarkRed" },
+        name: "RSI"
+      };
+  
+      var layout = {
+        height: 800,
+        grid: {
+          rows: 2,
+          columns: 1,
+          pattern: 'independent'
+        },
+  
+        yaxis: {
+          domain: [0.3, 1]
+        },
+        yaxis2: {
+          domain: [0, 0.2],
+          tickvals: [rsiOversold, 40, 50, 60, rsiOverbought],
+          gridcolor: 'rgba(100, 100, 100, 0.5)'
+        },
+        xaxis2: {
+          matches: 'x',
+          showgrid: false
+        }
+      };
+  
+      Plotly.react("live-plot", [close_trace, bbu_trace, bbl_trace, buy_signal_trace, sell_signal_trace, rsi_trace], layout);
+  
+    });
+  </script>
 {% endblock %}

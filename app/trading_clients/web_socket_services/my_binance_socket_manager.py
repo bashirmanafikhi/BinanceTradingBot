@@ -4,6 +4,7 @@ import asyncio
 import threading
 import asyncio
 from binance import AsyncClient, BinanceSocketManager
+from flask_app import socketio
 
 
 class MyBinanceSocketManager:
@@ -40,6 +41,7 @@ class MyBinanceSocketManager:
             asyncio.run(self.start_binance_socket_manager_async(symbol, callback))
             
         self.thread = threading.Thread(target=start_kline_socket, args=(symbol, callback))
+        self.thread.daemon = True
         self.thread.start()
 
 
