@@ -45,9 +45,3 @@ def set_crypto_balances():
         return binance_client.get_asset_balance("USDT")
 
     return "Balances received successfully"
-
-@testpage_bp.route('/show-logs', methods=['GET'])
-@login_required
-def show_logs():
-    logs = my_logger.read_logs()
-    return Response(logs, content_type='text/plain')

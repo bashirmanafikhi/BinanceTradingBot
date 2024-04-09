@@ -89,32 +89,7 @@
               >Trading Bots</a
             >
           </li>
-          
-            <li class="nav-item active">
-              <a
-                href="{{ url_for('testpage.testpage') }}"
-                class="btn btn-outline-secondary"
-                role="button"
-                >Test Page</a
-              >
-            </li>
-             <li class="nav-item active">
-              <a
-                href="{{ url_for('livetest.livetest', symbol='BTCUSDT') }}"
-                class="btn btn-outline-secondary"
-                role="button"
-                >BTC</a
-              >
-            </li>
-            <li class="nav-item active">
-              <a
-                href="{{ url_for('livetest.livetest', symbol='SOLUSDT') }}"
-                class="btn btn-outline-secondary"
-                role="button"
-                >SOL</a
-              >
-            </li>
-
+        
         </ul>
         <form class="form-inline my-2 my-lg-0">
           {% if current_user.is_authenticated %}

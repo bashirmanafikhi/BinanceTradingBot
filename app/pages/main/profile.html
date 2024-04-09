@@ -12,4 +12,9 @@
   <a href="{{ url_for('trading_bot.user_trading_bots') }}">here</a>.
 </p>
 <p></p>
+
+<form action="{{ url_for('main.show_logs') }}" method="GET">
+  <button type="submit" class="btn btn-primary">Show Logs</button>
+</form>
+
 {% endblock %}
