@@ -73,14 +73,12 @@
 <script>
     var socket = io.connect('{{socket_url}}');
 
-    var rsiOversold = '{{trading_bot.rsi_oversold}}';
-    var rsiOverbought = '{{trading_bot.rsi_overbought}}';
-  
-    console.log("{{socket_url}}");
     socket.on("connect", function (data) {
       console.log("connected");
-      
     });
+
+    var rsiOversold = '{{trading_bot.rsi_oversold}}';
+    var rsiOverbought = '{{trading_bot.rsi_overbought}}';
   
     socket.on("update_data_{{ trading_bot.id }}", function (data) {
       var last_signal = JSON.parse(data.last_signal);

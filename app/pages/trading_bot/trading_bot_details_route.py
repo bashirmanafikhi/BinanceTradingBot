@@ -9,7 +9,6 @@ from current_app_manager import CurrentAppManager
 from helpers.models import User, TradingBot
 from pages.trading_bot.trading_bot_route import trading_bot_bp
 from flask_app import socketio
-from flask_socketio import SocketIO, emit
 
 @trading_bot_bp.route("/details/<int:id>")
 @login_required
@@ -40,7 +39,7 @@ def start_kline_socket(trading_bot):
             
             binance_websocket_manager.start_kline_in_new_thread(
                 symbol=trading_bot.symbol,
-                callback=lambda data: kline_tick(data, trading_bot.id, socketio))
+                callback=lambda data: kline_tick(data, trading_bot.id))
             
     except Exception as e:
         # Handle the exception as per your application's requirements
@@ -93,7 +92,7 @@ def stop_bot():
 
 
 
-def kline_tick(data, trading_bot_id, socketio):
+def kline_tick(data, trading_bot_id):
     
     trading_system = CurrentAppManager.get_trading_system(trading_bot_id)
     if(trading_system is None):
@@ -101,9 +100,9 @@ def kline_tick(data, trading_bot_id, socketio):
     
     signals = trading_system.run_strategy(data)
     
-    send_chart_details(trading_bot_id, trading_system, signals, socketio)
+    send_chart_details(trading_bot_id, trading_system, signals)
 
-def send_chart_details(trading_bot_id, trading_system, signals, socketio):
+def send_chart_details(trading_bot_id, trading_system, signals):
 
     plot_size = 5000
     signals = signals.tail(plot_size)
@@ -169,13 +168,5 @@ def send_chart_details(trading_bot_id, trading_system, signals, socketio):
         data["sell_signal_y_data"] = sell_signals['close'].tolist()
     
     socketio.emit(f"update_data_{trading_bot_id}", data, namespace="/trading_bot_details")
-
-
-# symbol_info = binance_trading_client.get_symbol_info(trading_bot.symbol)
-# base_asset = symbol_info["baseAsset"]
-# quote_asset = symbol_info["quoteAsset"]
-# base_balance = binance_trading_client.get_asset_balance(base_asset)
-# quote_balance = binance_trading_client.get_asset_balance(quote_asset)
-
 
     
