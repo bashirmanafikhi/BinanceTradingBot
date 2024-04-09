@@ -42,6 +42,7 @@ def start_kline_socket(trading_bot):
                 callback=lambda data: kline_tick(data, trading_bot.id))
             
     except Exception as e:
+        CurrentAppManager.remove_websocket_manager(trading_bot.id)
         # Handle the exception as per your application's requirements
         print(f"An error occurred: {e}")
 

@@ -34,21 +34,35 @@ class MyBinanceSocketManager:
         finally:
             await self.client.close_connection()
 
-    def start_kline_in_new_thread(self, symbol, callback):
-        
-        @copy_current_request_context
-        def start_kline_socket(symbol, callback):
-            asyncio.run(self.start_binance_socket_manager_async(symbol, callback))
+    def run_async_method(self, coroutine):
+        def is_event_loop_running():
+            try:
+                loop = asyncio.get_running_loop()
+                return loop.is_running()
+            except RuntimeError:
+                return False
             
-        self.thread = threading.Thread(target=start_kline_socket, args=(symbol, callback))
+        if is_event_loop_running():
+            loop = asyncio.get_running_loop()
+            future = asyncio.run_coroutine_threadsafe(coroutine, loop)
+            future.result()
+        else:
+            asyncio.run(coroutine)    
+            
+    def start_kline_in_new_thread(self, symbol, callback):
+        @copy_current_request_context
+        def start_kline_socket(self, symbol, callback):
+            self.run_async_method(self.start_binance_socket_manager_async(symbol, callback))
+            
+        self.thread = threading.Thread(target=start_kline_socket, args=(self, symbol, callback))
         self.thread.daemon = True
         self.thread.start()
-
 
     def stop_kline_socket(self):
         self.stop_event.set()
         if self.client:
-            asyncio.run(self.client.close_connection())  # Close the client connection
+            self.run_async_method(self.client.close_connection())
+            
         if self.thread:
             self.thread.join()  # Wait for the thread to finish
 
