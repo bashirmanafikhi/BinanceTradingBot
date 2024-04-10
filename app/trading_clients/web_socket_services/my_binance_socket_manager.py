@@ -25,8 +25,11 @@ class MyBinanceSocketManager:
             async with ts as tscm:
                 while not self.stop_event.is_set():
                     res = await tscm.recv()
-                    df = self.convert_kline_to_dataframe(res)
-                    callback(df)
+                    try:
+                        df = self.convert_kline_to_dataframe(res)
+                        callback(df)
+                    except Exception as e:
+                        print(f"Error in the callback: {e}")
         except Exception as e:
             # Log the error or handle it according to your application's requirements
             print(f"An error occurred while starting Binance socket: {e}")

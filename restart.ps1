@@ -25,8 +25,8 @@ $SSHCommand = @"
     fi
 
     # Start Gunicorn in the background
-    #gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app --log-level info --error-logfile log/gunicorn_error.log --capture-output -D
-    gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app
+    gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app --log-level info --error-logfile log/gunicorn_error.log --capture-output -D
+    #gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:5000 run_web:app
 "@
 
 # Run SSH command
