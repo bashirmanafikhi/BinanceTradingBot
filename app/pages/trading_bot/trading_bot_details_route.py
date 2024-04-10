@@ -16,8 +16,8 @@ def details(id):
     trading_bot = TradingBot.query.get_or_404(id)
     #start_kline_socket(trading_bot)
     
-    trading_system = CurrentAppManager.get_trading_system(trading_bot.id)
     socket_url = f"{current_app.config['SERVER_URL']}trading_bot_details"
+    trading_system = CurrentAppManager.get_trading_system(trading_bot.id)
 
     return render_template(
         '/trading_bot/trading_bot_details.html', 
@@ -28,6 +28,21 @@ def details(id):
 @socketio.on("connect", namespace="/trading_bot_details")
 def handle_connect():
     print(f"handle_connect livetest")
+    
+def update_running_trading_system(trading_bot):
+    trading_system = CurrentAppManager.get_trading_system(trading_bot.id)
+    if(trading_system is None):
+        return
+    
+    
+    trading_system.trade_quote_percentage = trading_bot.trade_percentage
+    trading_system.trade_quote_size = trading_bot.trade_size
+    
+    strategy = trading_system.strategy
+
+    strategy.conditions_manager.conditions = trading_bot.get_conditions()
+    
+    
 
 def start_kline_socket(trading_bot):
     try:
@@ -104,6 +119,8 @@ def kline_tick(data, trading_bot_id):
     send_chart_details(trading_bot_id, trading_system, signals)
 
 def send_chart_details(trading_bot_id, trading_system, signals):
+    if(signals is None):
+        return
 
     plot_size = 5000
     signals = signals.tail(plot_size)
@@ -169,5 +186,4 @@ def send_chart_details(trading_bot_id, trading_system, signals):
         data["sell_signal_y_data"] = sell_signals['close'].tolist()
     
     socketio.emit(f"update_data_{trading_bot_id}", data, namespace="/trading_bot_details")
-
     

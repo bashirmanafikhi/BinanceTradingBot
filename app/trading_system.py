@@ -41,10 +41,11 @@ class TradingSystem:
         self.register_handlers()
         self.initialize_symbol_info(symbol)
         self.initialize_balance()
+        self.signals = None
 
     def run_strategy(self, data):
-        signals = self.strategy.execute(data)
-        return signals
+        self.signals = self.strategy.execute(data)
+        return self.signals
     
     def getTotalProfit(self):
         initial_base_balance = Decimal(self.initial_base_balance)

@@ -50,6 +50,7 @@ def update_trading_bot(id):
         
         db.session.commit()
         flash('TradingBot updated successfully!', 'success')
+        trading_bot_details_route.update_running_trading_system(trading_bot)
         return redirect(url_for('trading_bot.user_trading_bots'))
     return render_template('/trading_bot/trading_bot_update.html', form=form)
 

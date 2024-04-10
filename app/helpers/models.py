@@ -40,6 +40,9 @@ class TradingBot(db.Model):
     rsi_oversold =db. Column(db.Float, nullable=False, default=30)
     
     def get_strategy(self):
+        return ConditionsStrategy(self.get_conditions())
+    
+    def get_conditions(self):
         conditions_list = []
         
         if(self.use_bollinger_bands):
@@ -50,10 +53,7 @@ class TradingBot(db.Model):
             rsi_condition = RSICondition(self.rsi_period, self.rsi_overbought, self.rsi_oversold)
             conditions_list.append(rsi_condition)
         
-        strategy = ConditionsStrategy(conditions_list)
-        
-        return strategy
-
+        return conditions_list
 class Exchange(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
