@@ -135,19 +135,16 @@ class TradingSystem:
             if price == 0:
                 raise ValueError("Price should not be zero.")
             
-            if (action == ACTION_SELL and self.trade_quote_size is None):
-                    size = self.base_balance * self.trade_quote_percentage
-                    quantity = size
+            # Calculate quantity using decimal arithmetic
+            if(self.trade_quote_size is None):
+                size = self.quote_balance * self.trade_quote_percentage
             else:
-                # Calculate quantity using decimal arithmetic
-                if(self.trade_quote_size is None):
-                    size = self.quote_balance * self.trade_quote_percentage
-                else:
-                    size = self.trade_quote_size
-                    
-                quantity = (
-                    size * quantity_percentage / price
-                )
+                size = self.trade_quote_size
+                
+            quantity = (
+                size * quantity_percentage / price
+            )
+            
             if(self.initial_investment is None):
                 self.initial_investment = size
 

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
     <h1 class="mb-4">Trading Bots</h1>
+
     <a href="{{ url_for('trading_bot.create_trading_bot') }}" class="btn btn-primary mb-3">Add TradingBot</a>
     <div class="table-responsive">
         <table class="table table-striped">
@@ -27,5 +28,15 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+
+    <!-- Display payload information -->
+    <div class="card m-2">
+        <div class="card-header">Total Information</div>
+        <div class="card-body">
+            <p>Running Bots Count: {{ payload.running_bots_count }}</p>
+            <p>Total Trades Count: {{ payload.total_trades_count }}</p>
+            <p>Total Profit: {{ "{:.10f}".format(payload.total_profit) }}</p>
+        </div>
     </div>
 {% endblock %}

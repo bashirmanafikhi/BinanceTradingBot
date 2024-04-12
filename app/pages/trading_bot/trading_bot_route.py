@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import current_user, login_required
+from current_app_manager import CurrentAppManager
 from flask_app import db
 from helpers.models import Exchange, User, TradingBot
 from pages.trading_bot.trading_bot_form import TradingBotForm
@@ -13,7 +14,14 @@ from . import trading_bot_details_route
 def user_trading_bots():
     user = User.query.filter_by(email=current_user.email).first_or_404()
     trading_bots = user.trading_bots
-    return render_template('/trading_bot/trading_bots.html', trading_bots=trading_bots)
+    
+    trading_systems = CurrentAppManager.get_all_trading_systems()
+    payload = {
+        "running_bots_count" : len(trading_systems),
+        "total_trades_count" : sum(system.trades_count for system in trading_systems.values()),
+        "total_profit" : sum(system.total_profit for system in trading_systems.values()),
+    }
+    return render_template('/trading_bot/trading_bots.html', trading_bots=trading_bots,payload = payload)
 
 
 @trading_bot_bp.route("/create", methods=['GET', 'POST'])

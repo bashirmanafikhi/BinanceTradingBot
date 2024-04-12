@@ -48,6 +48,10 @@ class CurrentAppManager:
         Get the Trading System associated with a specific trading bot ID.
         """
         return current_app.trading_systems.get(trading_bot_id)
+
+    @staticmethod
+    def get_all_trading_systems():
+        return current_app.trading_systems
     
     @staticmethod    
     def remove_trading_system(trading_bot_id):
