@@ -148,10 +148,10 @@ class TradingSystem:
             if(self.initial_investment is None):
                 self.initial_investment = size
 
-            # Round the quantity to an appropriate number of decimal places
-            round_quantity = round(quantity, 8)
             step_size = float(self.symbol_info["filters"][1]["stepSize"])
-            round_quantity = self.round_to_nearest_multiple(round_quantity, step_size)
+            round_quantity = self.round_to_nearest_multiple(quantity, step_size)
+            # Round the quantity to an appropriate number of decimal places
+            round_quantity = round(round_quantity, 8)
             self.last_quantity = round_quantity
             return round_quantity
 
