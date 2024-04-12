@@ -1,5 +1,7 @@
+import csv
+from io import BytesIO, StringIO
 import time
-from flask import Blueprint, copy_current_request_context, render_template, redirect, url_for, flash, current_app,request
+from flask import Blueprint, copy_current_request_context, render_template, redirect, send_file, url_for, flash, current_app,request
 from flask_login import current_user, login_required
 from trading_clients.fake_trading_client import FakeTradingClient
 from trading_system import TradingSystem
@@ -24,6 +26,29 @@ def details(id):
         trading_bot=trading_bot, 
         is_running= (trading_system is not None), 
         socket_url=socket_url)
+
+@trading_bot_bp.route('/download_csv/<int:id>')
+def download_csv(id):
+    trading_bot = TradingBot.query.get_or_404(id)
+    trading_system = CurrentAppManager.get_trading_system(trading_bot.id)
+    if trading_system is None:
+        return "No data to download"
+    signals = trading_system.signals
+
+    # Create a BytesIO object to hold the CSV data in memory
+    csv_buffer = BytesIO()
+
+    # Write DataFrame to the BytesIO object as a CSV file
+    signals.to_csv(csv_buffer, index=False)
+    csv_buffer.seek(0)  # Reset file pointer to beginning of the file
+
+    # Send the BytesIO object containing the CSV data as a response
+    return send_file(
+        csv_buffer,
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name=f'{trading_bot.symbol}.csv'
+    )
 
 @socketio.on("connect", namespace="/trading_bot_details")
 def handle_connect():
@@ -76,8 +101,8 @@ def start_bot():
     
     exchange = trading_bot.exchange
     
-    #binance_client = BinanceTradingClient(exchange.api_key, exchange.api_secret, exchange.is_test)
-    binance_client = FakeTradingClient()
+    binance_client = BinanceTradingClient(exchange.api_key, exchange.api_secret, exchange.is_test)
+    #binance_client = FakeTradingClient()
     binance_client.COMMISSION_RATE = 0
     strategy = trading_bot.get_strategy()
     trading_system = TradingSystem(trading_bot.symbol, strategy, binance_client, trading_bot.trade_percentage, trading_bot.trade_size)
@@ -106,7 +131,6 @@ def stop_bot():
         CurrentAppManager.remove_websocket_manager(trading_bot.id)
         
     return "Stopped successfully.", 200
-
 
 
 def kline_tick(data, trading_bot_id):

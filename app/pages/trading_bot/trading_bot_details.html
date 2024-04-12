@@ -20,6 +20,10 @@
         <input type="hidden" id="id" name="id" value="{{trading_bot.id}}">
         <button type="submit" class="btn btn-danger m-2">Stop</button>
       </form>
+
+      <form action="{{ url_for('trading_bot.download_csv', id=trading_bot.id) }}" method="get">
+        <button class="btn btn-warning m-2" type="submit">Download Excel</button>
+      </form>
       <a href="{{ url_for('trading_bot.update_trading_bot', id=trading_bot.id) }}" class="btn btn-info m-2">Update
         Trading Bot</a>
     </div>
