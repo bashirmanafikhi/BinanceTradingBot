@@ -28,7 +28,7 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Price:</h5>
@@ -42,31 +42,17 @@
         </div>
       </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-6">
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Total Trades:</h5>
           <p class="card-text"><span id="total_trades"></span></p>
+          <h5 class="card-title">Last action:</h5>
+          <p class="card-text"><span id="last_action"></span> at <span id="last_price"></span></p>
           <h5 class="card-title">Total Profit:</h5>
           <p class="card-text"><span id="total_profit"></span></p>
-          <h5 class="card-title">Last action:</h5>
-          <p class="card-text"><span id="last_action"></span></p>
-          <h5 class="card-title">Last action price:</h5>
-          <p class="card-text"><span id="last_price"></span></p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Initial base balance:</h5>
-          <p class="card-text"><span id="initial_base_balance"></span></p>
-          <h5 class="card-title">Final base balance:</h5>
-          <p class="card-text"><span id="final_base_balance"></span></p>
-          <h5 class="card-title">Initial quote balance:</h5>
-          <p class="card-text"><span id="initial_quote_balance"></span></p>
-          <h5 class="card-title">Final quote balance:</h5>
-          <p class="card-text"><span id="final_quote_balance"></span></p>
+          <h5 class="card-title">Total Profit Percentage:</h5>
+          <p class="card-text"><span id="total_profit_percentage"></span></p>
         </div>
       </div>
     </div>
@@ -103,11 +89,7 @@
 
     document.getElementById("total_trades").innerHTML = data.total_trades_count;
     document.getElementById("total_profit").innerHTML = data.total_profit;
-
-    document.getElementById("initial_base_balance").innerHTML = data.initial_base_balance;
-    document.getElementById("initial_quote_balance").innerHTML = data.initial_quote_balance;
-    document.getElementById("final_base_balance").innerHTML = data.final_base_balance;
-    document.getElementById("final_quote_balance").innerHTML = data.final_quote_balance;
+    document.getElementById("total_profit_percentage").innerHTML = data.total_profit_percentage;
 
     var close_trace = {
       x: data.price_x_data,

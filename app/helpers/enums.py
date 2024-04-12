@@ -2,7 +2,7 @@ from enum import Enum
 
 class ExchangeType(Enum):
     Binance = 1
-    OKX = 2
+    #OKX = 2
 
 class OrderStatus(Enum):
     NEW = "NEW"

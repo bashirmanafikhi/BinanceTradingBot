@@ -34,11 +34,10 @@ def historical_data_example():
         trading_system = TradingSystem(symbol, strategy, fake_client)
 
         trading_system.run_strategy(data)
-        trading_system.calculate_profit_loss()
+        trading_system.log_trading_informations()
 
         print(f"\nYear: {year}")
         print(f"Total Commission: {trading_system.trading_client.total_paid_commission}")
         print(f"Trades Count: {trading_system.trades_count}")
-        print(f"Total Profit: {trading_system.getTotalProfit()}")
         
         break

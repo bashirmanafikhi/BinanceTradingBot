@@ -76,8 +76,9 @@ def start_bot():
     
     exchange = trading_bot.exchange
     
-    binance_client = BinanceTradingClient(exchange.api_key, exchange.api_secret, exchange.is_test)
-    #binance_client = FakeTradingClient()
+    #binance_client = BinanceTradingClient(exchange.api_key, exchange.api_secret, exchange.is_test)
+    binance_client = FakeTradingClient()
+    binance_client.COMMISSION_RATE = 0
     strategy = trading_bot.get_strategy()
     trading_system = TradingSystem(trading_bot.symbol, strategy, binance_client, trading_bot.trade_percentage, trading_bot.trade_size)
     
@@ -125,8 +126,6 @@ def send_chart_details(trading_bot_id, trading_system, signals):
     plot_size = 5000
     signals = signals.tail(plot_size)
     last_signal = signals.iloc[-1]
-    total_profit = trading_system.total_profit
-    total_trades_count = trading_system.trades_count
     # Convert data to lists
     close_x_data = signals.index.tolist()
     close_y_data = signals['close'].tolist()
@@ -136,12 +135,13 @@ def send_chart_details(trading_bot_id, trading_system, signals):
         "last_price": trading_system.last_price,
         "last_action": trading_system.last_action,
         "last_signal": last_signal.to_json(),
-        "initial_base_balance": float(trading_system.initial_base_balance),
-        "initial_quote_balance": float(trading_system.initial_quote_balance),
-        "final_base_balance": float(trading_system.final_base_balance),
-        "final_quote_balance": float(trading_system.final_quote_balance),
-        "total_profit": float(total_profit),
-        "total_trades_count": total_trades_count,
+        
+        "last_profit": trading_system.last_profit,
+        "last_profit_percentage": trading_system.last_profit_percentage,
+        "total_profit": trading_system.total_profit,
+        "total_profit_percentage": trading_system.total_profit_percentage,
+        
+        "total_trades_count": trading_system.trades_count,
         "price_x_data": close_x_data,
         "price_y_data": close_y_data
     }

@@ -1,4 +1,3 @@
-from decimal import ROUND_HALF_UP, Decimal
 import decimal
 import helpers.my_logger as my_logger
 import pandas as pd
@@ -6,9 +5,7 @@ from helpers.settings.constants import (
     ACTION_BUY,
     ACTION_SELL,
     ORDER_STATUS_FILLED,
-    ORDER_STATUS_NEW,
-    ORDER_TYPE_LIMIT,
-    ORDER_TYPE_MARKET,
+    ORDER_STATUS_NEW
 )
 from trading_clients.trading_client import TradingClient
 from trading_strategies.trading_strategy import TradingStrategy
@@ -31,34 +28,21 @@ class TradingSystem:
         self.trade_quote_size = trade_quote_size
         self.last_action = None
         self.last_price = 0
+        self.last_profit = 0
+        self.last_profit_percentage = 0
         self.total_profit = 0
-        self.max_quantity = 0
-        self.max_quote_quantity = 0
-        self.max_level = 0
-        self.levels = []
+        self.total_profit_percentage = 0
         self.trades_count = 0
         self.last_quantity = None
         self.register_handlers()
         self.initialize_symbol_info(symbol)
         self.initialize_balance()
         self.signals = None
+        self.initial_investment = None
 
     def run_strategy(self, data):
         self.signals = self.strategy.execute(data)
         return self.signals
-    
-    def getTotalProfit(self):
-        initial_base_balance = Decimal(self.initial_base_balance)
-        initial_quote_balance = Decimal(self.initial_quote_balance)
-
-        base_balance_change = self.final_base_balance - initial_base_balance
-        quote_balance_change = self.final_quote_balance - initial_quote_balance
-        
-        # Calculate the profit or loss amounts
-        profit_loss_base = base_balance_change * Decimal(self.last_price)
-        profit_loss_quote = quote_balance_change * 1  # Adjust this based on your quote asset pricing
-        total_profit = round(profit_loss_base + profit_loss_quote, 4)
-        return total_profit
 
     def register_handlers(self):
         self.strategy.buy_command.set_handler(self.handle_buy)
@@ -66,63 +50,24 @@ class TradingSystem:
         self.strategy.trade_closed_event.add_handler(self.handle_trade_closed)
 
     def handle_trade_closed(self):
-        self.calculate_profit_loss()
+        self.log_trading_informations()
         
     
-    def calculate_profit_loss(self):
+    def log_trading_informations(self):
         if(self.trades_count == 0):
             my_logger.info("No Trades Happened")
             return
         
-        initial_base_balance = Decimal(self.initial_base_balance)
-        initial_quote_balance = Decimal(self.initial_quote_balance)
-
-        final_base_balance = Decimal(self.trading_client.get_asset_balance(self.base_asset))
-        final_quote_balance = Decimal(self.trading_client.get_asset_balance(self.quote_asset))
-        
-        self.final_quote_balance = final_quote_balance
-        self.final_base_balance = final_base_balance
-
-        # Calculate the changes in balances
-        base_balance_change = final_base_balance - initial_base_balance
-        quote_balance_change = final_quote_balance - initial_quote_balance
-
         my_logger.info("")
-        my_logger.info(f"{self.base_asset} initial balance : {initial_base_balance}")
-        my_logger.info(f"{self.base_asset} final balance: {final_base_balance}")
-        my_logger.info(f"{self.base_asset} balance change: {base_balance_change}")
-        my_logger.info("")
-        my_logger.info(f"{self.quote_asset} initial balance : {initial_quote_balance}")
-        my_logger.info(f"{self.quote_asset} final balance: {final_quote_balance}")
-        my_logger.info(f"{self.quote_asset} balance change: {quote_balance_change}")
-        my_logger.info("")
-
-        my_logger.info(f"Max {self.base_asset} Quantity: {self.max_quantity}")
-        my_logger.info(f"Max Quote Quantity: {self.max_quote_quantity}")
-        my_logger.info(f"Max Level: {self.max_level}")
-        if(len(self.levels) > 0):
-            average = sum(self.levels) / len(self.levels)
-            my_logger.info(f"Levels Average:{average}")
         my_logger.info(f"Last Price: {self.last_price}")
         
-        
-        # Calculate the profit or loss amounts
-        profit_loss_base = base_balance_change * Decimal(self.last_price)
-        profit_loss_quote = quote_balance_change * 1  # Adjust this based on your quote asset pricing
-        self.total_profit = Decimal(round(profit_loss_base + profit_loss_quote, 4))
-        
-        profit_percentage = None
-        if initial_quote_balance != 0:
-            profit_percentage = (self.total_profit / initial_quote_balance) * 100
-        
         my_logger.info(f"Total Trades Count: {self.trades_count}")
-        my_logger.info(f"Profit Percentage: {profit_percentage} %")
-        my_logger.info(f"Total Profit: {self.total_profit} $")
-        my_logger.info("\n\n****************************\n")
+        my_logger.info(f"last profit: {self.last_profit} $")
+        my_logger.info(f"last profit percentage: {self.last_profit_percentage} $")
+        my_logger.info(f"total profit: {self.total_profit} $")
+        my_logger.info(f"total profit percentage: {self.total_profit_percentage} $")
+        my_logger.info("****************************\n\n\n")
 
-
-
-    
     def handle_buy(self, price, quantity, type):
         return self.create_order(ACTION_BUY, type, price, quantity)
 
@@ -130,12 +75,9 @@ class TradingSystem:
         return self.create_order(ACTION_SELL, type, price, quantity)
 
     def create_order(self, action, type, price, quantity):
-        level = quantity
         quantity = self.calculate_quantity(action, price, quantity)
         if(quantity == 0):
             my_logger.error("Quantity should not be zero.")
-            
-        quantity = Decimal(quantity)
 
         my_logger.info(f"{action} {quantity} {self.base_asset} at {price}")
 
@@ -146,52 +88,72 @@ class TradingSystem:
         # Print order price
         order_price = self.extract_price_from_order(order)
         if order_price is not None:
-            self.last_price = price
-            self.last_action = action
-            if(self.max_quantity < quantity):
-                self.max_quantity = quantity
-                self.max_level = level
-                self.max_quote_quantity = quantity * Decimal(price)
-                self.levels.append(level)
+            self.calculate_total_profit(action,price,quantity)
             my_logger.info(f"{action} order placed at: {order_price}")
             self.trades_count += 1
-            self.calculate_profit_loss()
+            self.log_trading_informations()
+            self.initialize_balance()
             return True
 
         return False
+    
+    def calculate_total_profit(self, action, price, current_quantity):
+        previous_price = self.last_price
+        previous_action = self.last_action
 
+        self.last_price = price
+        self.last_action = action
+
+        if previous_action is None or action == ACTION_BUY:
+            return 0
+
+        # Calculate costs
+        previous_cost = previous_price * current_quantity
+        current_cost = price * current_quantity
+
+        # Calculate profit for last action
+        self.last_profit = current_cost - previous_cost
+
+        # Update last_profit and total_profit
+        self.total_profit += self.last_profit
+        
+        # Calculate profit percentages
+        self.last_profit_percentage = (self.last_profit / previous_cost) * 100
+        self.total_profit_percentage = (self.total_profit / self.initial_investment) * 100
+
+        
+        
+        
+        
+        
     def calculate_quantity(self, action, price, quantity_percentage):
         try:
-            
             if (action == ACTION_SELL and self.last_quantity is not None):
                 return self.last_quantity
-                
-                
-            # Convert numbers to decimal before dividing
-            price = decimal.Decimal(str(price))
-            quantity_percentage = decimal.Decimal(str(quantity_percentage))
-
+            
             # Avoid division by zero
             if price == 0:
                 raise ValueError("Price should not be zero.")
-
+            
             if (action == ACTION_SELL and self.trade_quote_size is None):
-                    size = Decimal(self.final_base_balance) * Decimal(self.trade_quote_percentage)
+                    size = self.base_balance * self.trade_quote_percentage
                     quantity = size
             else:
                 # Calculate quantity using decimal arithmetic
                 if(self.trade_quote_size is None):
-                    size = Decimal(self.final_quote_balance) * Decimal(self.trade_quote_percentage)
+                    size = self.quote_balance * self.trade_quote_percentage
                 else:
-                    size = Decimal(self.trade_quote_size)
+                    size = self.trade_quote_size
                     
                 quantity = (
                     size * quantity_percentage / price
                 )
+            if(self.initial_investment is None):
+                self.initial_investment = size
 
             # Round the quantity to an appropriate number of decimal places
             round_quantity = round(quantity, 8)
-            step_size = Decimal(self.symbol_info["filters"][1]["stepSize"])
+            step_size = float(self.symbol_info["filters"][1]["stepSize"])
             round_quantity = self.round_to_nearest_multiple(round_quantity, step_size)
             self.last_quantity = round_quantity
             return round_quantity
@@ -206,7 +168,7 @@ class TradingSystem:
         original_number = abs(original_number)
         
         # Calculate the rounded number
-        rounded_number = (Decimal(original_number) // Decimal(multiple)) * Decimal(multiple)
+        rounded_number = (original_number) // multiple * multiple
         return rounded_number
 
     def extract_price_from_order(self, order):
@@ -230,12 +192,8 @@ class TradingSystem:
         self.quote_asset = self.symbol_info["quoteAsset"]
 
     def initialize_balance(self):
-        # Get the balance from the trading client
-        self.initial_base_balance = self.trading_client.get_asset_balance(self.base_asset)
-        self.initial_quote_balance = self.trading_client.get_asset_balance(self.quote_asset)
+        self.base_balance = self.trading_client.get_asset_balance(self.base_asset)
+        self.quote_balance = self.trading_client.get_asset_balance(self.quote_asset)
 
-        if(self.initial_base_balance is None or self.initial_quote_balance is None):
+        if(self.base_balance is None or self.quote_balance is None):
             raise ValueError("Couldn't initialize balance")
-        
-        self.final_base_balance = self.initial_base_balance
-        self.final_quote_balance = self.initial_quote_balance

@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from decimal import Decimal
 import helpers.my_logger as my_logger
 from helpers.settings.constants import (
     ACTION_BUY,
@@ -16,19 +15,17 @@ class FakeTradingClient(TradingClient):
     COMMISSION_RATE = 0.1
 
     def __init__(self):
-        self.balances = {"USDT": Decimal(200), "BTC": Decimal(0), "SOL": Decimal(0), "ETH": Decimal(0)}
-        # self.balances = {"USDT": Decimal(500), "BTC": Decimal(0.012)}
+        self.balances = {"USDT": 200, "BTC": 0, "SOL": 0, "ETH": 0}
         self.orders_history = []
         self.total_paid_commission = 0
 
     def _apply_commission(self, cost):
-        commission_rate = Decimal(self.COMMISSION_RATE)
+        commission_rate = self.COMMISSION_RATE
         commission = cost * commission_rate
         self.total_paid_commission += commission
         return cost + commission
 
     def _update_balances(self, symbol_info, side, quantity, price):
-        price = Decimal(str(price))
         cost = quantity * price
         cost_with_commission = self._apply_commission(cost)
 
