@@ -34,14 +34,12 @@ def create_app(debug=False):
     from pages.auth.auth_route import auth_bp
     from pages.exchange.exchange_route import exchange_bp
     from pages.trading_bot.trading_bot_route import trading_bot_bp
-    from pages.livetest.livetest_route import livetest_bp
     from pages.testpage.testpage_route import testpage_bp
     
     app.register_blueprint(exchange_bp)
     app.register_blueprint(trading_bot_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
-    app.register_blueprint(livetest_bp)
     app.register_blueprint(testpage_bp)
 
     CurrentAppManager.initialize_objects(app)

@@ -33,7 +33,8 @@ def download_csv(id):
     csv_buffer = bot_management.generate_csv(trading_system)
 
     if csv_buffer is None:
-        return "No data to download"
+        flash("No data to download", 'danger')
+        return redirect(url_for('trading_bot.details', id=id))
 
     return send_file(
         csv_buffer,
