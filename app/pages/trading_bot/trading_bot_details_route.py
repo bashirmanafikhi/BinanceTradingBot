@@ -1,14 +1,9 @@
-import csv
-from io import BytesIO, StringIO
 import os
-import time
-from flask import Blueprint, copy_current_request_context, render_template, redirect, send_file, url_for, flash, current_app,request
+from flask import render_template, redirect, send_file, url_for, flash, current_app,request
 from flask_login import current_user, login_required
 import pandas as pd
 from trading_clients.fake_trading_client import FakeTradingClient
 from trading_system import TradingSystem
-from trading_clients.binance_trading_client import BinanceTradingClient
-from trading_clients.web_socket_services.my_binance_socket_manager import MyBinanceSocketManager
 from current_app_manager import CurrentAppManager
 from helpers.models import User, TradingBot
 from pages.trading_bot.trading_bot_route import trading_bot_bp
@@ -27,7 +22,7 @@ def details(id):
     return render_template(
         '/trading_bot/trading_bot_details.html', 
         trading_bot=trading_bot, 
-        is_running= (trading_system is not None), 
+        is_running= (trading_system is not None and trading_system.is_running), 
         socket_url=socket_url)
 
 
@@ -57,14 +52,20 @@ def handle_connect():
 @login_required
 def start_bot():
     id = request.form.get('id')
-    return bot_management.start_bot(id, kline_tick)
+    result = bot_management.start_bot(id, kline_tick)
+    
+    flash(result, 'primary')
+    return redirect(url_for('trading_bot.details', id=id))
 
     
 @trading_bot_bp.route("/stop-bot", methods=['POST'])
 @login_required
 def stop_bot():
     id = request.form.get('id')
-    return bot_management.stop_bot(id)
+    result = bot_management.stop_bot(id)
+    
+    flash(result, 'primary')
+    return redirect(url_for('trading_bot.details', id=id))
 
 
 def kline_tick(data, trading_bot_id):
@@ -72,7 +73,7 @@ def kline_tick(data, trading_bot_id):
     if(trading_system is None):
         return
     
-    signals = trading_system.run_strategy(data)
+    signals = trading_system.process(data)
     
     data = bot_management.get_chart_details(trading_system, signals)
     
@@ -81,26 +82,28 @@ def kline_tick(data, trading_bot_id):
 @socketio.on("backtest", namespace="/trading_bot_details")
 def handle_backtest(id):
     trading_bot = TradingBot.query.get_or_404(id)
+    trading_system = CurrentAppManager.get_trading_system(trading_bot.id)
+    if(trading_system is not None and trading_system.is_running):
+        print('The bot is running, you can not backtest while the bot is running')
+        socketio.emit(f"update_data_{trading_bot.id}", None, namespace="/trading_bot_details")
+        return
     
     file_path = f'backtest/{trading_bot.symbol}.csv'
 
     # Check if the file exists
     if not os.path.exists(file_path):
-        print("File does not exist.")
+        print('File is not exist for backtesting.')
         socketio.emit(f"update_data_{trading_bot.id}", None, namespace="/trading_bot_details")
         return
 
     # Read the CSV file into a DataFrame
     data = pd.read_csv(file_path, usecols=['timestamp','open','high','low','close'])
     
-    # Now you can work with your DataFrame
-    print(data.head())  # Print the first few rows of the DataFrame
-    
     binance_client = FakeTradingClient()
     strategy = trading_bot.get_strategy()
     trading_system = TradingSystem(trading_bot.symbol, strategy, binance_client, trading_bot.trade_percentage, trading_bot.trade_size)
     
-    signals = trading_system.run_strategy(data)
+    signals = trading_system.process(data)
     
     data = bot_management.get_chart_details(trading_system, signals, plot_size= None)
     

@@ -77,7 +77,7 @@ def handle_disconnect():
 
 
 def on_kline_data_callback(trading_system, data):
-    signals = trading_system.run_strategy(data)
+    signals = trading_system.process(data)
 
     send_chart_details(trading_system, signals)
 

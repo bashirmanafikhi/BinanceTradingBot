@@ -13,4 +13,4 @@ def live_data_example():
     strategy = BollingerRSIStrategy(500,2,14,70,30)
 
     trading_system = TradingSystem(symbol, strategy, binance_client)
-    binance_client.start_kline_socket(symbol=symbol, callback=lambda data: trading_system.run_strategy(data))
+    binance_client.start_kline_socket(symbol=symbol, callback=lambda data: trading_system.process(data))

@@ -11,7 +11,7 @@ def start_bot(id, kline_callback):
     trading_bot = TradingBot.query.get_or_404(id)
     
     trading_system = CurrentAppManager.get_trading_system(trading_bot.id)
-    if(trading_system is not None):
+    if(trading_system is not None and trading_system.is_running):
         return "Already running!"
     
     start_kline_socket(trading_bot, kline_callback)
@@ -19,13 +19,12 @@ def start_bot(id, kline_callback):
     exchange = trading_bot.exchange
     
     binance_client = BinanceTradingClient(exchange.api_key, exchange.api_secret, exchange.is_test)
-    binance_client.COMMISSION_RATE = 0
     strategy = trading_bot.get_strategy()
     trading_system = TradingSystem(trading_bot.symbol, strategy, binance_client, trading_bot.trade_percentage, trading_bot.trade_size)
     
     CurrentAppManager.set_trading_system(trading_bot.id, trading_system)
 
-    return "Started successfully.", 200
+    return "Started successfully."
 
 
 def stop_bot(id):
@@ -33,8 +32,7 @@ def stop_bot(id):
     
     trading_system = CurrentAppManager.get_trading_system(trading_bot.id)
     if(trading_system is not None):
-        CurrentAppManager.remove_trading_system(trading_bot.id)
-        # do what you need with trading_system
+        trading_system.stop()
         
     # Stop Kline Socket and it's thread
     binance_websocket_manager = CurrentAppManager.get_websocket_manager(trading_bot.id)
@@ -42,7 +40,7 @@ def stop_bot(id):
         binance_websocket_manager.stop_kline_socket()
         CurrentAppManager.remove_websocket_manager(trading_bot.id)
     
-    return "Stopped successfully.", 200
+    return "Stopped successfully."
 
 
 def start_kline_socket(trading_bot, kline_callback):

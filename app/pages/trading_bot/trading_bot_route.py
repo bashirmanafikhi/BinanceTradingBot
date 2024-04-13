@@ -26,9 +26,10 @@ def user_trading_bots():
     # Sort the list by total_profit
     bot_system_pairs = sorted(bot_system_pairs, key=lambda pair: pair[1].total_profit if pair[1] else float('-inf'), reverse=True)
 
+    running_bots_count = len([trading_system for trading_system in trading_systems.values() if trading_system.is_running])
     payload = {
-        "running_bots_count" : len(trading_systems),
-        "not_running_bots_count" : len(trading_bots) - len(trading_systems),
+        "running_bots_count" : running_bots_count,
+        "not_running_bots_count" : len(trading_bots) - running_bots_count,
         "total_trades_count" : sum(system.trades_count for system in trading_systems.values()),
         "total_profit" : sum(system.total_profit for system in trading_systems.values()),
         "bot_system_pairs" : bot_system_pairs
@@ -77,8 +78,11 @@ def update_trading_bot(id):
 @trading_bot_bp.route("/delete/<int:id>", methods=['POST'])
 @login_required
 def delete_trading_bot(id):
-    #todo: prevent remove if the bot is running.
     trading_bot = TradingBot.query.get_or_404(id)
+    trading_system = CurrentAppManager.get_trading_system(trading_bot.id)
+    if(trading_system is not None and trading_system.is_running):
+        flash('TradingBot is running, stop it befor deletion!', 'danger')
+        return redirect(url_for('trading_bot.user_trading_bots'))
     db.session.delete(trading_bot)
     db.session.commit()
     flash('TradingBot deleted successfully!', 'success')

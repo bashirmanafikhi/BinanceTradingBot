@@ -22,15 +22,15 @@
             <tr>
                 <td>{{ trading_bot.name }}</td>
                 <td>{{ trading_bot.symbol }}</td>
-                {% if trading_system is none %}
-                <td><span class="badge badge-pill badge-danger">Not Running</span></td>
-                <td></td>
-                <td></td>
-                {% else %}
+                {% if trading_system is not none and trading_system.is_running %}
                 <td><span class="badge badge-pill badge-success">Running</span></td>
                 <td>{{ trading_system.trades_count }}</td>
                 <td>{{ '{:.2f}'.format(trading_system.total_profit) }} ({{
                     '{:.2f}'.format(trading_system.total_profit_percentage) }}%)</td>
+                {% else %}
+                <td><span class="badge badge-pill badge-danger">Not Running</span></td>
+                <td></td>
+                <td></td>
                 {% endif %}
                 <td>
                     <a href="{{ url_for('trading_bot.details', id=trading_bot.id) }}"
@@ -50,7 +50,7 @@
             <tr>
                 <th colspan="2"></th>
                 <th>
-                    <p>Count: 
+                    <p>Count:
                         <span class="badge badge-pill badge-success">{{ payload.running_bots_count }}</span>
                         <span class="badge badge-pill badge-danger">{{ payload.not_running_bots_count }}</span>
                     </p>

@@ -39,8 +39,16 @@ class TradingSystem:
         self.initialize_balance()
         self.signals = None
         self.initial_investment = None
+        self.is_running = True
 
-    def run_strategy(self, data):
+
+    def stop(self):
+        self.is_running = False
+        
+    def process(self, data):
+        if(not self.is_running):
+            raise SystemError("Trading system is not running")
+        
         self.signals = self.strategy.execute(data)
         return self.signals
 

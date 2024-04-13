@@ -33,7 +33,7 @@ def historical_data_example():
         strategy = BollingerRSIStrategy(300, 2, 100, 72, 28)
         trading_system = TradingSystem(symbol, strategy, fake_client)
 
-        trading_system.run_strategy(data)
+        trading_system.process(data)
         trading_system.log_trading_informations()
 
         print(f"\nYear: {year}")
