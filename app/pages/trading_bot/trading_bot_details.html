@@ -12,20 +12,23 @@
       {% endif %}
     </div>
     <div class="col-md-6">
-      <form method="post" action="{{ url_for('trading_bot.start_bot') }}">
+      <form method="post" action="{{ url_for('trading_bot.start_bot') }}" class="d-inline">
         <input type="hidden" id="id" name="id" value="{{trading_bot.id}}">
         <button type="submit" class="btn btn-primary m-2">Start</button>
       </form>
-      <form method="post" action="{{ url_for('trading_bot.stop_bot') }}">
+      <form method="post" action="{{ url_for('trading_bot.stop_bot') }}" class="d-inline">
         <input type="hidden" id="id" name="id" value="{{trading_bot.id}}">
         <button type="submit" class="btn btn-danger m-2">Stop</button>
       </form>
 
-      <form action="{{ url_for('trading_bot.download_csv', id=trading_bot.id) }}" method="get">
-        <button class="btn btn-warning m-2" type="submit">Download Excel</button>
-      </form>
       <a href="{{ url_for('trading_bot.update_trading_bot', id=trading_bot.id) }}" class="btn btn-info m-2">Update
         Trading Bot</a>
+
+      <form action="{{ url_for('trading_bot.download_csv', id=trading_bot.id) }}" method="get" class="d-inline">
+        <button class="btn btn-warning m-2" type="submit">Download CSV</button>
+      </form>
+
+      <button id="backtestBtn" class="btn btn-secondary m-2" onclick="backtest()">Backtest</button>
     </div>
   </div>
 </div>
@@ -67,6 +70,7 @@
 <div id="rsi-plot"></div>
 
 <script>
+
   var socket = io.connect('{{socket_url}}');
 
   socket.on("connect", function (data) {
@@ -81,7 +85,20 @@
   });
 
 
+  function backtest() {
+    // Disable the button
+    document.getElementById("backtestBtn").disabled = true;
+    document.getElementById("backtestBtn").innerText = 'Backtesting...';
+
+    // Emit backtest event to the server
+    socket.emit('backtest', '{{trading_bot.id}}');
+  }
+
   function show_chart_data(data) {
+    // Enable the button
+    document.getElementById("backtestBtn").disabled = false;
+    document.getElementById("backtestBtn").innerText = 'Backtest';
+
     var last_signal = JSON.parse(data.last_signal);
     document.getElementById("last_bbu").innerHTML = Math.round(last_signal.BBU * 100) / 100;
     document.getElementById("last_close").innerHTML = Math.round(last_signal.close * 100) / 100;
@@ -176,5 +193,6 @@
 
     Plotly.react("live-plot", [close_trace, bbu_trace, bbl_trace, buy_signal_trace, sell_signal_trace, rsi_trace], layout);
   }
+
 </script>
 {% endblock %}

@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import current_user, login_required
+from pages.trading_bot.trading_bot_management import update_running_trading_system
 from current_app_manager import CurrentAppManager
 from flask_app import db
 from helpers.models import Exchange, User, TradingBot
@@ -40,7 +41,7 @@ def create_trading_bot():
         db.session.add(trading_bot)
         db.session.commit()
         flash('TradingBot created successfully!', 'success')
-        return redirect(url_for('trading_bot.user_trading_bots'))
+        return redirect(url_for('trading_bot.details', id=trading_bot.id))
     
 
     return render_template('/trading_bot/trading_bot_create.html', form=form)
@@ -58,8 +59,8 @@ def update_trading_bot(id):
         
         db.session.commit()
         flash('TradingBot updated successfully!', 'success')
-        trading_bot_details_route.update_running_trading_system(trading_bot)
-        return redirect(url_for('trading_bot.user_trading_bots'))
+        update_running_trading_system(trading_bot)
+        return redirect(url_for('trading_bot.details', id=trading_bot.id))
     return render_template('/trading_bot/trading_bot_update.html', form=form)
 
 @trading_bot_bp.route("/delete/<int:id>", methods=['POST'])
