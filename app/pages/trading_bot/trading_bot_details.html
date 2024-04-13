@@ -3,12 +3,12 @@
 <div class="container">
   <div class="row">
     <div class="col-md-6">
-      <h1 class="mb-4">Name: {{trading_bot.name}}</h1>
-      <h2 class="mb-4">Symbol: {{trading_bot.symbol}}</h2>
+      <h2 class="m-2">{{trading_bot.name}}</h1>
+      <h3 class="m-2 text-secondary">{{trading_bot.symbol}}</h2>
       {% if is_running %}
-      <h3 style="color: green">Is running: {{ is_running }}</h3>
+      <td><span class="badge badge-pill badge-success mb-3">Running</span></td>
       {% else %}
-      <h3 style="color: red">Is running: {{ is_running }}</h3>
+      <td><span class="badge badge-pill badge-danger mb-3">Not Running</span></td>
       {% endif %}
     </div>
     <div class="col-md-6">
@@ -33,6 +33,7 @@
   </div>
 </div>
 
+{% if is_running %}
 <div class="container">
   <div class="row">
     <div class="col-md-6">
@@ -68,6 +69,13 @@
 
 <div id="live-plot"></div>
 <div id="rsi-plot"></div>
+{% else %}
+<div class="row mt-5 text-secondary">
+  <div class="col text-center">
+      <h1 class="display-5">Start the bot to see it's information here</h1>
+  </div>
+</div>
+{% endif %}
 
 <script>
 
