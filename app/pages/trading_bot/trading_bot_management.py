@@ -20,7 +20,7 @@ def start_bot(id, kline_callback):
     
     binance_client = BinanceTradingClient(exchange.api_key, exchange.api_secret, exchange.is_test)
     strategy = trading_bot.get_strategy()
-    trading_system = TradingSystem(trading_bot.symbol, strategy, binance_client, trading_bot.trade_percentage, trading_bot.trade_size)
+    trading_system = TradingSystem(trading_bot.base_asset, trading_bot.quote_asset, strategy, binance_client, trading_bot.trade_size)
     
     CurrentAppManager.set_trading_system(trading_bot.id, trading_system)
 
@@ -52,7 +52,7 @@ def start_kline_socket(trading_bot, kline_callback):
             CurrentAppManager.set_websocket_manager(trading_bot.id, binance_websocket_manager)
             
             binance_websocket_manager.start_kline_in_new_thread(
-                symbol=trading_bot.symbol,
+                symbol=trading_bot.get_symbol(),
                 callback=lambda data: kline_callback(data, trading_bot.id))
             
     except Exception as e:
@@ -136,7 +136,6 @@ def update_running_trading_system(trading_bot):
     if(trading_system is None):
         return
     
-    trading_system.trade_quote_percentage = trading_bot.trade_percentage
     trading_system.trade_quote_size = trading_bot.trade_size
     strategy = trading_system.strategy
     strategy.conditions_manager.conditions = trading_bot.get_conditions()

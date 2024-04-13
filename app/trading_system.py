@@ -15,16 +15,15 @@ class TradingSystem:
 
     def __init__(
         self,
-        symbol: str,
+        base_asset: str,
+        quote_asset: str,
         strategy: TradingStrategy,
         trading_client: TradingClient,
         # should be between 0 and 1
-        trade_quote_percentage= 0.9,
         trade_quote_size = None
     ):
         self.strategy = strategy
         self.trading_client = trading_client
-        self.trade_quote_percentage = trade_quote_percentage
         self.trade_quote_size = trade_quote_size
         self.last_action = None
         self.last_price = 0
@@ -35,7 +34,7 @@ class TradingSystem:
         self.trades_count = 0
         self.last_quantity = None
         self.register_handlers()
-        self.initialize_symbol_info(symbol)
+        self.initialize_symbol_info(base_asset, quote_asset)
         self.initialize_balance()
         self.signals = None
         self.initial_investment = None
@@ -143,11 +142,7 @@ class TradingSystem:
             if price == 0:
                 raise ValueError("Price should not be zero.")
             
-            # Calculate quantity using decimal arithmetic
-            if(self.trade_quote_size is None):
-                size = self.quote_balance * self.trade_quote_percentage
-            else:
-                size = self.trade_quote_size
+            size = self.trade_quote_size + self.total_profit
                 
             quantity = (
                 size * quantity_percentage / price
@@ -189,7 +184,8 @@ class TradingSystem:
             #my_logger.info(f"Error extracting price from order: {e}")
             return None
         
-    def initialize_symbol_info(self, symbol):
+    def initialize_symbol_info(self, base_asset, quote_asset):
+        symbol = f'{base_asset}{quote_asset}'
         # Extract quote and base asset names
         self.symbol_info = self.trading_client.get_symbol_info(symbol)
         self.symbol = symbol

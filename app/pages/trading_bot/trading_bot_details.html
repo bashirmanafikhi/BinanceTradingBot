@@ -4,7 +4,7 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="m-2">{{trading_bot.name}}</h1>
-      <h3 class="m-2 text-secondary">{{trading_bot.symbol}}</h2>
+      <h3 class="m-2 text-secondary">{{trading_bot.get_symbol()}}</h2>
       {% if is_running %}
       <td><span class="badge badge-pill badge-success mb-3">Running</span></td>
       {% else %}

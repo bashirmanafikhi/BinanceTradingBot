@@ -21,7 +21,7 @@
             {% for trading_bot, trading_system in payload.bot_system_pairs %}
             <tr>
                 <td>{{ trading_bot.name }}</td>
-                <td>{{ trading_bot.symbol }}</td>
+                <td>{{trading_bot.get_symbol()}}</td>
                 {% if trading_system is not none and trading_system.is_running %}
                 <td><span class="badge badge-pill badge-success">Running</span></td>
                 <td>{{ trading_system.trades_count }}</td>

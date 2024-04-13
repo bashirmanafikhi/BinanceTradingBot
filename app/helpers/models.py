@@ -24,8 +24,8 @@ class TradingBot(db.Model):
     exchange_id = db.Column(db.Integer, db.ForeignKey('exchange.id'), nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     name = db.Column(db.String(255), nullable=False)
-    symbol = db.Column(db.String(255), nullable=False)
-    trade_percentage = db.Column(db.Float, nullable=True)
+    base_asset = db.Column(db.String(100), nullable=False)
+    quote_asset = db.Column(db.String(100), nullable=False)
     trade_size = db.Column(db.Float, nullable=True)
 
     # Bollinger Bands Columns
@@ -38,6 +38,9 @@ class TradingBot(db.Model):
     rsi_period = db.Column(db.Float, nullable=False, default=14)
     rsi_overbought = db.Column(db.Float, nullable=False, default=70)
     rsi_oversold =db. Column(db.Float, nullable=False, default=30)
+    
+    def get_symbol(self):
+        return f'{self.base_asset}{self.quote_asset}'
     
     def get_strategy(self):
         return ConditionsStrategy(self.get_conditions())

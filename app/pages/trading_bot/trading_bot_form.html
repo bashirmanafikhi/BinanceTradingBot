@@ -4,7 +4,10 @@
         {{ form.name.label }} {{ form.name(size=32, class="form-control") }}
     </div>
     <div class="form-group">
-        {{ form.symbol.label }} {{ form.symbol(size=32, class="form-control") }}
+        {{ form.base_asset.label }} {{ form.base_asset(size=32, class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.quote_asset.label }} {{ form.quote_asset(size=32, class="form-control") }}
     </div>
     <div class="form-group">
         {{ form.exchange_id.label }} 
@@ -44,10 +47,6 @@
         {{ form.rsi_oversold.label }} {{ form.rsi_oversold(size=32, class="form-control") }}
     </div>
 
-    
-    <div class="form-group">
-        {{ form.trade_percentage.label }} {{ form.trade_percentage(size=32, class="form-control") }}
-    </div>
     <div class="form-group">
         {{ form.trade_size.label }} {{ form.trade_size(size=32, class="form-control") }}
     </div>

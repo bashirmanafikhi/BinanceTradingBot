@@ -40,7 +40,7 @@ def download_csv(id):
         csv_buffer,
         mimetype='text/csv',
         as_attachment=True,
-        download_name=f'{trading_bot.symbol}.csv'
+        download_name=f'{trading_bot.get_symbol()}.csv'
     )
 
 
@@ -89,7 +89,7 @@ def handle_backtest(id):
         socketio.emit(f"update_data_{trading_bot.id}", None, namespace="/trading_bot_details")
         return
     
-    file_path = f'backtest/{trading_bot.symbol}.csv'
+    file_path = f'backtest/{trading_bot.get_symbol()}.csv'
 
     # Check if the file exists
     if not os.path.exists(file_path):
@@ -102,7 +102,7 @@ def handle_backtest(id):
     
     binance_client = FakeTradingClient()
     strategy = trading_bot.get_strategy()
-    trading_system = TradingSystem(trading_bot.symbol, strategy, binance_client, trading_bot.trade_percentage, trading_bot.trade_size)
+    trading_system = TradingSystem(trading_bot.base_asset, trading_bot.quote_asset, strategy, binance_client, trading_bot.trade_size)
     
     signals = trading_system.process(data)
     

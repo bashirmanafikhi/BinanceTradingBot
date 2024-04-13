@@ -22,7 +22,8 @@ def get_historical_data(year):
         return pd.DataFrame()
 
 def historical_data_example():
-    symbol = "BTCUSDT"
+    base_asset = "BTC"
+    quote_asset = "USDT"
     trading_client_factory = TradingClientFactory()
     years = [2017, 2018, 2019, 2020, 2021] 
     years = [2021]
@@ -31,7 +32,7 @@ def historical_data_example():
         data = get_historical_data(year)
         fake_client = trading_client_factory.create_fake_trading_client()
         strategy = BollingerRSIStrategy(300, 2, 100, 72, 28)
-        trading_system = TradingSystem(symbol, strategy, fake_client)
+        trading_system = TradingSystem(base_asset, quote_asset, strategy, fake_client)
 
         trading_system.process(data)
         trading_system.log_trading_informations()
