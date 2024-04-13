@@ -23,7 +23,9 @@ def user_trading_bots():
         trading_system = trading_systems.get(bot.id)
         bot_system_pairs.append((bot, trading_system))
         
-        
+    # Sort the list by total_profit
+    bot_system_pairs = sorted(bot_system_pairs, key=lambda pair: pair[1].total_profit if pair[1] else float('-inf'), reverse=True)
+
     payload = {
         "running_bots_count" : len(trading_systems),
         "not_running_bots_count" : len(trading_bots) - len(trading_systems),
