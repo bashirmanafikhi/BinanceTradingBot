@@ -17,12 +17,20 @@ def user_trading_bots():
     trading_bots = user.trading_bots
     
     trading_systems = CurrentAppManager.get_all_trading_systems()
+    
+    bot_system_pairs = []
+    for bot in trading_bots:
+        trading_system = trading_systems.get(bot.id)
+        bot_system_pairs.append((bot, trading_system))
+        
+        
     payload = {
         "running_bots_count" : len(trading_systems),
         "total_trades_count" : sum(system.trades_count for system in trading_systems.values()),
         "total_profit" : sum(system.total_profit for system in trading_systems.values()),
+        "bot_system_pairs" : bot_system_pairs
     }
-    return render_template('/trading_bot/trading_bots.html', trading_bots=trading_bots,payload = payload)
+    return render_template('/trading_bot/trading_bots.html', payload = payload)
 
 
 @trading_bot_bp.route("/create", methods=['GET', 'POST'])
