@@ -30,7 +30,16 @@ class ConditionsManager():
         return None
     
     def all_signals_equals_action(self, row, action):
-        return (all(condition.get_signal(row) == action for condition in self.conditions))
+        
+        def check_condition(condition):
+            return ((action == ACTION_BUY and condition.use_to_open) or 
+                    (action == ACTION_SELL and condition.use_to_close))
+        
+        filtered_conditions = list(filter(check_condition , self.conditions))
+        if(len(filtered_conditions) == 0):
+            return False
+        
+        return (all(condition.get_signal(row) == action for condition in filtered_conditions))
     
     def any_signal_equals_action(self, row, action):
         return (any(condition.get_signal(row) == action for condition in self.conditions))

@@ -2,7 +2,10 @@ from enum import Enum
 
 class ExchangeType(Enum):
     Binance = 1
-    #OKX = 2
+    OKX = 2
+    
+    def __str__(self):
+        return str(self.value)
 
 class OrderStatus(Enum):
     NEW = "NEW"
@@ -49,3 +52,11 @@ class Interval(Enum):
 class OrderSide(Enum):
     BUY = "BUY"
     SELL = "SELL"
+
+class BotType(Enum):
+    LONG = 'LONG'
+    SHORT = 'SHORT'
+    BOTH = 'BOTH'
+    
+    def __str__(self):
+        return str(self.value)

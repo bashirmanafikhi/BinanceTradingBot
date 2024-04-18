@@ -1,54 +1,210 @@
 <form method="post">
     {{ form.hidden_tag() }}
-    <div class="form-group">
-        {{ form.name.label }} {{ form.name(size=32, class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.base_asset.label }} {{ form.base_asset(size=32, class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.quote_asset.label }} {{ form.quote_asset(size=32, class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.exchange_id.label }} 
-        <select name="exchange_id" class="form-control">
-            {% for value, label in form.exchange_id.choices %}
-                {% if value == form.exchange_id.data %}
-                    <option value="{{ value }}" selected>{{ label }}</option>
-                {% else %}
-                    <option value="{{ value }}">{{ label }}</option>
-                {% endif %}
-            {% endfor %}
-        </select>
-    </div>
-    
-    
-    <div class="form-group">
-        {{ form.use_bollinger_bands.label }} {{ form.use_bollinger_bands() }}
-    </div>
-    <div class="form-group">
-        {{ form.bollinger_bands_period.label }} {{ form.bollinger_bands_period(size=32, class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.bollinger_bands_stddev.label }} {{ form.bollinger_bands_stddev(size=32, class="form-control") }}
-    </div>
-    
 
-    <div class="form-group">
-        {{ form.use_rsi.label }} {{ form.use_rsi() }}
-    </div>
-    <div class="form-group">
-        {{ form.rsi_period.label }} {{ form.rsi_period(size=32, class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.rsi_overbought.label }} {{ form.rsi_overbought(size=32, class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.rsi_oversold.label }} {{ form.rsi_oversold(size=32, class="form-control") }}
+
+
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-12">
+                <fieldset class="border border-dark p-2">
+                    <legend class="w-auto">Main Properties</legend>
+                    <div class="form-group">
+                        {{ form.name.label }} {{ form.name(size=32, class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.base_asset.label }} {{ form.base_asset(size=32, class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.quote_asset.label }} {{ form.quote_asset(size=32, class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.exchange_id.label }}
+                        {{ form.exchange_id(class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.trade_size.label }} {{ form.trade_size(size=32, class="form-control") }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.bot_type.label }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        {{ form.bot_type(class="form-control") }}
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="col-md-6">
+                <fieldset class="border border-dark p-2">
+                    <legend class="w-auto">Stop Loss</legend>
+                    <div class="form-group">
+                        {{ form.use_stop_loss.label() }}
+                        {{ form.use_stop_loss() }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        <br />
+                        {{ form.stop_loss_deviation_percentage.label(class="form-label") }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        {{ form.stop_loss_deviation_percentage(class="form-control") }}
+                        <br />
+                        {{ form.trailing_stop_loss.label() }}
+                        {{ form.trailing_stop_loss() }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        <br />
+                        {{ form.stop_loss_timeout.label(class="form-label") }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        {{ form.stop_loss_timeout(class="form-control") }}
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="col-md-6">
+                <fieldset class="border border-dark p-2">
+                    <legend class="w-auto">Take Profit</legend>
+                    <div class="form-group">
+                        {{ form.use_take_profit.label() }}
+                        {{ form.use_take_profit() }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        <br />
+                        {{ form.take_profit_size_percentage.label(class="form-label") }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        {{ form.take_profit_size_percentage(class="form-control") }}
+                        <br />
+                        {{ form.trailing_take_profit.label() }}
+                        {{ form.trailing_take_profit() }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        <br />
+                        {{ form.trailing_take_profit_deviation_percentage.label(class="form-label") }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        {{ form.trailing_take_profit_deviation_percentage(class="form-control") }}
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <fieldset class="border border-dark p-2">
+                    <legend class="w-auto">Extra Orders</legend>
+                    <div class="form-group">
+                        {{ form.extra_order_size.label(class="form-label") }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        {{ form.extra_order_size(class="form-control") }}
+                        <br />
+                        {{ form.extra_orders_count.label(class="form-label") }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        {{ form.extra_orders_count(class="form-control") }}
+                        <br />
+                        {{ form.extra_order_deviation.label(class="form-label") }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        {{ form.extra_order_deviation(class="form-control") }}
+                        <br />
+                        {{ form.extra_order_size_scale.label(class="form-label") }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        {{ form.extra_order_size_scale(class="form-control") }}
+                        <br />
+                        {{ form.extra_order_deviation_scale.label(class="form-label") }}
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        {{ form.extra_order_deviation_scale(class="form-control") }}
+                    </div>
+                </fieldset>
+            </div>
+            <div class="col-md-6">
+                <fieldset class="border border-dark p-2">
+                    <legend class="w-auto">Start Conditions</legend>
+                    <div class="form-group">
+
+                        <div id="start_conditions">
+                            {% for indicator in form.start_conditions %}
+                            {{ indicator.form.hidden_tag() }}
+                            <div class="indicator">
+                                {{ indicator.form.type(class="form-control") }}
+                                <br>
+                                <div class="parameters">
+                                    <div class="none"></div>
+                                    <div class="bollinger_bands">
+                                        <div class="row">
+                                            <div class="col-md-6 form-group">
+                                                {{ indicator.form.bollinger_bands.use_to_open.label() }}
+                                                {{ indicator.form.bollinger_bands.use_to_open() }}
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                {{ indicator.form.bollinger_bands.use_to_close.label() }}
+                                                {{ indicator.form.bollinger_bands.use_to_close() }}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 form-group">
+                                                {{ indicator.form.bollinger_bands.period.label }}
+                                                {{ indicator.form.bollinger_bands.period(size=24, class="form-control") }}
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                {{ indicator.form.bollinger_bands.stddev.label }}
+                                                {{ indicator.form.bollinger_bands.stddev(size=24, class="form-control") }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="rsi">
+                                        <div class="row">
+                                            <div class="col-md-6 form-group">
+                                                {{ indicator.form.rsi.use_to_open.label() }}
+                                                {{ indicator.form.rsi.use_to_open() }}
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                {{ indicator.form.rsi.use_to_close.label() }}
+                                                {{ indicator.form.rsi.use_to_close() }}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4 form-group">
+                                                {{ indicator.form.rsi.period.label }}
+                                                {{ indicator.form.rsi.period(size=24, class="form-control") }}
+                                            </div>
+                                            <div class="col-md-4 form-group">
+                                                {{ indicator.form.rsi.overbought.label }}
+                                                {{ indicator.form.rsi.overbought(size=24, class="form-control") }}
+                                            </div>
+                                            <div class="col-md-4 form-group">
+                                                {{ indicator.form.rsi.oversold.label }}
+                                                {{ indicator.form.rsi.oversold(size=24, class="form-control") }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <!-- <button type="button" id="add-indicator">Add Indicator</button><br><br> -->
+                    </div>
+                </fieldset>
+            </div>
+        </div>
     </div>
 
-    <div class="form-group">
-        {{ form.trade_size.label }} {{ form.trade_size(size=32, class="form-control") }}
-    </div>
+
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+
+<script>
+    $(document).ready(function () {
+
+        // Iterate over each indicator
+        $('.indicator').each(function() {
+            var typeSelect = $(this).find('select[name$="type"]'); // Find the select box with name "type"
+            var selectedType = typeSelect.val(); // Get the value of the select box
+            
+            // Hide all parameter rows within the indicator
+            $(this).find('.parameters > div').hide();
+            
+            // Show the parameter row corresponding to the selected type
+            $(this).find('.' + selectedType).show();
+            
+            // Update the parameter row when the select box value changes
+            typeSelect.change(function() {
+                var newSelectedType = $(this).val(); // Get the new selected value
+                $(this).closest('.indicator').find('.parameters > div').hide(); // Hide all parameter rows
+                $(this).closest('.indicator').find('.' + newSelectedType).show(); // Show the corresponding parameter row
+            });
+        });
+    });
+</script>

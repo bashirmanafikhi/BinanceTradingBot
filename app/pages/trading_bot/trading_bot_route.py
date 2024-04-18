@@ -1,10 +1,13 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import current_user, login_required
+from helpers.enums import BotType
 from pages.trading_bot.trading_bot_management import update_running_trading_system
 from current_app_manager import CurrentAppManager
 from flask_app import db
 from helpers.models import Exchange, User, TradingBot
-from pages.trading_bot.trading_bot_form import TradingBotForm
+from pages.trading_bot.trading_bot_form import IndicatorConditionForm, TradingBotForm
+import json
+
 
 trading_bot_bp = Blueprint('trading_bot', __name__, url_prefix='/trading_bot')
 
@@ -36,18 +39,22 @@ def user_trading_bots():
     }
     return render_template('/trading_bot/trading_bots.html', payload = payload)
 
-
 @trading_bot_bp.route("/create", methods=['GET', 'POST'])
 @login_required
 def create_trading_bot():
     form = TradingBotForm()
 
-    form.exchange_id.choices = [(exchange.id, exchange.name) for exchange in Exchange.query.all()]
+    fill_exchanges(form)
 
     if form.validate_on_submit():
-        
         trading_bot = TradingBot()
-        form.populate_obj(trading_bot) 
+        
+        for name, field in form._fields.items():
+            if(name == 'start_conditions'):
+                continue
+            field.populate_obj(trading_bot, name)
+            
+        trading_bot.start_conditions = form.get_start_conditions()
         trading_bot.user = current_user  
         
         db.session.add(trading_bot)
@@ -58,16 +65,28 @@ def create_trading_bot():
 
     return render_template('/trading_bot/trading_bot_create.html', form=form)
 
+def fill_exchanges(form):
+    user = User.query.filter_by(email=current_user.email).first_or_404()
+    exchanges = user.exchanges
+    form.set_exchange_choices(exchanges)
+
 @trading_bot_bp.route("/update/<int:id>", methods=['GET', 'POST'])
 @login_required
 def update_trading_bot(id):
     trading_bot = TradingBot.query.get_or_404(id)
-    form = TradingBotForm(obj=trading_bot)
 
-    form.exchange_id.choices = [(exchange.id, exchange.name) for exchange in Exchange.query.all()]
+    # Pass the Enum member to the form
+    form = TradingBotForm(obj=trading_bot)
+    fill_exchanges(form)
     
-    if form.validate_on_submit():
-        form.populate_obj(trading_bot)
+    if form.validate_on_submit(): 
+        
+        for name, field in form._fields.items():
+            if(name == 'start_conditions'):
+                continue
+            field.populate_obj(trading_bot, name)
+            
+        trading_bot.start_conditions = form.get_start_conditions()
         
         db.session.commit()
         flash('TradingBot updated successfully!', 'success')

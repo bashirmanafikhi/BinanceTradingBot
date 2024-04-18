@@ -6,8 +6,8 @@ import helpers.my_logger as my_logger
 class RSICondition(TradingCondition):
     RSI_KEY = "RSI"
 
-    def __init__(self, rsi_window = 14, rsi_overbought=70, rsi_oversold=30):
-        super().__init__()
+    def __init__(self, rsi_window = 14, rsi_overbought=70, rsi_oversold=30, use_to_open = True, use_to_close = False):
+        super().__init__(use_to_open = use_to_open, use_to_close = use_to_close)
         self.rsi_window = rsi_window
         self.rsi_overbought = rsi_overbought
         self.rsi_oversold = rsi_oversold

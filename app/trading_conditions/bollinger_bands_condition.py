@@ -7,11 +7,10 @@ class BollingerBandsCondition(TradingCondition):
     UPPER_BAND_KEY = "BBU"
     LOWER_BAND_KEY = "BBL"
 
-    def __init__(self, bollinger_window=20, bollinger_dev=2):
-        super().__init__()
+    def __init__(self, bollinger_window=20, bollinger_dev=2, use_to_open = True, use_to_close = False):
+        super().__init__(use_to_open = use_to_open, use_to_close = use_to_close)
         self.bollinger_window = bollinger_window
         self.bollinger_dev = bollinger_dev
-
 
     def calculate(self, data):
         if len(data) >= self.bollinger_window:
@@ -19,10 +18,8 @@ class BollingerBandsCondition(TradingCondition):
         
         return data
 
-
     def is_calculated(self, row):
         return self.LOWER_BAND_KEY in row.index and self.UPPER_BAND_KEY in row.index 
-
 
     def get_signal(self, row):
 

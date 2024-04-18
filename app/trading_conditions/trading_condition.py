@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 
 
 class TradingCondition(ABC):
-    def __init__(self):
-        pass
+    def __init__(self, use_to_open = True, use_to_close = False):
+        self.use_to_open = use_to_open
+        self.use_to_close = use_to_close
   
     @abstractmethod
     def calculate(self, data):
