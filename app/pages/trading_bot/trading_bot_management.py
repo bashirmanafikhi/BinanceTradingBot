@@ -150,7 +150,7 @@ def update_running_trading_system(trading_bot):
     
     trading_system.trade_quote_size = trading_bot.trade_size
     strategy = trading_system.strategy
-    strategy.conditions_manager.conditions = trading_bot.get_conditions()
+    strategy.conditions_manager.conditions = trading_bot.get_start_conditions()
     
 def generate_csv(trading_system):
     if trading_system is None:
