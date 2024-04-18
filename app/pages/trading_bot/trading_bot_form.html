@@ -41,15 +41,12 @@
                     <div class="form-group">
                         {{ form.use_stop_loss.label() }}
                         {{ form.use_stop_loss() }}
-                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
                         <br />
-                        {{ form.stop_loss_deviation_percentage.label(class="form-label") }}
-                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
-                        {{ form.stop_loss_deviation_percentage(class="form-control") }}
+                        {{ form.stop_loss_percentage.label(class="form-label") }}
+                        {{ form.stop_loss_percentage(class="form-control") }}
                         <br />
                         {{ form.trailing_stop_loss.label() }}
                         {{ form.trailing_stop_loss() }}
-                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
                         <br />
                         {{ form.stop_loss_timeout.label(class="form-label") }}
                         <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
@@ -64,11 +61,9 @@
                     <div class="form-group">
                         {{ form.use_take_profit.label() }}
                         {{ form.use_take_profit() }}
-                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
                         <br />
-                        {{ form.take_profit_size_percentage.label(class="form-label") }}
-                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
-                        {{ form.take_profit_size_percentage(class="form-control") }}
+                        {{ form.take_profit_percentage.label(class="form-label") }}
+                        {{ form.take_profit_percentage(class="form-control") }}
                         <br />
                         {{ form.trailing_take_profit.label() }}
                         {{ form.trailing_take_profit() }}

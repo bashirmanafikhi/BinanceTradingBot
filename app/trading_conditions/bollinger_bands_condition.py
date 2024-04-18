@@ -1,33 +1,29 @@
+from trading_conditions.indicator_condition import IndicatorCondition
 from trading_conditions.trading_condition import TradingCondition
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL
 import pandas_ta as ta
 import helpers.my_logger as my_logger
 
-class BollingerBandsCondition(TradingCondition):
+class BollingerBandsCondition(IndicatorCondition):
     def __init__(self, bollinger_window=20, bollinger_dev=2, use_to_open = True, use_to_close = False):
         super().__init__(use_to_open = use_to_open, use_to_close = use_to_close)
         self.bollinger_window = bollinger_window
         self.bollinger_dev = bollinger_dev
 
+    def on_order_placed_successfully(self, price, action):
+        pass
+    
     def calculate(self, data):
         if len(data) >= self.bollinger_window:
             data = self.calculate_bollinger_band(data)
-        
         return data
 
-    def is_calculated(self, row):
-        return self.get_lower_band_key() in row.index and self.get_upper_band_key() in row.index 
-
     def get_signal(self, row):
-
-        if(not self.is_calculated(row)):
-            return None
-        
         price = row["close"]
 
-        if (price < row[self.get_lower_band_key()]):
+        if (self.get_lower_band_key() in row.index and price < row[self.get_lower_band_key()]):
             return ACTION_BUY
-        elif (price > row[self.get_upper_band_key()]):
+        elif (self.get_upper_band_key() in row.index and price > row[self.get_upper_band_key()]):
             return ACTION_SELL
         
         return None

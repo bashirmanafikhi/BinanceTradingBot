@@ -13,19 +13,16 @@ class ConditionsStrategy(TradingStrategy):
     def process_all(self, data):
         data = self.conditions_manager.calculate(data)
         return data
-
     def process_row(self, row):
-        if not self.conditions_manager.is_calculated(row):
-            return
-            
         price = row["close"]
-        signal = self.conditions_manager.get_signal(row)
-
-        if (self.last_action is None or self.last_action == ACTION_SELL) and signal == ACTION_BUY:
-            self.current_signal = signal
-        elif (self.last_action is None or self.last_action == ACTION_BUY) and signal == ACTION_SELL:
-            self.current_signal = signal
-        elif self.current_signal and not self.conditions_manager.any_signal_equals_action(row, self.current_signal):
-            return self.create_trade_action(self.current_signal, price, False)
+        if ((self.last_action is None or self.last_action == ACTION_SELL) and self.conditions_manager.should_buy(row)):
+            signal_to_return = self.create_trade_action(ACTION_BUY, price, False)
+            self.conditions_manager.on_order_placed_successfully(price, ACTION_BUY)
+            return signal_to_return
+            
+        elif((self.last_action is None or self.last_action == ACTION_BUY) and self.conditions_manager.should_sell(row)):
+            signal_to_return = self.create_trade_action(ACTION_SELL, price, False)
+            self.conditions_manager.on_order_placed_successfully(price, ACTION_SELL)
+            return signal_to_return
 
         return None

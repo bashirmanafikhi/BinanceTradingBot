@@ -18,11 +18,9 @@ class TradingStrategy(ABC):
         self.high_close_limit = None
         self.low_close_limit = None
         self.last_action = ACTION_SELL
-        self.current_signal = None
             
         self.buy_command = BuyCommand()
         self.sell_command = SellCommand()
-        self.trade_closed_event = Event()
         
         self.create_order_tries_limit = 3
         self.create_order_tries_counter = 0
@@ -88,6 +86,47 @@ class TradingStrategy(ABC):
 
         finally:
             self.disable_processing()
+    
+    def create_trade_action(self, action, price, set_stop_limits = True):
+        self.create_order_tries_counter += 1
+        # Create an order with a fixed quantity
+        is_succeed = self.create_order(action, price, self.QUANTITY)
+
+        if is_succeed:
+            if(set_stop_limits):
+                self.set_profit_lose_limits(action, price)
+            self.last_action = action
+            self.create_order_tries_counter = 0
+            return {"action": action, "quantity": self.QUANTITY}
+        else:
+            if(self.create_order_tries_counter == self.create_order_tries_limit):
+                my_logger.warning(f"create order failed {self.create_order_tries_counter} times, we will not try again.")
+                self.create_order_tries_counter = 0
+            return None
+        
+    def create_order(self, action, price, quantity, type=ORDER_TYPE_MARKET):
+        if(action == ACTION_BUY):
+            return self.buy_command(price, quantity, type)
+        elif(action == ACTION_SELL):
+            return self.sell_command(price, quantity, type)
+
+    def set_profit_lose_limits(self, action,  price):
+        if(action == ACTION_BUY):
+            self.high_close_limit = price + self.take_profit_range
+            self.low_close_limit = price -  self.stop_lose_range
+        elif(action == ACTION_SELL):
+            self.high_close_limit = price + self.stop_lose_range
+            self.low_close_limit = price -  self.take_profit_range
+        
+    def enable_processing(self):
+        self.set_processing(True)
+
+    def disable_processing(self):
+        self.set_processing(False)
+
+    def set_processing(self, is_processing):
+        self.is_processing = is_processing
+
       
     
                 
@@ -152,62 +191,4 @@ class TradingStrategy(ABC):
     #     plt.pause(2)
             
             
-            
-            
-            
-    def create_order(self, action, price, quantity, type=ORDER_TYPE_MARKET):
-        if(action == ACTION_BUY):
-            return self.buy_command(price, quantity, type)
-        elif(action == ACTION_SELL):
-            return self.sell_command(price, quantity, type)
-
-    def close_order(self, price):
-        result = None    
         
-        if(self.last_action == ACTION_BUY):
-            result = self.create_trade_action(ACTION_SELL, price, set_stop_limits = False)
-        elif(self.last_action == ACTION_SELL):
-            result = self.create_trade_action(ACTION_BUY, price, set_stop_limits = False)
-        
-        if(len(result) != 0):
-            self.trade_closed_event()
-            self.high_close_limit = None
-            self.low_close_limit = None
-            
-        return result
-    
-    def create_trade_action(self, action, price, set_stop_limits = True):
-        self.create_order_tries_counter += 1
-        # Create an order with a fixed quantity
-        is_succeed = self.create_order(action, price, self.QUANTITY)
-
-        if is_succeed:
-            if(set_stop_limits):
-                self.set_profit_lose_limits(action, price)
-            self.last_action = action
-            self.current_signal = None
-            self.create_order_tries_counter = 0
-            return {"action": action, "quantity": self.QUANTITY}
-        else:
-            if(self.create_order_tries_counter == self.create_order_tries_limit):
-                my_logger.warning(f"create order failed {self.create_order_tries_counter} times, we will not try again.")
-                self.current_signal = None
-                self.create_order_tries_counter = 0
-            return None
-
-    def set_profit_lose_limits(self, action,  price):
-        if(action == ACTION_BUY):
-            self.high_close_limit = price + self.take_profit_range
-            self.low_close_limit = price -  self.stop_lose_range
-        elif(action == ACTION_SELL):
-            self.high_close_limit = price + self.stop_lose_range
-            self.low_close_limit = price -  self.take_profit_range
-        
-    def enable_processing(self):
-        self.set_processing(True)
-
-    def disable_processing(self):
-        self.set_processing(False)
-
-    def set_processing(self, is_processing):
-        self.is_processing = is_processing

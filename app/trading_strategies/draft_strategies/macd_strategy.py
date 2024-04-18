@@ -65,7 +65,7 @@ class MACDStrategy(TradingStrategy):
 
         # Close
         elif self.last_action != None and (price > self.high_close_limit or price < self.low_close_limit):
-            return self.close_order(price) 
+            return [] # todo close the order
         
         else:
             return []

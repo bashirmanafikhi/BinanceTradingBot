@@ -8,10 +8,12 @@
 # import pandas_ta as ta
 # import helpers.my_logger as my_logger
 
-# class MACDCondition(TradingCondition):
+# class MACDCondition(IndicatorCondition):
 #     MACD_KEY = "MACD"
 #     SIGNAL_KEY = "MACD_Signal"
 
+        # def on_order_placed_successfully(self, price, action):
+        # pass
 #     def __init__(self, macd_fast=12, macd_slow=26, signal_period=9, use_to_open = True, use_to_close = False):
 #         super().__init__(use_to_open = use_to_open, use_to_close = use_to_close)
 #         self.macd_fast = macd_fast
@@ -23,11 +25,8 @@
 #             data = self.calculate_macd(data, self.macd_fast, self.macd_slow, self.signal_period)
 #         return data
 
-#     def is_calculated(self, row):
-#         return self.MACD_KEY in row.index and self.SIGNAL_KEY in row.index
-
 #     def get_signal(self, row):
-#         if not self.is_calculated(row):
+#         if not (self.MACD_KEY in row.index and self.SIGNAL_KEY in row.index):
 #             return None
         
 #         macd = row[self.MACD_KEY]

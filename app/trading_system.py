@@ -54,11 +54,6 @@ class TradingSystem:
     def register_handlers(self):
         self.strategy.buy_command.set_handler(self.handle_buy)
         self.strategy.sell_command.set_handler(self.handle_sell)
-        self.strategy.trade_closed_event.add_handler(self.handle_trade_closed)
-
-    def handle_trade_closed(self):
-        self.log_trading_informations()
-        
     
     def log_trading_informations(self):
         if(self.trades_count == 0):

@@ -1,5 +1,7 @@
 from flask_login import UserMixin
 from datetime import datetime
+from trading_conditions.take_profit_condition import TakeProfitCondition
+from trading_conditions.stop_loss_condition import StopLossCondition
 from trading_conditions.bollinger_bands_condition import BollingerBandsCondition
 from trading_conditions.rsi_condition import RSICondition
 from trading_strategies.conditions_strategy import ConditionsStrategy
@@ -42,13 +44,13 @@ class TradingBot(db.Model):
     
     # Stop Loss
     use_stop_loss = db.Column(db.Boolean, nullable=False, default=False)
-    stop_loss_deviation_percentage = db.Column(db.Float, nullable=False, default=5)
+    stop_loss_percentage = db.Column(db.Float, nullable=False, default=5)
     trailing_stop_loss = db.Column(db.Boolean, nullable=False, default=False)
     stop_loss_timeout = db.Column(db.Integer, nullable=False, default=60)
     
     # Take Profit
     use_take_profit = db.Column(db.Boolean, nullable=False, default=False)
-    take_profit_size_percentage = db.Column(db.Float, nullable=False, default=10)
+    take_profit_percentage = db.Column(db.Float, nullable=False, default=10)
     trailing_take_profit = db.Column(db.Boolean, nullable=False, default=False)
     trailing_take_profit_deviation_percentage = db.Column(db.Float, nullable=False, default=3)
     
@@ -73,6 +75,19 @@ class TradingBot(db.Model):
     
     def get_start_conditions(self):
         conditions_list = []
+        
+        if(self.use_stop_loss):
+            stop_loss_condition = StopLossCondition(self.stop_loss_percentage, 
+                                                    self.trailing_stop_loss, 
+                                                    self.stop_loss_timeout)
+            conditions_list.append(stop_loss_condition)
+        
+        if(self.use_take_profit):
+            take_profit_condition = TakeProfitCondition(self.take_profit_percentage, 
+                                                        self.trailing_take_profit, 
+                                                        self.trailing_take_profit_deviation_percentage)
+            conditions_list.append(take_profit_condition)
+        
         for condition in self.start_conditions:    
             if(condition['type'] == 'rsi'):
                 rsi_condition = RSICondition(condition['rsi']['period'], 

@@ -35,13 +35,13 @@ class TradingBotForm(FlaskForm):
     
     # Stop Loss
     use_stop_loss = BooleanField('Use Stop Loss', default=False)
-    stop_loss_deviation_percentage = FloatField('Stop Loss Deviation Percentage', default=5)
+    stop_loss_percentage = FloatField('Stop Loss Deviation Percentage', default=5)
     trailing_stop_loss = BooleanField('Trailing Stop Loss', default=False)
     stop_loss_timeout = IntegerField('Stop Loss Timeout', default=60)
     
     # Take Profit
     use_take_profit = BooleanField('Use Take Profit', default=False)
-    take_profit_size_percentage = FloatField('Take Profit Size Percentage', default=10)
+    take_profit_percentage = FloatField('Take Profit Percentage', default=10)
     trailing_take_profit = BooleanField('Trailing Take Profit', default=False)
     trailing_take_profit_deviation_percentage = FloatField('Trailing Take Profit Deviation Percentage', default=3)
     
