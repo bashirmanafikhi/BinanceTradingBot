@@ -89,26 +89,38 @@ def get_chart_details(trading_system, signals, plot_size = 5000):
         "price_y_data": close_y_data
     }
 
-    # Check if 'BBL' and 'BBU' columns exist in the DataFrame
-    if 'BBL' in signals.columns and 'BBU' in signals.columns:
+    # Check if any columns contain 'BBL' and 'BBU' in their names
+    bbl_columns = [col for col in signals.columns if 'BBL' in col]
+    bbu_columns = [col for col in signals.columns if 'BBU' in col]
+
+    if bbl_columns and bbu_columns:
+        # Take the first column found containing 'BBL' and 'BBU'
+        bbl_column = bbl_columns[0]
+        bbu_column = bbu_columns[0]
+
         # Drop rows with NaN values in 'BBL' and 'BBU' columns
-        bollinger_signals = signals[['BBL', 'BBU']].dropna()
+        bollinger_signals = signals[[bbl_column, bbu_column]].dropna()
 
         # Extract x data
         data["bbl_bbu_x_data"] = bollinger_signals.index.tolist()
 
         # Extract y data for 'BBL' and 'BBU'
-        data["bbl_y_data"] = bollinger_signals['BBL'].tolist()
-        data["bbu_y_data"] = bollinger_signals['BBU'].tolist()
+        data["bbl_y_data"] = bollinger_signals[bbl_column].tolist()
+        data["bbu_y_data"] = bollinger_signals[bbu_column].tolist()
 
-    # Check if 'RSI' column exist in the DataFrame
-    if 'RSI' in signals.columns:
+    # Check if any column contains 'rsi' in its name
+    rsi_columns = [col for col in signals.columns if 'RSI' in col]
+
+    if rsi_columns:
+        # Take the first column found containing 'rsi'
+        rsi_column = rsi_columns[0]
+
         # Replace rows with NaN values
-        rsi_signals = signals[['RSI']].fillna(50)
+        rsi_signals = signals[[rsi_column]].fillna(50)
 
         # Extract x and y data
         data["rsi_x_data"] = rsi_signals.index.tolist()
-        data["rsi_y_data"] = rsi_signals['RSI'].tolist()
+        data["rsi_y_data"] = rsi_signals[rsi_column].tolist()
 
     # action signals
     

@@ -4,9 +4,6 @@ import pandas_ta as ta
 import helpers.my_logger as my_logger
 
 class BollingerBandsCondition(TradingCondition):
-    UPPER_BAND_KEY = "BBU"
-    LOWER_BAND_KEY = "BBL"
-
     def __init__(self, bollinger_window=20, bollinger_dev=2, use_to_open = True, use_to_close = False):
         super().__init__(use_to_open = use_to_open, use_to_close = use_to_close)
         self.bollinger_window = bollinger_window
@@ -19,7 +16,7 @@ class BollingerBandsCondition(TradingCondition):
         return data
 
     def is_calculated(self, row):
-        return self.LOWER_BAND_KEY in row.index and self.UPPER_BAND_KEY in row.index 
+        return self.get_lower_band_key() in row.index and self.get_upper_band_key() in row.index 
 
     def get_signal(self, row):
 
@@ -28,9 +25,9 @@ class BollingerBandsCondition(TradingCondition):
         
         price = row["close"]
 
-        if (price < row[self.LOWER_BAND_KEY]):
+        if (price < row[self.get_lower_band_key()]):
             return ACTION_BUY
-        elif (price > row[self.UPPER_BAND_KEY]):
+        elif (price > row[self.get_upper_band_key()]):
             return ACTION_SELL
         
         return None
@@ -40,8 +37,8 @@ class BollingerBandsCondition(TradingCondition):
         try:
             bb_result = ta.bbands(data["close"], length=self.bollinger_window, std=self.bollinger_dev)
             
-            data[self.LOWER_BAND_KEY] = bb_result["BBL_%d_%s" % (self.bollinger_window, self.format_one_zero_decimal(self.bollinger_dev))]
-            data[self.UPPER_BAND_KEY] = bb_result["BBU_%d_%s" % (self.bollinger_window, self.format_one_zero_decimal(self.bollinger_dev))]
+            data[self.get_lower_band_key()] = bb_result[self.get_lower_band_key()]
+            data[self.get_upper_band_key()] = bb_result[self.get_upper_band_key()]
             
         except TypeError as e:
             my_logger.error(f"Error during Bollinger Bands calculation: {e}")
@@ -54,3 +51,9 @@ class BollingerBandsCondition(TradingCondition):
         if '.' not in formatted:
             formatted += '.0'
         return formatted
+    
+    def get_lower_band_key(self):
+        return "BBL_%d_%s" % (self.bollinger_window, self.format_one_zero_decimal(self.bollinger_dev))
+    
+    def get_upper_band_key(self):
+        return "BBU_%d_%s" % (self.bollinger_window, self.format_one_zero_decimal(self.bollinger_dev))
