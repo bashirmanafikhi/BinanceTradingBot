@@ -20,13 +20,14 @@ class TakeProfitCondition(TradingCondition):
         
         self.take_profit = None
 
-    def on_order_placed_successfully(self, price, action):
-        if(action == ACTION_SELL):
+    def on_order_placed_successfully(self, signal_scale):
+        if(signal_scale.action == ACTION_SELL):
             self.take_profit = None
-        if(action == ACTION_BUY):
-            self.set_take_profit(price)
+        if(signal_scale.action == ACTION_BUY):
+            self.set_take_profit(signal_scale.price)
 
     def set_take_profit(self, price):
+        # todo: store the extra trades and calculate the take profit from the average 
         self.take_profit = self.calculate_take_profit(price)
 
     def calculate_take_profit(self, price):

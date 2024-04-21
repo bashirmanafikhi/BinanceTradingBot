@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import current_user, login_required
 from flask_app import db
-from helpers.models import User, Exchange
+from models.database_models import User, Exchange
 from pages.exchange.exchange_form import ExchangeForm
 from helpers.enums import ExchangeType
 

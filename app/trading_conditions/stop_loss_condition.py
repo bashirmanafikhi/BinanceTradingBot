@@ -15,11 +15,11 @@ class StopLossCondition(TradingCondition):
         
         self.stop_loss = None
 
-    def on_order_placed_successfully(self, price, action):
-        if(action == ACTION_SELL):
+    def on_order_placed_successfully(self, signal_scale):
+        if(signal_scale.action == ACTION_SELL):
             self.stop_loss = None
-        if(action == ACTION_BUY):
-            self.set_stop_loss(price)
+        if(signal_scale.action == ACTION_BUY):
+            self.set_stop_loss(signal_scale.price)
 
     def set_stop_loss(self, price):
         new_stop_loss = self.calculate_stop_loss(price)

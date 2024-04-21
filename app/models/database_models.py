@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 from datetime import datetime
+from trading_conditions.extra_orders_condition import ExtraOrdersCondition
 from trading_conditions.take_profit_condition import TakeProfitCondition
 from trading_conditions.stop_loss_condition import StopLossCondition
 from trading_conditions.bollinger_bands_condition import BollingerBandsCondition
@@ -55,11 +56,13 @@ class TradingBot(db.Model):
     trailing_take_profit_deviation_percentage = db.Column(db.Float, nullable=False, default=3)
     
     # Extra Orders
-    extra_order_size = db.Column(db.Float, nullable=False, default=0)
     extra_orders_count = db.Column(db.Integer, nullable=False, default=0)
-    extra_order_deviation = db.Column(db.Float, nullable=False, default=1)
-    extra_order_size_scale = db.Column(db.Float, nullable=False, default=1)
-    extra_order_deviation_scale = db.Column(db.Float, nullable=False, default=1)
+    
+    extra_order_first_volume_scale = db.Column(db.Float, nullable=False, default=1)
+    extra_order_first_deviation_percentage = db.Column(db.Float, nullable=False, default=1)
+    
+    extra_order_step_volume_scale = db.Column(db.Float, nullable=False, default=1)
+    extra_order_step_deviation_scale = db.Column(db.Float, nullable=False, default=1)
     
     # start conditions
     start_conditions = db.Column(db.JSON, nullable=True)
@@ -87,6 +90,14 @@ class TradingBot(db.Model):
                                                         self.trailing_take_profit, 
                                                         self.trailing_take_profit_deviation_percentage)
             conditions_list.append(take_profit_condition)
+        
+        if(self.extra_orders_count > 0):
+            extra_orders_condition = ExtraOrdersCondition(self.extra_orders_count, 
+                                                          self.extra_order_first_volume_scale, 
+                                                          self.extra_order_first_deviation_percentage,
+                                                          self.extra_order_step_volume_scale,
+                                                          self.extra_order_step_deviation_scale)
+            conditions_list.append(extra_orders_condition)
         
         for condition in self.start_conditions:    
             if(condition['type'] == 'rsi'):

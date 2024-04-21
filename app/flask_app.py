@@ -23,7 +23,7 @@ def create_app(debug=False):
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
-    from helpers.models import User
+    from models.database_models import User
 
     @login_manager.user_loader
     def load_user(user_id):

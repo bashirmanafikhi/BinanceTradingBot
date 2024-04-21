@@ -10,7 +10,7 @@ class BollingerBandsCondition(IndicatorCondition):
         self.bollinger_window = bollinger_window
         self.bollinger_dev = bollinger_dev
 
-    def on_order_placed_successfully(self, price, action):
+    def on_order_placed_successfully(self, signal_scale):
         pass
     
     def calculate(self, data):

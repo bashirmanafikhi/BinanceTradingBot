@@ -5,7 +5,7 @@ import pandas as pd
 from trading_clients.fake_trading_client import FakeTradingClient
 from trading_system import TradingSystem
 from current_app_manager import CurrentAppManager
-from helpers.models import User, TradingBot
+from models.database_models import User, TradingBot
 from pages.trading_bot.trading_bot_route import trading_bot_bp
 import pages.trading_bot.trading_bot_management as bot_management
 from flask_app import socketio

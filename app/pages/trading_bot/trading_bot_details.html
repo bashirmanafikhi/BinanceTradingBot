@@ -55,7 +55,7 @@
           <h5 class="card-title">Total Trades:</h5>
           <p class="card-text"><span id="total_trades"></span></p>
           <h5 class="card-title">Last action:</h5>
-          <p class="card-text"><span id="last_action"></span> at <span id="last_price"></span></p>
+          <p class="card-text"><span id="last_action"></span> at <span id="last_action_price"></span></p>
           <h5 class="card-title">Total Profit:</h5>
           <p class="card-text"><span id="total_profit"></span></p>
           <h5 class="card-title">Total Profit Percentage:</h5>
@@ -112,7 +112,7 @@
     document.getElementById("last_rsi").innerHTML = Math.round(last_signal.RSI * 100) / 100;
 
     document.getElementById("last_action").innerHTML = data.last_action;
-    document.getElementById("last_price").innerHTML = data.last_price;
+    document.getElementById("last_action_price").innerHTML = data.last_action_price;
 
     document.getElementById("total_trades").innerHTML = data.total_trades_count;
     document.getElementById("total_profit").innerHTML = data.total_profit;

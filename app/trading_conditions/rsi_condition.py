@@ -17,7 +17,7 @@ class RSICondition(IndicatorCondition):
             data = self.calculate_rsi(data, self.rsi_window)
         return data
 
-    def on_order_placed_successfully(self, price, action):
+    def on_order_placed_successfully(self, signal_scale):
         pass
     
     def get_signal(self, row):

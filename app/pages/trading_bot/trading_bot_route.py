@@ -4,7 +4,7 @@ from helpers.enums import BotType
 from pages.trading_bot.trading_bot_management import update_running_trading_system
 from current_app_manager import CurrentAppManager
 from flask_app import db
-from helpers.models import Exchange, User, TradingBot
+from models.database_models import Exchange, User, TradingBot
 from pages.trading_bot.trading_bot_form import IndicatorConditionForm, TradingBotForm
 import json
 

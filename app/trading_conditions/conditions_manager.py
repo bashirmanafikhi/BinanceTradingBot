@@ -1,3 +1,4 @@
+from trading_conditions.extra_orders_condition import ExtraOrdersCondition
 from trading_conditions.indicator_condition import IndicatorCondition
 from trading_conditions.take_profit_condition import TakeProfitCondition
 from trading_conditions.stop_loss_condition import StopLossCondition
@@ -17,9 +18,12 @@ class ConditionsManager():
             data = condition.calculate(data)
         return data
     
-    def on_order_placed_successfully(self, price, action):
+    def on_order_placed_successfully(self, signal_scale):
         for condition in self.conditions:
-            condition.on_order_placed_successfully(price, action)
+            condition.on_order_placed_successfully(signal_scale)
+            
+    def get_extra_orders_condition(self):
+        return next((x for x in self.conditions if isinstance(x, ExtraOrdersCondition)), None)
 
     def should_buy(self, row):
         

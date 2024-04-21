@@ -3,7 +3,7 @@ from trading_system import TradingSystem
 from trading_clients.binance_trading_client import BinanceTradingClient
 from trading_clients.web_socket_services.my_binance_socket_manager import MyBinanceSocketManager
 from current_app_manager import CurrentAppManager
-from helpers.models import User, TradingBot
+from models.database_models import User, TradingBot
 
 
 
@@ -75,16 +75,16 @@ def get_chart_details(trading_system, signals, plot_size = 5000):
     
     # Prepare data dictionary
     data = {
-        "last_price": trading_system.last_price,
-        "last_action": trading_system.last_action,
+        "last_action_price": None,
+        "last_action": None,
         "last_signal": last_signal.to_json(),
         
-        "last_profit": trading_system.last_profit,
-        "last_profit_percentage": trading_system.last_profit_percentage,
+        "last_profit": trading_system.get_last_profit(),
+        "last_profit_percentage": trading_system.get_last_profit_percentage(),
         "total_profit": trading_system.total_profit,
         "total_profit_percentage": trading_system.total_profit_percentage,
         
-        "total_trades_count": trading_system.trades_count,
+        "total_trades_count": len(trading_system.orders_history),
         "price_x_data": close_x_data,
         "price_y_data": close_y_data
     }
@@ -129,8 +129,8 @@ def get_chart_details(trading_system, signals, plot_size = 5000):
         action_signals = signals[['close', 'signal']].dropna(subset=['signal'])
 
         # Filter buy and sell signals
-        buy_signals = action_signals[action_signals['signal'].apply(lambda x: x.get('action', '').upper()) == 'BUY']
-        sell_signals = action_signals[action_signals['signal'].apply(lambda x: x.get('action', '').upper()) == 'SELL']
+        buy_signals = action_signals[action_signals['signal'].apply(lambda x: x.action) == 'BUY']
+        sell_signals = action_signals[action_signals['signal'].apply(lambda x: x.action) == 'SELL']
 
         # Extract buy signal x and y data
         data["buy_signal_x_data"] = buy_signals.index.tolist()

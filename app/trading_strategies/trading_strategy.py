@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from models.signal import Signal
 import helpers.my_logger as my_logger
 import pandas as pd
 from helpers.ddd.buy_command import BuyCommand
@@ -9,14 +10,9 @@ import matplotlib.pyplot as plt
 
 # an interface for the trading strategy
 class TradingStrategy(ABC):
-    QUANTITY = 1
     PLOT_WINDOW = 100
     
-    def __init__(self, stop_lose_range = 20, take_profit_range = 40):
-        self.stop_lose_range = stop_lose_range
-        self.take_profit_range = take_profit_range
-        self.high_close_limit = None
-        self.low_close_limit = None
+    def __init__(self):
         self.last_action = ACTION_SELL
             
         self.buy_command = BuyCommand()
@@ -81,42 +77,35 @@ class TradingStrategy(ABC):
         
         try:
             self.enable_processing()
-            
             return self.process_row(candle)
 
         finally:
             self.disable_processing()
     
-    def create_trade_action(self, action, price, set_stop_limits = True):
+    def create_trade_action(self, action, price, scale = 1):
+        if(self.create_order_tries_counter == self.create_order_tries_limit):
+            return None
+            my_logger.warning(f"create order failed {self.create_order_tries_counter} times, strategy is disabled.")
+                
         self.create_order_tries_counter += 1
-        # Create an order with a fixed quantity
-        is_succeed = self.create_order(action, price, self.QUANTITY)
+        # Create an order with a fixed scale
+        is_succeed = self.create_order(action, price, scale)
 
         if is_succeed:
-            if(set_stop_limits):
-                self.set_profit_lose_limits(action, price)
             self.last_action = action
             self.create_order_tries_counter = 0
-            return {"action": action, "quantity": self.QUANTITY}
+            return Signal(price, action, scale)
         else:
             if(self.create_order_tries_counter == self.create_order_tries_limit):
-                my_logger.warning(f"create order failed {self.create_order_tries_counter} times, we will not try again.")
-                self.create_order_tries_counter = 0
+                my_logger.error(f"create order failed {self.create_order_tries_counter} times, strategy is disabled.")
+                # todo send telegram notification
             return None
         
-    def create_order(self, action, price, quantity, type=ORDER_TYPE_MARKET):
+    def create_order(self, action, price, scale, type=ORDER_TYPE_MARKET):
         if(action == ACTION_BUY):
-            return self.buy_command(price, quantity, type)
+            return self.buy_command(price, scale, type)
         elif(action == ACTION_SELL):
-            return self.sell_command(price, quantity, type)
-
-    def set_profit_lose_limits(self, action,  price):
-        if(action == ACTION_BUY):
-            self.high_close_limit = price + self.take_profit_range
-            self.low_close_limit = price -  self.stop_lose_range
-        elif(action == ACTION_SELL):
-            self.high_close_limit = price + self.stop_lose_range
-            self.low_close_limit = price -  self.take_profit_range
+            return self.sell_command(price, scale, type)
         
     def enable_processing(self):
         self.set_processing(True)

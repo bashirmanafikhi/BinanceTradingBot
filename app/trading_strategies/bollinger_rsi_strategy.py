@@ -63,12 +63,12 @@ class BollingerRSIStrategy(TradingStrategy):
             and row["RSI"] < self.rsi_oversold
             and (self.last_action == ACTION_SELL or self.last_action is None)
         ):
-                return self.create_trade_action(ACTION_BUY, price, False)
+                return self.create_trade_action(ACTION_BUY, price)
         elif (
             price > row["BBU"]
             and row["RSI"] > self.rsi_overbought
             and (self.last_action == ACTION_BUY or self.last_action is None)
         ):
-                return self.create_trade_action(ACTION_SELL, price, False)
+                return self.create_trade_action(ACTION_SELL, price)
             
         return None

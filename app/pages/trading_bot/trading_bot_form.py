@@ -46,11 +46,13 @@ class TradingBotForm(FlaskForm):
     trailing_take_profit_deviation_percentage = FloatField('Trailing Take Profit Deviation Percentage', default=3)
     
     # Extra Orders
-    extra_order_size = FloatField('Extra Order Size', default=0)
     extra_orders_count = IntegerField('Extra Orders Count', default=0)
-    extra_order_deviation = FloatField('Extra Order Deviation', default=1)
-    extra_order_size_scale = FloatField('Extra Order Size Scale', default=1)
-    extra_order_deviation_scale = FloatField('Extra Order Deviation Scale', default=1)
+    
+    extra_order_first_volume_scale = FloatField('Extra order first volume percentage', default=1)
+    extra_order_first_deviation_percentage = FloatField('Extra order first deviation percentage', default=1)
+    
+    extra_order_step_volume_scale = FloatField('Extra order step volume scale', default=1)
+    extra_order_step_deviation_scale = FloatField('Extra order step deviation scale', default=1)
 
     start_conditions = FieldList(FormField(IndicatorConditionForm), min_entries=3)
     

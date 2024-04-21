@@ -15,5 +15,5 @@ class IndicatorCondition(TradingCondition):
         pass
     
     @abstractmethod
-    def on_order_placed_successfully(self, price, action):
+    def on_order_placed_successfully(self, signal_scale):
         pass

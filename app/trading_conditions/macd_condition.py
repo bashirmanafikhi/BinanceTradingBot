@@ -12,7 +12,7 @@
 #     MACD_KEY = "MACD"
 #     SIGNAL_KEY = "MACD_Signal"
 
-        # def on_order_placed_successfully(self, price, action):
+        # def on_order_placed_successfully(self, signal_scale):
         # pass
 #     def __init__(self, macd_fast=12, macd_slow=26, signal_period=9, use_to_open = True, use_to_close = False):
 #         super().__init__(use_to_open = use_to_open, use_to_close = use_to_close)
