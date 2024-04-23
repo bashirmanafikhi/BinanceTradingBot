@@ -1,3 +1,5 @@
+from helpers.enums import SignalCategory
+from models.signal import Signal
 from trading_conditions.trading_condition import TradingCondition
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL
 import pandas_ta as ta
@@ -15,11 +17,11 @@ class StopLossCondition(TradingCondition):
         
         self.stop_loss = None
 
-    def on_order_placed_successfully(self, signal_scale):
-        if(signal_scale.action == ACTION_SELL):
+    def on_order_placed_successfully(self, signal):
+        if(signal.action == ACTION_SELL):
             self.stop_loss = None
-        if(signal_scale.action == ACTION_BUY):
-            self.set_stop_loss(signal_scale.price)
+        if(signal.action == ACTION_BUY):
+            self.set_stop_loss(signal.price)
 
     def set_stop_loss(self, price):
         new_stop_loss = self.calculate_stop_loss(price)
@@ -43,9 +45,7 @@ class StopLossCondition(TradingCondition):
         # update trailing stop loss
         self.set_stop_loss(price)
             
-        
-        
         if (price < self.stop_loss):
-            return ACTION_SELL
+            return Signal(price, ACTION_SELL, None, SignalCategory.STOP_LOSS)
         
         return None

@@ -25,10 +25,11 @@ class RSICondition(IndicatorCondition):
         if(self.get_rsi_key() not in row.index):
             return None
         
+        price = row["close"]
         if (row[self.get_rsi_key()] < self.rsi_oversold):
-            return ACTION_BUY
+            return self.return_signal(price, ACTION_BUY)
         elif (row[self.get_rsi_key()] > self.rsi_overbought):
-            return ACTION_SELL
+            return self.return_signal(price, ACTION_SELL)
         
         return None
     

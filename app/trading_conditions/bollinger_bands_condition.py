@@ -22,9 +22,9 @@ class BollingerBandsCondition(IndicatorCondition):
         price = row["close"]
 
         if (self.get_lower_band_key() in row.index and price < row[self.get_lower_band_key()]):
-            return ACTION_BUY
+            return self.return_signal(price, ACTION_BUY)
         elif (self.get_upper_band_key() in row.index and price > row[self.get_upper_band_key()]):
-            return ACTION_SELL
+            return self.return_signal(price, ACTION_SELL)
         
         return None
     

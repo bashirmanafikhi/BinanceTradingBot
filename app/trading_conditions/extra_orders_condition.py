@@ -1,4 +1,5 @@
 from typing import List
+from helpers.enums import SignalCategory
 from models.signal import Signal
 from trading_conditions.trading_condition import TradingCondition
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL
@@ -32,12 +33,12 @@ class ExtraOrdersCondition(TradingCondition):
         self.extra_orders: List[ExtraOrderDto] = []
         self.done_orders_count = 0
 
-    def on_order_placed_successfully(self, signal_scale):
-        if signal_scale.action == ACTION_SELL:
+    def on_order_placed_successfully(self, signal):
+        if signal.action == ACTION_SELL:
             self.extra_orders.clear()
             self.done_orders_count = 0
-        if signal_scale.action == ACTION_BUY:
-            self.check_extra_orders(signal_scale.price)
+        if signal.action == ACTION_BUY:
+            self.check_extra_orders(signal.price)
 
     def check_extra_orders(self, price):
         if self.extra_orders:
@@ -74,10 +75,11 @@ class ExtraOrdersCondition(TradingCondition):
             return None
 
         price = row["close"]
-        extra_order = self.extra_orders[self.done_orders_count]
-        
-        if price < extra_order.deviation:
-            return Signal(price, ACTION_BUY, extra_order.volume_scale)
+
+        if self.extra_orders_count > self.done_orders_count:
+            extra_order = self.extra_orders[self.done_orders_count]
+            if price < extra_order.deviation:
+                return Signal(price, ACTION_BUY, extra_order.volume_scale, SignalCategory.EXTRA_ORDER)
 
         return None
 

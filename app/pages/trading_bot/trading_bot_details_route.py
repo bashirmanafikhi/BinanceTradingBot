@@ -1,4 +1,5 @@
 import os
+import helpers.my_logger as my_logger
 from flask import render_template, redirect, send_file, url_for, flash, current_app,request
 from flask_login import current_user, login_required
 import pandas as pd
@@ -106,7 +107,14 @@ def handle_backtest(id):
     
     signals = trading_system.process(data)
     
-    data = bot_management.get_chart_details(trading_system, signals, plot_size= None)
+    for order in trading_system.orders_history:
+        my_logger.info(f"action = {order.action},  price = {order.price}, quantity = {order.quantity}, profit = {order.profit}")
     
+    total_paid_commission = binance_client.total_paid_commission
+    my_logger.info("total_paid_commission :" + str(total_paid_commission))
+    
+    my_logger.info(f"total_profit = {trading_system.total_profit}")
+    
+    data = bot_management.get_chart_details(trading_system, signals, plot_size= None)
     socketio.emit(f"update_data_{trading_bot.id}", data, namespace="/trading_bot_details")
     

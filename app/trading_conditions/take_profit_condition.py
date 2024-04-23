@@ -1,3 +1,5 @@
+from helpers.enums import SignalCategory
+from models.signal import Signal
 from trading_conditions.trading_condition import TradingCondition
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL
 import pandas_ta as ta
@@ -20,11 +22,11 @@ class TakeProfitCondition(TradingCondition):
         
         self.take_profit = None
 
-    def on_order_placed_successfully(self, signal_scale):
-        if(signal_scale.action == ACTION_SELL):
+    def on_order_placed_successfully(self, signal):
+        if(signal.action == ACTION_SELL):
             self.take_profit = None
-        if(signal_scale.action == ACTION_BUY):
-            self.set_take_profit(signal_scale.price)
+        if(signal.action == ACTION_BUY):
+            self.set_take_profit(signal.price)
 
     def set_take_profit(self, price):
         # todo: store the extra trades and calculate the take profit from the average 
@@ -45,6 +47,6 @@ class TakeProfitCondition(TradingCondition):
         price = row["close"]
         
         if (price > self.take_profit):
-            return ACTION_SELL
+            return Signal(price, ACTION_SELL, None, SignalCategory.TAKE_PROFIT)
         
         return None

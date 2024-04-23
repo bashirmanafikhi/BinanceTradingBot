@@ -60,3 +60,9 @@ class BotType(Enum):
     
     def __str__(self):
         return str(self.value)
+    
+class SignalCategory(Enum):
+    INDICATOR_SIGNAL = "INDICATOR_SIGNAL"
+    EXTRA_ORDER = "EXTRA_ORDER"
+    STOP_LOSS = "STOP_LOSS"
+    TAKE_PROFIT = "STOP_LOSS"

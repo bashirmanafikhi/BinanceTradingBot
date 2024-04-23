@@ -1,4 +1,5 @@
 from io import BytesIO
+from helpers.settings.constants import ACTION_BUY, ACTION_SELL
 from trading_system import TradingSystem
 from trading_clients.binance_trading_client import BinanceTradingClient
 from trading_clients.web_socket_services.my_binance_socket_manager import MyBinanceSocketManager
@@ -129,8 +130,8 @@ def get_chart_details(trading_system, signals, plot_size = 5000):
         action_signals = signals[['close', 'signal']].dropna(subset=['signal'])
 
         # Filter buy and sell signals
-        buy_signals = action_signals[action_signals['signal'].apply(lambda x: x.action) == 'BUY']
-        sell_signals = action_signals[action_signals['signal'].apply(lambda x: x.action) == 'SELL']
+        buy_signals = action_signals[action_signals['signal'].apply(lambda x: x.action) == ACTION_BUY]
+        sell_signals = action_signals[action_signals['signal'].apply(lambda x: x.action) == ACTION_SELL]
 
         # Extract buy signal x and y data
         data["buy_signal_x_data"] = buy_signals.index.tolist()

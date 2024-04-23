@@ -31,7 +31,13 @@ class TradingStrategy(ABC):
     def process_all(self, data):
         pass
     
-        
+    
+    def can_sell(self):
+        return (self.last_action is None or self.last_action == ACTION_BUY)
+    
+    def can_buy(self):
+        return (self.last_action is None or self.last_action == ACTION_SELL)
+    
     def execute(self, data):
         # Check if data is empty or None
         if data is None or data.empty:
@@ -82,19 +88,19 @@ class TradingStrategy(ABC):
         finally:
             self.disable_processing()
     
-    def create_trade_action(self, action, price, scale = 1):
+    def create_trade_action(self, signal):
         if(self.create_order_tries_counter == self.create_order_tries_limit):
-            return None
             my_logger.warning(f"create order failed {self.create_order_tries_counter} times, strategy is disabled.")
+            return None
                 
         self.create_order_tries_counter += 1
         # Create an order with a fixed scale
-        is_succeed = self.create_order(action, price, scale)
+        is_succeed = self.create_order(signal.action, signal.price, signal.scale)
 
         if is_succeed:
-            self.last_action = action
+            self.last_action = signal.action
             self.create_order_tries_counter = 0
-            return Signal(price, action, scale)
+            return signal
         else:
             if(self.create_order_tries_counter == self.create_order_tries_limit):
                 my_logger.error(f"create order failed {self.create_order_tries_counter} times, strategy is disabled.")
