@@ -5,47 +5,62 @@ from helpers.settings.constants import ACTION_BUY, ACTION_SELL
 import pandas_ta as ta
 import helpers.my_logger as my_logger
 
+
 class StopLossCondition(TradingCondition):
 
-    def __init__(self, stop_loss_percentage = 1.0, trailing_stop_loss = True, timeout = None):
-        if(stop_loss_percentage <= 0 or stop_loss_percentage >= 100):
+    def __init__(self, stop_loss_percentage=1.0, trailing_stop_loss=True, timeout=None):
+        if stop_loss_percentage <= 0 or stop_loss_percentage >= 100:
             raise ValueError("stop_loss_percentage should be between 0 and 100")
-        
+
         self.stop_loss_percentage = stop_loss_percentage
         self.trailing_stop_loss = trailing_stop_loss
         self.timeout = timeout
-        
+
         self.stop_loss = None
+        self.buy_signals = []
 
     def on_order_placed_successfully(self, signal):
-        if(signal.action == ACTION_SELL):
+        if signal.action == ACTION_SELL:
             self.stop_loss = None
-        if(signal.action == ACTION_BUY):
-            self.set_stop_loss(signal.price)
+            self.buy_signals.clear()
+        if signal.action == ACTION_BUY:
+            self.buy_signals.append(signal)
+            self.set_stop_loss()
 
-    def set_stop_loss(self, price):
-        new_stop_loss = self.calculate_stop_loss(price)
-        if(self.stop_loss is None or (self.trailing_stop_loss and new_stop_loss > self.stop_loss)):
+    def set_stop_loss(self):
+        if not self.buy_signals:
+            return  # No buy signals yet, cannot set stop loss
+
+        # Calculate weighted stop loss based on all buy signals
+        total_price = sum(signal.price * signal.scale for signal in self.buy_signals)
+        total_scale = sum(signal.scale for signal in self.buy_signals)
+        average_price = total_price / total_scale
+
+        self.stop_loss = self.calculate_stop_loss(average_price)
+
+    def update_trailing_stop_loss(self, new_stop_loss):
+        if self.trailing_stop_loss and self.stop_loss is not None and new_stop_loss > self.stop_loss:
             self.stop_loss = new_stop_loss
 
     def calculate_stop_loss(self, price):
         amount = price * self.stop_loss_percentage / 100
         return price - amount
-        
+
     def calculate(self, data):
         return data
 
     def get_signal(self, row):
-        
-        if(self.stop_loss is None):
+
+        if self.stop_loss is None:
             return None
-        
+
         price = row["close"]
-        
-        # update trailing stop loss
-        self.set_stop_loss(price)
-            
-        if (price < self.stop_loss):
+
+        # update trailing stop loss 
+        # needs to be fixed after calculating the wighted average stop loss
+        #self.set_stop_loss()
+
+        if price < self.stop_loss:
             return Signal(price, ACTION_SELL, None, SignalCategory.STOP_LOSS)
-        
+
         return None

@@ -28,8 +28,8 @@
                     </div>
 
                     <div class="form-group">
-                        {{ form.bot_type.label }}
                         <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        {{ form.bot_type.label }}
                         {{ form.bot_type(class="form-control") }}
                     </div>
                 </fieldset>
@@ -45,11 +45,12 @@
                         {{ form.stop_loss_percentage.label(class="form-label") }}
                         {{ form.stop_loss_percentage(class="form-control") }}
                         <br />
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
                         {{ form.trailing_stop_loss.label() }}
                         {{ form.trailing_stop_loss() }}
                         <br />
-                        {{ form.stop_loss_timeout.label(class="form-label") }}
                         <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        {{ form.stop_loss_timeout.label(class="form-label") }}
                         {{ form.stop_loss_timeout(class="form-control") }}
                     </div>
                 </fieldset>
@@ -65,12 +66,12 @@
                         {{ form.take_profit_percentage.label(class="form-label") }}
                         {{ form.take_profit_percentage(class="form-control") }}
                         <br />
+                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
                         {{ form.trailing_take_profit.label() }}
                         {{ form.trailing_take_profit() }}
-                        <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
                         <br />
-                        {{ form.trailing_take_profit_deviation_percentage.label(class="form-label") }}
                         <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
+                        {{ form.trailing_take_profit_deviation_percentage.label(class="form-label") }}
                         {{ form.trailing_take_profit_deviation_percentage(class="form-control") }}
                     </div>
                 </fieldset>

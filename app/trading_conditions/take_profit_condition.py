@@ -21,16 +21,26 @@ class TakeProfitCondition(TradingCondition):
         self.trailing_take_profit_deviation_percentage = trailing_take_profit_deviation_percentage
         
         self.take_profit = None
+        self.buy_signals = []
 
     def on_order_placed_successfully(self, signal):
         if(signal.action == ACTION_SELL):
             self.take_profit = None
+            self.buy_signals.clear()
         if(signal.action == ACTION_BUY):
-            self.set_take_profit(signal.price)
+            self.buy_signals.append(signal)
+            self.set_take_profit()
 
-    def set_take_profit(self, price):
-        # todo: store the extra trades and calculate the take profit from the average 
-        self.take_profit = self.calculate_take_profit(price)
+    def set_take_profit(self):
+        if not self.buy_signals:
+            return  # No buy signals yet, cannot set take-profit
+        
+        # Calculate weighted average price based on all buy signals
+        total_price = sum(signal.price * signal.scale for signal in self.buy_signals)
+        total_scale = sum(signal.scale for signal in self.buy_signals)
+        average_price = total_price / total_scale
+
+        self.take_profit = self.calculate_take_profit(average_price)
 
     def calculate_take_profit(self, price):
         amount = price * self.take_profit_percentage / 100
