@@ -11,6 +11,7 @@ class ConditionsStrategy(TradingStrategy):
     def __init__(self, trading_conditions: None):
         super().__init__()
         self.conditions_manager = ConditionsManager(trading_conditions)
+        self.pending_signal = None
 
     def process_all(self, data):
         data = self.conditions_manager.calculate(data)
@@ -35,10 +36,12 @@ class ConditionsStrategy(TradingStrategy):
 
         # Handle Indicator signals
         if self.can_buy() and self.conditions_manager.all_indicators_equal_action(row, ACTION_BUY):
-            return self.create_and_notify_trade_signal(Signal(price, ACTION_BUY, 1, SignalCategory.INDICATOR_SIGNAL))
+            self.pending_signal = Signal(price, ACTION_BUY, 1, SignalCategory.INDICATOR_SIGNAL)
 
         elif self.can_sell() and self.conditions_manager.all_indicators_equal_action(row, ACTION_SELL):
-            return self.create_and_notify_trade_signal(Signal(price, ACTION_SELL, 1, SignalCategory.INDICATOR_SIGNAL))
+            self.pending_signal = Signal(price, ACTION_SELL, 1, SignalCategory.INDICATOR_SIGNAL)
+        elif self.pending_signal:
+            return self.create_and_notify_trade_signal(self.pending_signal)
 
         return None
 
@@ -46,4 +49,5 @@ class ConditionsStrategy(TradingStrategy):
         trade_signal = self.create_trade_action(input_signal)
         if trade_signal:
             self.conditions_manager.on_order_placed_successfully(trade_signal)
+            self.pending_signal = None
         return trade_signal

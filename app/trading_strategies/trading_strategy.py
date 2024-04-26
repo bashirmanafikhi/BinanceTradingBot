@@ -90,7 +90,7 @@ class TradingStrategy(ABC):
     
     def create_trade_action(self, signal):
         if(self.create_order_tries_counter == self.create_order_tries_limit):
-            my_logger.warning(f"create order failed {self.create_order_tries_counter} times, strategy is disabled.")
+            #my_logger.warning(f"create order failed {self.create_order_tries_counter} times, strategy is disabled.")
             return None
                 
         self.create_order_tries_counter += 1

@@ -15,7 +15,7 @@ class FakeTradingClient(TradingClient):
     COMMISSION_RATE = 0.01
 
     def __init__(self):
-        self.balances = {"USDT": 200, "BTC": 0, "SOL": 0, "ETH": 0}
+        self.balances = {"USDT": 200, "BTC": 0, "SOL": 0, "ETH": 0, "XRP": 0, "LTO": 0, "ICP": 0}
         self.orders_history = []
         self.total_paid_commission = 0
 
@@ -36,11 +36,13 @@ class FakeTradingClient(TradingClient):
 
         current_quote_balance = self.balances[symbol_info["quoteAsset"]]
         current_base_balance = self.balances[symbol_info["baseAsset"]]
-        
+
         if side == ACTION_BUY:
             if cost_with_commission > current_quote_balance:
                 my_logger.info("Insufficient balance to place order.")
-                my_logger.info(f"side: {side}, price: {price}, cost_with_commission: {cost_with_commission}, current_quote_balance: {current_quote_balance}, current_base_balance: {current_base_balance}")
+                my_logger.info(
+                    f"side: {side}, price: {price}, cost_with_commission: {cost_with_commission}, current_quote_balance: {current_quote_balance}, current_base_balance: {current_base_balance}"
+                )
                 return False
 
             self.balances[symbol_info["quoteAsset"]] -= cost_with_commission
@@ -48,7 +50,9 @@ class FakeTradingClient(TradingClient):
         elif side == ACTION_SELL:
             if quantity > current_base_balance:
                 my_logger.info("Insufficient balance to place order.")
-                my_logger.info(f"side: {side}, price: {price}, quantity: {quantity}, current_quote_balance: {current_quote_balance}, current_base_balance: {current_base_balance}")
+                my_logger.info(
+                    f"side: {side}, price: {price}, quantity: {quantity}, current_quote_balance: {current_quote_balance}, current_base_balance: {current_base_balance}"
+                )
                 return False
 
             self.balances[symbol_info["baseAsset"]] -= quantity
@@ -60,19 +64,13 @@ class FakeTradingClient(TradingClient):
         order["timestamp"] = time.time()
         self.orders_history.append(order)
 
-    def create_market_order(self,
-                            side,
-                            symbol,
-                            quantity,
-                            price,
-                            quoteOrderQty=None):
+    def create_market_order(self, side, symbol, quantity, price, quoteOrderQty=None):
         if side not in [ACTION_BUY, ACTION_SELL]:
             my_logger.warning("Invalid side for market order.")
             return
 
         if quoteOrderQty is not None:
-            my_logger.warning(
-                "quoteOrderQty parameter is only applicable for limit orders.")
+            my_logger.warning("quoteOrderQty parameter is only applicable for limit orders.")
             return
 
         symbol_info = self.get_symbol_info(symbol)
@@ -90,9 +88,7 @@ class FakeTradingClient(TradingClient):
             "quantity": quantity,
             "price": price,
             "status": ORDER_STATUS_FILLED,
-            "fills": [{
-                "price": price
-            }],
+            "fills": [{"price": price}],
         }
 
         self._add_to_orders_history(order)
@@ -115,25 +111,16 @@ class FakeTradingClient(TradingClient):
             "quantity": quantity,
             "price": price,
             "status": ORDER_STATUS_FILLED,
-            "fills": [{
-                "price": price
-            }],
+            "fills": [{"price": price}],
         }
 
         self._add_to_orders_history(order)
-        #my_logger.info(f"Placed limit order - {order}")
+        # my_logger.info(f"Placed limit order - {order}")
         return order
 
-    def create_order(self,
-                     side,
-                     type,
-                     symbol,
-                     quantity,
-                     price,
-                     quoteOrderQty=None):
+    def create_order(self, side, type, symbol, quantity, price, quoteOrderQty=None):
         if type == ORDER_TYPE_MARKET:
-            return self.create_market_order(side, symbol, quantity, price,
-                                            quoteOrderQty)
+            return self.create_market_order(side, symbol, quantity, price, quoteOrderQty)
         elif type == ORDER_TYPE_LIMIT:
             return self.create_limit_order(side, symbol, quantity, price)
 
@@ -143,12 +130,9 @@ class FakeTradingClient(TradingClient):
     def get_symbol_info(self, symbol):
         symbol_info_list = [
             {
-                "symbol":
-                "BTCUSDT",
-                "baseAsset":
-                "BTC",
-                "quoteAsset":
-                "USDT",
+                "symbol": "BTCUSDT",
+                "baseAsset": "BTC",
+                "quoteAsset": "USDT",
                 "filters": [
                     {
                         "filterType": "PRICE_FILTER",
@@ -165,12 +149,9 @@ class FakeTradingClient(TradingClient):
                 ],
             },
             {
-                "symbol":
-                "ETHBTC",
-                "baseAsset":
-                "ETH",
-                "quoteAsset":
-                "BTC",
+                "symbol": "ETHBTC",
+                "baseAsset": "ETH",
+                "quoteAsset": "BTC",
                 "filters": [
                     {
                         "filterType": "PRICE_FILTER",
@@ -187,12 +168,66 @@ class FakeTradingClient(TradingClient):
                 ],
             },
             {
-                "symbol":
-                "SOLUSDT",
-                "baseAsset":
-                "SOL",
-                "quoteAsset":
-                "USDT",
+                "symbol": "SOLUSDT",
+                "baseAsset": "SOL",
+                "quoteAsset": "USDT",
+                "filters": [
+                    {
+                        "filterType": "PRICE_FILTER",
+                        "minPrice": "0.00001",
+                        "maxPrice": "10000.0",
+                        "tickSize": "0.0001",
+                    },
+                    {
+                        "filterType": "LOT_SIZE",
+                        "minQty": "0.00001000",
+                        "maxQty": "9000.00000000",
+                        "stepSize": "0.00001000",
+                    },
+                ],
+            },
+            {
+                "symbol": "XRPUSDT",
+                "baseAsset": "XRP",
+                "quoteAsset": "USDT",
+                "filters": [
+                    {
+                        "filterType": "PRICE_FILTER",
+                        "minPrice": "0.00001",
+                        "maxPrice": "10000.0",
+                        "tickSize": "0.0001",
+                    },
+                    {
+                        "filterType": "LOT_SIZE",
+                        "minQty": "0.00001000",
+                        "maxQty": "9000.00000000",
+                        "stepSize": "0.00001000",
+                    },
+                ],
+            },
+            {
+                "symbol": "LTOUSDT",
+                "baseAsset": "LTO",
+                "quoteAsset": "USDT",
+                "filters": [
+                    {
+                        "filterType": "PRICE_FILTER",
+                        "minPrice": "0.00001",
+                        "maxPrice": "10000.0",
+                        "tickSize": "0.0001",
+                    },
+                    {
+                        "filterType": "LOT_SIZE",
+                        "minQty": "0.00001000",
+                        "maxQty": "9000.00000000",
+                        "stepSize": "0.00001000",
+                    },
+                ],
+            },
+            {
+                "symbol": "ICPUSDT",
+                "baseAsset": "ICP",
+                "quoteAsset": "USDT",
                 "filters": [
                     {
                         "filterType": "PRICE_FILTER",

@@ -114,6 +114,7 @@ def handle_backtest(id):
     my_logger.info("total_paid_commission :" + str(total_paid_commission))
     
     my_logger.info(f"total_profit = {trading_system.total_profit}")
+    my_logger.info(f"total_trades = {len(trading_system.orders_history)}")
     
     data = bot_management.get_chart_details(trading_system, signals, plot_size= None)
     socketio.emit(f"update_data_{trading_bot.id}", data, namespace="/trading_bot_details")
