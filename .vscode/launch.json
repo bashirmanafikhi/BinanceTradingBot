@@ -11,14 +11,6 @@
             "program": "${workspaceFolder}/app/run_web.py",
             "cwd": "${workspaceFolder}/app",
             "justMyCode": true
-        },
-        {
-            "name": "Console : Module",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/app/run_console.py",
-            "cwd": "${workspaceFolder}/app",
-            "justMyCode": true
         }
     ]
 }

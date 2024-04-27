@@ -33,7 +33,7 @@ def user_trading_bots():
     payload = {
         "running_bots_count" : running_bots_count,
         "not_running_bots_count" : len(trading_bots) - running_bots_count,
-        "total_trades_count" : sum(system.trades_count for system in trading_systems.values()),
+        "total_trades_count" : sum(len(system.orders_history) for system in trading_systems.values()),
         "total_profit" : sum(system.total_profit for system in trading_systems.values()),
         "bot_system_pairs" : bot_system_pairs
     }

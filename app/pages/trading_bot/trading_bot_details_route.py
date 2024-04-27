@@ -1,4 +1,5 @@
 import os
+from helpers.historical_data_service import HistoricalDataService
 import helpers.my_logger as my_logger
 from flask import render_template, redirect, send_file, url_for, flash, current_app,request
 from flask_login import current_user, login_required
@@ -83,7 +84,7 @@ def kline_tick(data, trading_bot_id):
 
 @socketio.on("backtest", namespace="/trading_bot_details")
 def handle_backtest(id):
-    trading_bot = TradingBot.query.get_or_404(id)
+    trading_bot: TradingBot = TradingBot.query.get_or_404(id)
     trading_system = CurrentAppManager.get_trading_system(trading_bot.id)
     if(trading_system is not None and trading_system.is_running):
         print('The bot is running, you can not backtest while the bot is running')
@@ -101,10 +102,14 @@ def handle_backtest(id):
     # Read the CSV file into a DataFrame
     data = pd.read_csv(file_path, usecols=['timestamp','open','high','low','close'])
     
+    # data_service = HistoricalDataService()
+    # data = data_service.get_historical_data()
+    # data = data.head(100000)
+    
     binance_client = FakeTradingClient()
     strategy = trading_bot.get_strategy()
     trading_system = TradingSystem(trading_bot.base_asset, trading_bot.quote_asset, strategy, binance_client, trading_bot.trade_size)
-    
+        
     signals = trading_system.process(data)
     
     for order in trading_system.orders_history:

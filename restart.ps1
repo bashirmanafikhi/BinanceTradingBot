@@ -1,8 +1,8 @@
 # Define server details
 $SERVER_USER = "root"
 #$SERVER_USER = "bashir-ssh"
-$SERVER_HOST = "154.56.60.12"
-$SERVER_PATH = "/home/langora/htdocs/www.langora.online/"
+$SERVER_HOST = "93.127.202.191"
+$SERVER_PATH = "/home/videostatuses/htdocs/videostatuses.com/"
 
 # SSH into the server and run commands
 $SSHCommand = @"

@@ -9,7 +9,7 @@ class Config:
 
 class ProductionConfig(Config):
     ENVIRONMENT = 'production'
-    SERVER_URL = 'https://www.langora.online/'
+    SERVER_URL = 'https://videostatuses.com/'
 
 def get_config():
     env = os.environ.get('FLASK_ENV', 'development')
