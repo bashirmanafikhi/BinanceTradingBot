@@ -20,10 +20,18 @@ class RSIForm(Form):
     use_to_open = BooleanField('Open Trades', default=True)
     use_to_close = BooleanField('Close Trades', default=False)
 
+class MacdForm(Form):
+    macd_fast = FloatField('MACD Fast Period', validators=[Optional()], default=12)
+    macd_slow = FloatField('MACD Slow Period', validators=[Optional()], default=26)
+    macd_signal = FloatField('MACD Signal Period', validators=[Optional()], default=9)
+    use_to_open = BooleanField('Open Trades', default=True)
+    use_to_close = BooleanField('Close Trades', default=False)
+
 class IndicatorConditionForm(FlaskForm):
-    type = SelectField('Type', choices=[('none',''),('bollinger_bands', 'Bollinger Bands'), ('rsi', 'RSI')], validators=[Optional()])
+    type = SelectField('Type', choices=[('none',''),('bollinger_bands', 'Bollinger Bands'), ('rsi', 'RSI'), ('macd', 'MACD')], validators=[Optional()])
     bollinger_bands = FormField(BollingerBandsForm)
     rsi = FormField(RSIForm)
+    macd = FormField(MacdForm)
 
 class TradingBotForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
@@ -69,8 +77,8 @@ class TradingBotForm(FlaskForm):
                     'bollinger_bands': {
                         'period': form.bollinger_bands.period.data,
                         'stddev': form.bollinger_bands.stddev.data,
-                        'use_to_open' : form.bollinger_bands.use_to_open.data,
-                        'use_to_close' :form.bollinger_bands.use_to_close.data
+                        'use_to_open': form.bollinger_bands.use_to_open.data,
+                        'use_to_close': form.bollinger_bands.use_to_close.data
                     }
                 }
                 conditions.append(condition)
@@ -81,10 +89,23 @@ class TradingBotForm(FlaskForm):
                         'period': form.rsi.period.data,
                         'overbought': form.rsi.overbought.data,
                         'oversold': form.rsi.oversold.data,
-                        'use_to_open' : form.rsi.use_to_open.data,
-                        'use_to_close' :form.rsi.use_to_close.data
+                        'use_to_open': form.rsi.use_to_open.data,
+                        'use_to_close': form.rsi.use_to_close.data
+                    }
+                }
+                conditions.append(condition)
+            elif form.data['type'] == 'macd':
+                condition = {
+                    'type': 'macd',
+                    'macd': {
+                        'macd_fast': form.macd.macd_fast.data,
+                        'macd_slow': form.macd.macd_slow.data,
+                        'macd_signal': form.macd.macd_signal.data,
+                        'use_to_open': form.macd.use_to_open.data,
+                        'use_to_close': form.macd.use_to_close.data
                     }
                 }
                 conditions.append(condition)
         return conditions
+
 

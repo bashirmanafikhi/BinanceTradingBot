@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 from datetime import datetime
+from trading_conditions.macd_condition import MacdCondition
 from trading_conditions.extra_orders_condition import ExtraOrdersCondition
 from trading_conditions.take_profit_condition import TakeProfitCondition
 from trading_conditions.stop_loss_condition import StopLossCondition
@@ -100,22 +101,35 @@ class TradingBot(db.Model):
             conditions_list.append(extra_orders_condition)
         
         for condition in self.start_conditions:    
-            if(condition['type'] == 'rsi'):
-                rsi_condition = RSICondition(condition['rsi']['period'], 
-                                             condition['rsi']['overbought'], 
-                                             condition['rsi']['oversold'],
-                                             condition['rsi']['use_to_open'],
-                                             condition['rsi']['use_to_close'])
+            if condition['type'] == 'rsi':
+                rsi_condition = RSICondition(
+                    rsi_window=condition['rsi']['period'],
+                    rsi_overbought=condition['rsi']['overbought'],
+                    rsi_oversold=condition['rsi']['oversold'],
+                    use_to_open=condition['rsi']['use_to_open'],
+                    use_to_close=condition['rsi']['use_to_close']
+                )
                 conditions_list.append(rsi_condition)
                 
-            if(condition['type'] == 'bollinger_bands'):
+            elif condition['type'] == 'bollinger_bands':
                 bollinger_condition = BollingerBandsCondition(
-                                             condition['bollinger_bands']['period'], 
-                                             condition['bollinger_bands']['stddev'],
-                                             condition['bollinger_bands']['use_to_open'],
-                                             condition['bollinger_bands']['use_to_close'])
+                    period=condition['bollinger_bands']['period'],
+                    stddev=condition['bollinger_bands']['stddev'],
+                    use_to_open=condition['bollinger_bands']['use_to_open'],
+                    use_to_close=condition['bollinger_bands']['use_to_close']
+                )
                 conditions_list.append(bollinger_condition)
                 
+            elif condition['type'] == 'macd':
+                macd_condition = MacdCondition(
+                    macd_fast=condition['macd']['macd_fast'],
+                    macd_slow=condition['macd']['macd_slow'],
+                    macd_signal=condition['macd']['macd_signal'],
+                    use_to_open=condition['macd']['use_to_open'],
+                    use_to_close=condition['macd']['use_to_close']
+                )
+                conditions_list.append(macd_condition)
+
         return conditions_list
     
     

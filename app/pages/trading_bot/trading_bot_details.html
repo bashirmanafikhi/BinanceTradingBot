@@ -126,23 +126,6 @@
       name: "Price"
     };
 
-    var bbu_trace = {
-      x: data.bbl_bbu_x_data,
-      y: data.bbu_y_data,
-      type: "scatter",
-      line: { dash: "dot", color: "LightCoral" },
-      name: "BBU"
-    };
-
-    var bbl_trace = {
-      x: data.bbl_bbu_x_data,
-      y: data.bbl_y_data,
-      type: "scatter",
-      line: { dash: "dot", color: "DarkCyan" },
-      name: "BBL"
-    };
-
-
     var buy_signal_trace = {
       x: data.buy_signal_x_data,
       y: data.buy_signal_y_data,
@@ -167,17 +150,6 @@
       text: data.sell_signal_hover_text
     };
 
-
-    var rsi_trace = {
-      x: data.rsi_x_data,
-      y: data.rsi_y_data,
-      xaxis: 'x2',
-      yaxis: 'y2',
-      type: "scatter",
-      line: { color: "DarkRed" },
-      name: "RSI"
-    };
-
     var take_profit_level = {
       x: data.price_x_data,
       y: Array(data.price_x_data.length).fill(data.take_profit),
@@ -196,42 +168,104 @@
       name: "Stop Loss"
     };
 
+    var bbu_trace = {
+      x: data.bbl_bbu_x_data,
+      y: data.bbu_y_data,
+      type: "scatter",
+      line: { dash: "dot", color: "LightCoral" },
+      name: "BBU"
+    };
+
+    var bbl_trace = {
+      x: data.bbl_bbu_x_data,
+      y: data.bbl_y_data,
+      type: "scatter",
+      line: { dash: "dot", color: "DarkCyan" },
+      name: "BBL"
+    };
+
+    var rsi_trace = {
+      x: data.rsi_x_data,
+      y: data.rsi_y_data,
+      xaxis: 'x2',
+      yaxis: 'y2',
+      type: "scatter",
+      line: { color: "DarkRed" },
+      name: "RSI"
+    };
+
+    var macd_trace = {
+      x: data.macd_x_data,
+      y: data.macd_y_data,
+      xaxis: 'x3',
+      yaxis: 'y3',
+      type: "scatter",
+      line: { color: "MediumPurple" },
+      name: "MACD"
+    };
+
+    var macd_signal_trace = {
+      x: data.macd_x_data,
+      y: data.macd_signal_y_data,
+      xaxis: 'x3',
+      yaxis: 'y3',
+      type: "scatter",
+      line: { color: "MediumTurquoise" },
+      name: "MACD Signal"
+    };
+
+    var macd_histogram_trace = {
+      x: data.macd_x_data,
+      y: data.macd_histogram_y_data, // Assuming this is the data for MACD histogram
+      xaxis: 'x3',
+      yaxis: 'y3',
+      type: "bar",
+      marker: {color: "LightSkyBlue"},
+      name: "MACD Histogram"
+    };
+
     var layout = {
       height: 800,
       grid: {
-        rows: 2,
+        rows: 3,
         columns: 1,
         pattern: 'independent'
       },
-
       yaxis: {
-        domain: [0.3, 1]
+        domain: [0.5, 1] // Adjust domain for main traces
       },
       yaxis2: {
-        domain: [0, 0.2],
+        domain: [0.3, 0.45], // Adjust domain for RSI
         tickvals: [rsiOversold, 40, 50, 60, rsiOverbought],
+        gridcolor: 'rgba(100, 100, 100, 0.5)'
+      },
+      yaxis3: {
+        domain: [0, 0.25], // Domain for MACD
         gridcolor: 'rgba(100, 100, 100, 0.5)'
       },
       xaxis2: {
         matches: 'x',
         showgrid: false
       },
-      plot_bgcolor: '#1d2630', // Background color of the plot area
-      paper_bgcolor: '#1d2630', // Background color of the whole plot
+      plot_bgcolor: '#1d2630',
+      paper_bgcolor: '#1d2630',
       font: {
-        color: 'white' // Color of text
+        color: 'white'
       }
     };
 
     Plotly.react("live-plot", [
       close_trace,
-      bbu_trace,
-      bbl_trace,
       buy_signal_trace,
       sell_signal_trace,
-      rsi_trace,
       take_profit_level,
-      stop_loss_level
+      stop_loss_level,
+      bbu_trace,
+      bbl_trace,
+      rsi_trace,
+      macd_trace,
+      macd_signal_trace,
+      macd_histogram_trace
     ], layout);
   }
 

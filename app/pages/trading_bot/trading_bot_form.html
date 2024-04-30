@@ -8,7 +8,7 @@
 
             <div class="col-md-12">
                 <fieldset class="border border-dark p-2">
-                    <legend class="w-auto">Main Properties</legend>
+                    <legend class="w-auto text-warning">Main Properties</legend>
                     <div class="form-group">
                         {{ form.name.label }} {{ form.name(size=32, class="form-control") }}
                     </div>
@@ -37,7 +37,7 @@
 
             <div class="col-md-6">
                 <fieldset class="border border-dark p-2">
-                    <legend class="w-auto">Stop Loss</legend>
+                    <legend class="w-auto text-warning">Stop Loss</legend>
                     <div class="form-group">
                         {{ form.use_stop_loss.label() }}
                         {{ form.use_stop_loss() }}
@@ -58,7 +58,7 @@
 
             <div class="col-md-6">
                 <fieldset class="border border-dark p-2">
-                    <legend class="w-auto">Take Profit</legend>
+                    <legend class="w-auto text-warning">Take Profit</legend>
                     <div class="form-group">
                         {{ form.use_take_profit.label() }}
                         {{ form.use_take_profit() }}
@@ -80,7 +80,7 @@
         <div class="row">
             <div class="col-md-6">
                 <fieldset class="border border-dark p-2">
-                    <legend class="w-auto">Extra Orders</legend>
+                    <legend class="w-auto text-warning">Extra Orders</legend>
                     <div class="form-group">
                         {{ form.extra_order_first_volume_scale.label(class="form-label") }}
                         {{ form.extra_order_first_volume_scale(class="form-control") }}
@@ -101,7 +101,7 @@
             </div>
             <div class="col-md-6">
                 <fieldset class="border border-dark p-2">
-                    <legend class="w-auto">Start Conditions</legend>
+                    <legend class="w-auto text-warning">Start Conditions</legend>
                     <div class="form-group">
 
                         <div id="start_conditions">
@@ -157,6 +157,33 @@
                                             <div class="col-md-4 form-group">
                                                 {{ indicator.form.rsi.oversold.label }}
                                                 {{ indicator.form.rsi.oversold(size=24, class="form-control") }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="macd">
+                                        <div class="row">
+                                            <div class="col-md-6 form-group">
+                                                {{ indicator.form.macd.use_to_open.label() }}
+                                                {{ indicator.form.macd.use_to_open() }}
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                {{ indicator.form.macd.use_to_close.label() }}
+                                                {{ indicator.form.macd.use_to_close() }}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4 form-group">
+                                                {{ indicator.form.macd.macd_fast.label }}
+                                                {{ indicator.form.macd.macd_fast(size=24, class="form-control") }}
+                                            </div>
+                                            <div class="col-md-4 form-group">
+                                                {{ indicator.form.macd.macd_slow.label }}
+                                                {{ indicator.form.macd.macd_slow(size=24, class="form-control") }}
+                                            </div>
+                                            <div class="col-md-4 form-group">
+                                                {{ indicator.form.macd.macd_signal.label }}
+                                                {{ indicator.form.macd.macd_signal(size=24, class="form-control") }}
                                             </div>
                                         </div>
                                     </div>
