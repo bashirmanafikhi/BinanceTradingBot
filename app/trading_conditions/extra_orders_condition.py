@@ -32,6 +32,20 @@ class ExtraOrdersCondition(TradingCondition):
 
         self.extra_orders: List[ExtraOrderDto] = []
         self.done_orders_count = 0
+        
+        self.condition_changed = False
+    
+    def on_condition_changed(self, new_condition):
+        if(not new_condition):
+            return
+        
+        self.extra_orders_count = new_condition.extra_orders_count
+        self.extra_order_first_volume_scale = new_condition.extra_order_first_volume_scale
+        self.extra_order_first_deviation_percentage = new_condition.extra_order_first_deviation_percentage
+        self.extra_order_step_volume_scale = new_condition.extra_order_step_volume_scale
+        self.extra_order_step_deviation_scale = new_condition.extra_order_step_deviation_scale
+        
+        self.condition_changed = True
 
     def on_order_placed_successfully(self, signal):
         if signal.action == ACTION_SELL:
@@ -46,12 +60,17 @@ class ExtraOrdersCondition(TradingCondition):
             my_logger.info(f"Extra order triggered: {self.done_orders_count}")
         else:
             self.calculate_extra_orders(price)
-            for order in self.extra_orders:
-                my_logger.info(
-                    f"set extra order: volume:{order.volume_scale}, deviation_percentage:{order.deviation_percentage}, deviation:{order.deviation} "
-                )
+            self.log_extra_orders()
+    
+    def log_extra_orders(self):
+        for order in self.extra_orders:
+            my_logger.info(
+                f"set extra order: volume:{order.volume_scale}, deviation_percentage:{order.deviation_percentage}, deviation:{order.deviation} "
+            )
 
     def calculate_extra_orders(self, price):
+        self.extra_orders.clear()
+            
         first_order_volume_scale = self.extra_order_first_volume_scale
         first_order_deviation_percentage = self.extra_order_first_deviation_percentage
         first_order_deviation = price - (price * first_order_deviation_percentage / 100)
@@ -70,11 +89,16 @@ class ExtraOrdersCondition(TradingCondition):
         return data
 
     def get_signal(self, row):
+        price = row["close"]
+        
+        if(self.condition_changed):
+            self.calculate_extra_orders(price)
+            self.log_extra_orders()
+            self.condition_changed = False
 
         if not self.extra_orders:
             return None
 
-        price = row["close"]
 
         if self.extra_orders_count > self.done_orders_count:
             extra_order = self.extra_orders[self.done_orders_count]

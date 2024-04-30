@@ -21,7 +21,25 @@ class ConditionsManager:
     def on_order_placed_successfully(self, signal: 'Signal') -> None:
         for condition in self.conditions:
             condition.on_order_placed_successfully(signal)
+    
+    def on_conditions_changed(self, new_conditions) -> None:
+            new_extra_order_condition = self.get_extra_orders_condition(new_conditions)
+            old_extra_order_condition = self.get_extra_orders_condition()
+            old_extra_order_condition.on_condition_changed(new_extra_order_condition)
             
+            new_take_profit_condition = self.get_take_profit_condition(new_conditions)
+            old_take_profit_condition = self.get_take_profit_condition()
+            old_take_profit_condition.on_condition_changed(new_take_profit_condition)
+            
+            new_stop_loss_condition = self.get_stop_loss_condition(new_conditions)
+            old_stop_loss_condition = self.get_stop_loss_condition()
+            old_stop_loss_condition.on_condition_changed(new_stop_loss_condition)
+            
+            old_conditions_without_indicators = [condition for condition in self.conditions if not isinstance(condition, IndicatorCondition)]
+            new_indicators = [condition for condition in new_conditions if isinstance(condition, IndicatorCondition)]
+            self.conditions.clear()
+            self.conditions.extend(old_conditions_without_indicators)
+            self.conditions.extend(new_indicators)
     
     def get_extra_orders_signal(self, row):
         return self.get_first_signal_of_type(ExtraOrdersCondition, row)
@@ -42,17 +60,19 @@ class ConditionsManager:
 
     
      
-    def get_extra_orders_condition(self) -> Union['ExtraOrdersCondition', None]:
-        return self.get_first_condition_of_type(ExtraOrdersCondition)
+    def get_extra_orders_condition(self, conditions = None) -> Union['ExtraOrdersCondition', None]:
+        return self.get_first_condition_of_type(ExtraOrdersCondition, conditions)
             
-    def get_take_profit_condition(self) -> Union['TakeProfitCondition', None]:
-        return self.get_first_condition_of_type(TakeProfitCondition)
+    def get_take_profit_condition(self, conditions = None) -> Union['TakeProfitCondition', None]:
+        return self.get_first_condition_of_type(TakeProfitCondition, conditions)
             
-    def get_stop_loss_condition(self) -> Union['StopLossCondition', None]:
-        return self.get_first_condition_of_type(StopLossCondition)
+    def get_stop_loss_condition(self, conditions = None) -> Union['StopLossCondition', None]:
+        return self.get_first_condition_of_type(StopLossCondition, conditions)
     
-    def get_first_condition_of_type(self, condition_type: Type['TradingCondition']) -> Union['TradingCondition', None]:
-        for condition in self.conditions:
+    def get_first_condition_of_type(self, condition_type: Type['TradingCondition'], conditions = None) -> Union['TradingCondition', None]:
+        if(not conditions):
+            conditions = self.conditions
+        for condition in conditions:
             if isinstance(condition, condition_type):
                 return condition
         return None
@@ -64,7 +84,9 @@ class ConditionsManager:
 
     def all_indicators_equal_action(self, row, action) -> bool:
         indicator_conditions = self.get_all_conditions_of_type(IndicatorCondition)
-        
+        if (action == ACTION_SELL):
+            indicator_conditions = [indicator for indicator in indicator_conditions if indicator.use_to_close]
+            
         if not indicator_conditions:
             False
             

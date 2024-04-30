@@ -1,3 +1,4 @@
+import datetime
 import decimal
 from models.trade_history import TradeHistory
 import helpers.my_logger as my_logger
@@ -31,6 +32,9 @@ class TradingSystem:
         self.initial_investment = None
         self.is_running = True
         self.orders_history: TradeHistory = []
+        self.start_date = datetime.datetime.now()
+        my_logger.info(f"Start Date: {self.start_date}")
+        
 
     def stop(self):
         self.is_running = False
@@ -132,7 +136,7 @@ class TradingSystem:
     def calculate_quantity(self, action, price, quantity_percentage):
         try:
             if action == ACTION_SELL and self.total_buy_quantity > 0:
-                return self.total_buy_quantity
+                return self.round_quantity(self.total_buy_quantity)
 
             # Avoid division by zero
             if price == 0:
@@ -145,17 +149,20 @@ class TradingSystem:
             if self.initial_investment is None:
                 self.initial_investment = size
 
-            step_size = float(self.symbol_info["filters"][1]["stepSize"])
-            round_quantity = self.round_to_nearest_multiple(quantity, step_size)
-            # Round the quantity to an appropriate number of decimal places
-            round_quantity = round(round_quantity, 8)
-            return round_quantity
+            return self.round_quantity(quantity)
 
         except (ValueError, decimal.InvalidOperation) as e:
             # Handle exceptions, such as invalid values or division by zero
             my_logger.info(f"Error calculating quantity: {e}")
             return None
 
+    def round_quantity(self, quantity):
+        step_size = float(self.symbol_info["filters"][1]["stepSize"])
+        round_quantity = self.round_to_nearest_multiple(quantity, step_size)
+        # Round the quantity to an appropriate number of decimal places
+        round_quantity = round(round_quantity, 8)
+        return round_quantity
+        
     def round_to_nearest_multiple(self, original_number, multiple):
         # Ensure original_number is positive
         original_number = abs(original_number)

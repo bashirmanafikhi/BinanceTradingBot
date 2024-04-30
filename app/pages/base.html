@@ -37,8 +37,8 @@
     {% endblock %}
   </head>
 
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <body style="background-color: #1d2630; color: white;">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <a class="navbar-brand" href="{{ url_for('main.index') }}">Crypto Bots</a>
 
       <button
@@ -58,7 +58,7 @@
           <li class="nav-item active">
             <a
               href="{{ url_for('exchange.user_exchanges') }}"
-              class="btn btn-outline-secondary"
+              class="btn nav-link"
               role="button"
               >Exchanges</a
             >
@@ -66,7 +66,7 @@
           <li class="nav-item active">
             <a
               href="{{ url_for('trading_bot.user_trading_bots') }}"
-              class="btn btn-outline-secondary"
+              class="btn nav-link"
               role="button"
               >Trading Bots</a
             >
@@ -78,7 +78,7 @@
           
             <a
               href="{{ url_for('main.profile') }}"
-              class="btn btn-outline-secondary"
+              class="btn btn-outline-light"
               role="button"
               >Account</a
             >

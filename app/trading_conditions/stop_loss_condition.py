@@ -18,6 +18,16 @@ class StopLossCondition(TradingCondition):
 
         self.stop_loss = None
         self.buy_signals = []
+    
+    def on_condition_changed(self, new_condition):
+        if(not new_condition):
+            return
+        
+        self.stop_loss_percentage = new_condition.stop_loss_percentage
+        self.trailing_stop_loss = new_condition.trailing_stop_loss
+        self.timeout = new_condition.timeout
+        
+        self.set_stop_loss()
 
     def on_order_placed_successfully(self, signal):
         if signal.action == ACTION_SELL:

@@ -1,4 +1,8 @@
 from io import BytesIO
+from trading_conditions.rsi_condition import RSICondition
+from trading_conditions.bollinger_bands_condition import BollingerBandsCondition
+from trading_conditions.stop_loss_condition import StopLossCondition
+from trading_conditions.take_profit_condition import TakeProfitCondition
 from helpers.settings.constants import ACTION_BUY, ACTION_SELL
 from trading_system import TradingSystem
 from trading_clients.binance_trading_client import BinanceTradingClient
@@ -62,7 +66,7 @@ def start_kline_socket(trading_bot, kline_callback):
         print(f"An error occurred: {e}")
 
 
-def get_chart_details(trading_system, signals, plot_size = 5000):
+def get_chart_details(trading_system, signals, plot_size = 10000):
     if(signals is None):
         return
     
@@ -74,11 +78,20 @@ def get_chart_details(trading_system, signals, plot_size = 5000):
     close_x_data = signals.index.tolist()
     close_y_data = signals['close'].tolist()
     
+    last_order = trading_system.orders_history[-1] if trading_system.orders_history else None
+    strategy = trading_system.strategy
+    conditions_manager = strategy.conditions_manager
+    stop_loss_condition = conditions_manager.get_first_condition_of_type(StopLossCondition)
+    take_profit_condition =conditions_manager.get_first_condition_of_type(TakeProfitCondition)
+    
     # Prepare data dictionary
     data = {
-        "last_action_price": None,
-        "last_action": None,
+        "last_action_price": last_order.price if last_order else None,
+        "last_action": last_order.action if last_order else None,
         "last_signal": last_signal.to_json(),
+        
+        "take_profit": take_profit_condition.take_profit if take_profit_condition else None,
+        "stop_loss": stop_loss_condition.stop_loss if stop_loss_condition else None,
         
         "last_profit": trading_system.get_last_profit(),
         "last_profit_percentage": trading_system.get_last_profit_percentage(),
@@ -90,41 +103,7 @@ def get_chart_details(trading_system, signals, plot_size = 5000):
         "price_y_data": close_y_data
     }
 
-    # Check if any columns contain 'BBL' and 'BBU' in their names
-    bbl_columns = [col for col in signals.columns if 'BBL' in col]
-    bbu_columns = [col for col in signals.columns if 'BBU' in col]
-
-    if bbl_columns and bbu_columns:
-        # Take the first column found containing 'BBL' and 'BBU'
-        bbl_column = bbl_columns[0]
-        bbu_column = bbu_columns[0]
-
-        # Drop rows with NaN values in 'BBL' and 'BBU' columns
-        bollinger_signals = signals[[bbl_column, bbu_column]].dropna()
-
-        # Extract x data
-        data["bbl_bbu_x_data"] = bollinger_signals.index.tolist()
-
-        # Extract y data for 'BBL' and 'BBU'
-        data["bbl_y_data"] = bollinger_signals[bbl_column].tolist()
-        data["bbu_y_data"] = bollinger_signals[bbu_column].tolist()
-
-    # Check if any column contains 'rsi' in its name
-    rsi_columns = [col for col in signals.columns if 'RSI' in col]
-
-    if rsi_columns:
-        # Take the first column found containing 'rsi'
-        rsi_column = rsi_columns[0]
-
-        # Replace rows with NaN values
-        rsi_signals = signals[[rsi_column]].fillna(50)
-
-        # Extract x and y data
-        data["rsi_x_data"] = rsi_signals.index.tolist()
-        data["rsi_y_data"] = rsi_signals[rsi_column].tolist()
-
     # action signals
-    
     if 'signal' in signals.columns:
         # Keep only 'close' and 'signal' columns and drop rows with NaN in 'signal'
         action_signals = signals[['close', 'signal']].dropna(subset=['signal'])
@@ -141,6 +120,34 @@ def get_chart_details(trading_system, signals, plot_size = 5000):
         data["sell_signal_x_data"] = sell_signals.index.tolist()
         data["sell_signal_y_data"] = sell_signals['close'].tolist()
     
+    bollinger_band_condition = conditions_manager.get_first_condition_of_type(BollingerBandsCondition)
+    if bollinger_band_condition:
+        upper_band_key = bollinger_band_condition.get_upper_band_key()
+        lower_band_key = bollinger_band_condition.get_lower_band_key()
+    
+        if lower_band_key in signals.columns and upper_band_key in signals.columns:
+            # Drop rows with NaN values in 'BBL' and 'BBU' columns
+            bollinger_signals = signals[[lower_band_key, upper_band_key]].dropna()
+
+            # Extract x data
+            data["bbl_bbu_x_data"] = bollinger_signals.index.tolist()
+
+            # Extract y data for 'BBL' and 'BBU'
+            data["bbl_y_data"] = bollinger_signals[lower_band_key].tolist()
+            data["bbu_y_data"] = bollinger_signals[upper_band_key].tolist()
+    
+    rsi_condition = conditions_manager.get_first_condition_of_type(RSICondition)
+    if rsi_condition:
+        rsi_key = rsi_condition.get_rsi_key()
+    
+        if rsi_key in signals.columns:
+            # Replace rows with NaN values
+            rsi_signals = signals[[rsi_key]].fillna(50)
+
+            # Extract x and y data
+            data["rsi_x_data"] = rsi_signals.index.tolist()
+            data["rsi_y_data"] = rsi_signals[rsi_key].tolist()
+    
     return data
   
 
@@ -151,7 +158,7 @@ def update_running_trading_system(trading_bot):
     
     trading_system.trade_quote_size = trading_bot.trade_size
     strategy = trading_system.strategy
-    strategy.conditions_manager.conditions = trading_bot.get_start_conditions()
+    strategy.conditions_manager.on_conditions_changed(trading_bot.get_start_conditions())
     
 def generate_csv(trading_system):
     if trading_system is None:

@@ -22,6 +22,16 @@ class TakeProfitCondition(TradingCondition):
         
         self.take_profit = None
         self.buy_signals = []
+    
+    def on_condition_changed(self, new_condition):
+        if(not new_condition):
+            return
+        
+        self.take_profit_percentage = new_condition.take_profit_percentage
+        self.trailing_take_profit = new_condition.trailing_take_profit
+        self.trailing_take_profit_deviation_percentage = new_condition.trailing_take_profit_deviation_percentage
+        
+        self.set_take_profit()
 
     def on_order_placed_successfully(self, signal):
         if(signal.action == ACTION_SELL):

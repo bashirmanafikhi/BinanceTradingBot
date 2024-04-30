@@ -4,7 +4,8 @@
   <div class="row">
     <div class="col-md-6">
       <h2 class="m-2">{{trading_bot.name}}</h1>
-      <h3 class="m-2 text-secondary">{{trading_bot.get_symbol()}}</h2>
+        <h3 class="m-2 text-secondary">{{trading_bot.get_symbol()}}
+      </h2>
       {% if is_running %}
       <td><span class="badge badge-pill badge-success mb-3">Running</span></td>
       {% else %}
@@ -36,7 +37,7 @@
 <div class="container">
   <div class="row">
     <div class="col-md-6">
-      <div class="card">
+      <div class="card bg-dark text-white">
         <div class="card-body">
           <h5 class="card-title">Price:</h5>
           <p class="card-text"><span id="last_close"></span></p>
@@ -50,7 +51,7 @@
       </div>
     </div>
     <div class="col-md-6">
-      <div class="card">
+      <div class="card bg-dark text-white">
         <div class="card-body">
           <h5 class="card-title">Total Trades:</h5>
           <p class="card-text"><span id="total_trades"></span></p>
@@ -175,6 +176,24 @@
       name: "RSI"
     };
 
+    var take_profit_level = {
+      x: data.price_x_data,
+      y: Array(data.price_x_data.length).fill(data.take_profit),
+      type: "scatter",
+      mode: "lines",
+      line: { dash: "dash", color: "green" },
+      name: "Take Profit"
+    };
+
+    var stop_loss_level = {
+      x: data.price_x_data,
+      y: Array(data.price_x_data.length).fill(data.stop_loss),
+      type: "scatter",
+      mode: "lines",
+      line: { dash: "dash", color: "red" },
+      name: "Stop Loss"
+    };
+
     var layout = {
       height: 800,
       grid: {
@@ -194,10 +213,24 @@
       xaxis2: {
         matches: 'x',
         showgrid: false
+      },
+      plot_bgcolor: '#1d2630', // Background color of the plot area
+      paper_bgcolor: '#1d2630', // Background color of the whole plot
+      font: {
+        color: 'white' // Color of text
       }
     };
 
-    Plotly.react("live-plot", [close_trace, bbu_trace, bbl_trace, buy_signal_trace, sell_signal_trace, rsi_trace], layout);
+    Plotly.react("live-plot", [
+      close_trace,
+      bbu_trace,
+      bbl_trace,
+      buy_signal_trace,
+      sell_signal_trace,
+      rsi_trace,
+      take_profit_level,
+      stop_loss_level
+    ], layout);
   }
 
 </script>
