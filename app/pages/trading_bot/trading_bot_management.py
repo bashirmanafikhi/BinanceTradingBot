@@ -115,10 +115,12 @@ def get_chart_details(trading_system, signals, plot_size = 10000):
         # Extract buy signal x and y data
         data["buy_signal_x_data"] = buy_signals.index.tolist()
         data["buy_signal_y_data"] = buy_signals['close'].tolist()
+        data["buy_signal_hover_text"] = buy_signals['signal'].apply(lambda x: f"scale: {x.scale}, category: {x.signal_category}").tolist()
 
         # Extract sell signal x and y data
         data["sell_signal_x_data"] = sell_signals.index.tolist()
         data["sell_signal_y_data"] = sell_signals['close'].tolist()
+        data["sell_signal_hover_text"] = sell_signals['signal'].apply(lambda x: f"scale: {x.scale}, category: {x.signal_category}").tolist()
     
     bollinger_band_condition = conditions_manager.get_first_condition_of_type(BollingerBandsCondition)
     if bollinger_band_condition:
