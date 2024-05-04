@@ -58,10 +58,14 @@ class TakeProfitCondition(TradingCondition):
         total_scale = sum(signal.scale for signal in self.buy_signals)
         average_price = total_price / total_scale
 
-        self.take_profit = self.calculate_take_profit(average_price)
+        if(self.include_extra_orders_positions):
+            self.take_profit = self.calculate_take_profit(average_price, self.take_profit_percentage)
+        else:
+            take_profit_percentage = self.take_profit_percentage / total_scale
+            self.take_profit = self.calculate_take_profit(average_price, take_profit_percentage)
 
-    def calculate_take_profit(self, price):
-        amount = price * self.take_profit_percentage / 100
+    def calculate_take_profit(self, price, take_profit_percentage):
+        amount = price * take_profit_percentage / 100
         return price + amount
 
     def calculate(self, data):

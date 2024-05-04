@@ -49,15 +49,20 @@ class StopLossCondition(TradingCondition):
         total_scale = sum(signal.scale for signal in self.buy_signals)
         average_price = total_price / total_scale
 
-        self.stop_loss = self.calculate_stop_loss(average_price)
+        if(self.include_extra_orders_positions):
+            self.stop_loss = self.calculate_stop_loss(average_price, self.stop_loss_percentage)
+        else:
+            stop_loss_percentage = self.stop_loss_percentage / total_scale
+            self.stop_loss = self.calculate_stop_loss(average_price, stop_loss_percentage)
+
+    def calculate_stop_loss(self, price, stop_loss_percentage):
+        amount = price * stop_loss_percentage / 100
+        return price - amount
+            
 
     def update_trailing_stop_loss(self, new_stop_loss):
         if self.trailing_stop_loss and self.stop_loss is not None and new_stop_loss > self.stop_loss:
             self.stop_loss = new_stop_loss
-
-    def calculate_stop_loss(self, price):
-        amount = price * self.stop_loss_percentage / 100
-        return price - amount
 
     def calculate(self, data):
         return data
