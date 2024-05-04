@@ -47,12 +47,14 @@ class TradingBot(db.Model):
     # Stop Loss
     use_stop_loss = db.Column(db.Boolean, nullable=False, default=False)
     stop_loss_percentage = db.Column(db.Float, nullable=False, default=5)
+    stop_loss_include_extra_orders_positions = db.Column(db.Boolean, nullable=False, default=False)
     trailing_stop_loss = db.Column(db.Boolean, nullable=False, default=False)
     stop_loss_timeout = db.Column(db.Integer, nullable=False, default=60)
     
     # Take Profit
     use_take_profit = db.Column(db.Boolean, nullable=False, default=False)
     take_profit_percentage = db.Column(db.Float, nullable=False, default=10)
+    take_profit_include_extra_orders_positions = db.Column(db.Boolean, nullable=False, default=False)
     trailing_take_profit = db.Column(db.Boolean, nullable=False, default=False)
     trailing_take_profit_deviation_percentage = db.Column(db.Float, nullable=False, default=3)
     
@@ -82,12 +84,14 @@ class TradingBot(db.Model):
         
         if(self.use_stop_loss):
             stop_loss_condition = StopLossCondition(self.stop_loss_percentage, 
+                                                    self.stop_loss_include_extra_orders_positions,
                                                     self.trailing_stop_loss, 
                                                     self.stop_loss_timeout)
             conditions_list.append(stop_loss_condition)
         
         if(self.use_take_profit):
-            take_profit_condition = TakeProfitCondition(self.take_profit_percentage, 
+            take_profit_condition = TakeProfitCondition(self.take_profit_percentage,
+                                                        self.take_profit_include_extra_orders_positions, 
                                                         self.trailing_take_profit, 
                                                         self.trailing_take_profit_deviation_percentage)
             conditions_list.append(take_profit_condition)

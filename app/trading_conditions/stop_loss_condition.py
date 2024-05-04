@@ -8,25 +8,28 @@ import helpers.my_logger as my_logger
 
 class StopLossCondition(TradingCondition):
 
-    def __init__(self, stop_loss_percentage=1.0, trailing_stop_loss=True, timeout=None):
+    def __init__(
+        self, stop_loss_percentage=1.0, include_extra_orders_positions=False, trailing_stop_loss=True, timeout=None
+    ):
         if stop_loss_percentage <= 0 or stop_loss_percentage >= 100:
             raise ValueError("stop_loss_percentage should be between 0 and 100")
 
         self.stop_loss_percentage = stop_loss_percentage
+        self.include_extra_orders_positions = include_extra_orders_positions
         self.trailing_stop_loss = trailing_stop_loss
         self.timeout = timeout
 
         self.stop_loss = None
         self.buy_signals = []
-    
+
     def on_condition_changed(self, new_condition):
-        if(not new_condition):
+        if not new_condition:
             return
-        
+
         self.stop_loss_percentage = new_condition.stop_loss_percentage
         self.trailing_stop_loss = new_condition.trailing_stop_loss
         self.timeout = new_condition.timeout
-        
+
         self.set_stop_loss()
 
     def on_order_placed_successfully(self, signal):
@@ -66,9 +69,9 @@ class StopLossCondition(TradingCondition):
 
         price = row["close"]
 
-        # update trailing stop loss 
+        # update trailing stop loss
         # needs to be fixed after calculating the wighted average stop loss
-        #self.set_stop_loss()
+        # self.set_stop_loss()
 
         if price < self.stop_loss:
             return Signal(price, ACTION_SELL, None, SignalCategory.STOP_LOSS)

@@ -45,6 +45,9 @@
                         {{ form.stop_loss_percentage.label(class="form-label") }}
                         {{ form.stop_loss_percentage(class="form-control") }}
                         <br />
+                        {{ form.stop_loss_include_extra_orders_positions.label() }}
+                        {{ form.stop_loss_include_extra_orders_positions() }}
+                        <br />
                         <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
                         {{ form.trailing_stop_loss.label() }}
                         {{ form.trailing_stop_loss() }}
@@ -65,6 +68,9 @@
                         <br />
                         {{ form.take_profit_percentage.label(class="form-label") }}
                         {{ form.take_profit_percentage(class="form-control") }}
+                        <br />
+                        {{ form.take_profit_include_extra_orders_positions.label() }}
+                        {{ form.take_profit_include_extra_orders_positions() }}
                         <br />
                         <span class="badge badge-pill badge-danger mb-3">Not Ready</span>
                         {{ form.trailing_take_profit.label() }}
