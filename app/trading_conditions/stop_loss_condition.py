@@ -27,6 +27,7 @@ class StopLossCondition(TradingCondition):
             return
 
         self.stop_loss_percentage = new_condition.stop_loss_percentage
+        self.include_extra_orders_positions = new_condition.include_extra_orders_positions
         self.trailing_stop_loss = new_condition.trailing_stop_loss
         self.timeout = new_condition.timeout
 
