@@ -161,7 +161,7 @@ def get_chart_details(trading_system, signals, plot_size=10000):
 
         if macd_key in signals.columns and macd_signal_key in signals.columns and macd_histogram_key in signals.columns:
             # Drop rows with NaN values in MACD and signal columns
-            macd_signals = signals[[macd_key, macd_signal_key, macd_histogram_key]].dropna()
+            macd_signals = signals[[macd_key, macd_signal_key, macd_histogram_key]].fillna(0)
 
             # Extract x data
             data["macd_x_data"] = macd_signals.index.tolist()

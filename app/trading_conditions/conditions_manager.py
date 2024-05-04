@@ -86,6 +86,8 @@ class ConditionsManager:
         indicator_conditions = self.get_all_conditions_of_type(IndicatorCondition)
         if (action == ACTION_SELL):
             indicator_conditions = [indicator for indicator in indicator_conditions if indicator.use_to_close]
+        elif (action == ACTION_BUY):
+            indicator_conditions = [indicator for indicator in indicator_conditions if indicator.use_to_open]
             
         if not indicator_conditions:
             False

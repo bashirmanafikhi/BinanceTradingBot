@@ -113,8 +113,8 @@ class TradingBot(db.Model):
                 
             elif condition['type'] == 'bollinger_bands':
                 bollinger_condition = BollingerBandsCondition(
-                    period=condition['bollinger_bands']['period'],
-                    stddev=condition['bollinger_bands']['stddev'],
+                    bollinger_window=condition['bollinger_bands']['period'],
+                    bollinger_dev=condition['bollinger_bands']['stddev'],
                     use_to_open=condition['bollinger_bands']['use_to_open'],
                     use_to_close=condition['bollinger_bands']['use_to_close']
                 )

@@ -32,6 +32,7 @@ class MacdCondition(IndicatorCondition):
         pass
 
     def get_signal(self, row):
+        
         if self.get_macd_key() not in row.index or self.get_macd_signal_key() not in row.index:
             return None
         
@@ -44,6 +45,8 @@ class MacdCondition(IndicatorCondition):
         self.previous_macd = new_macd
         self.previous_macd_signal = new_macd_signal
         
+        if(previous_macd is None or previous_macd_signal is None): 
+            return None
 
         if (new_macd < 0 and new_macd_signal < 0 and previous_macd < previous_macd_signal and new_macd > new_macd_signal):
             return self.return_signal(row["close"], ACTION_BUY)
